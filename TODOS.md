@@ -32,8 +32,6 @@
 
 ## postman testing:
 - get errors:
-  - calendar
-    - findByRange
 - post errors:
 - put errors:
 - delete errors:
