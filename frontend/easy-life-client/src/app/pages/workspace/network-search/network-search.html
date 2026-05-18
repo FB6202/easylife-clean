@@ -1,0 +1,128 @@
+<div class="search-page">
+
+  <div class="search-header">
+    <button class="search-back" (click)="goBack()">
+      <span class="material-symbols-outlined">arrow_back</span>
+    </button>
+    <div class="search-header__text">
+      <p class="search-header__label">Network</p>
+      <h1 class="search-header__title">Find People</h1>
+    </div>
+  </div>
+
+  <!-- Search Bar -->
+  <div class="search-bar-wrap">
+    <div class="search-bar">
+      <span class="material-symbols-outlined search-bar__icon">search</span>
+      <input type="text" class="search-bar__input" placeholder="Search by name, username or keywords..."
+        [value]="searchQuery()" (input)="onSearchInput($any($event.target).value)" (keydown.enter)="onSearch()"
+        autofocus />
+      @if (searchQuery()) {
+      <button class="search-bar__clear" (click)="searchQuery.set(''); hasSearched.set(false)">
+        <span class="material-symbols-outlined">close</span>
+      </button>
+      }
+    </div>
+    <button class="btn-primary" (click)="onSearch()">
+      <span class="material-symbols-outlined">search</span>
+      Search
+    </button>
+  </div>
+
+  <!-- Results -->
+  @if (isSearching()) {
+  <div class="search-loading">
+    <div class="search-loading__spinner"></div>
+    <p>Searching...</p>
+  </div>
+  } @else if (hasSearched() && filteredResults().length === 0) {
+  <div class="empty-state">
+    <span class="material-symbols-outlined empty-state__icon">person_search</span>
+    <p class="empty-state__title">No results found</p>
+    <p class="empty-state__text">Try searching with a different name or username.</p>
+  </div>
+  } @else if (hasSearched() || searchQuery()) {
+  <div class="search-results">
+    <p class="search-results__count">
+      {{ filteredResults().length }} result{{ filteredResults().length !== 1 ? 's' : '' }}
+      @if (searchQuery()) { for "{{ searchQuery() }}" }
+    </p>
+    <div class="search-results__list">
+      @for (result of filteredResults(); track result.id) {
+      <div class="search-result-card">
+        <div class="search-result-card__avatar" [style.background]="result.avatarColor">
+          {{ result.initials }}
+        </div>
+        <div class="search-result-card__info" (click)="goToProfile(result.id)">
+          <div class="search-result-card__name-row">
+            <h3 class="search-result-card__name">{{ result.firstname }} {{ result.lastname }}</h3>
+            <span class="search-result-card__username">@{{ result.username }}</span>
+          </div>
+          <p class="search-result-card__bio">{{ result.bio }}</p>
+          <div class="search-result-card__meta">
+            <span class="search-result-card__stat">
+              <span class="material-symbols-outlined">flag</span>
+              {{ result.publicGoals }} goals
+            </span>
+            <span class="search-result-card__stat">
+              <span class="material-symbols-outlined">category</span>
+              {{ result.publicCategories }} categories
+            </span>
+            @if (result.mutualConnections > 0) {
+            <span class="search-result-card__mutual">
+              <span class="material-symbols-outlined">people</span>
+              {{ result.mutualConnections }} mutual
+            </span>
+            }
+          </div>
+        </div>
+        <div class="search-result-card__actions">
+          @if (result.followStatus === 'FOLLOWING') {
+          <button class="btn-secondary search-result-card__follow-btn search-result-card__follow-btn--following"
+            (click)="toggleFollow(result)">
+            <span class="material-symbols-outlined">how_to_reg</span>
+            Following
+          </button>
+          } @else if (result.followStatus === 'REQUESTED') {
+          <button class="btn-secondary search-result-card__follow-btn" (click)="toggleFollow(result)">
+            <span class="material-symbols-outlined">schedule</span>
+            Requested
+          </button>
+          } @else {
+          <button class="btn-primary search-result-card__follow-btn" (click)="toggleFollow(result)">
+            <span class="material-symbols-outlined">person_add</span>
+            Follow
+          </button>
+          }
+          <button class="btn-secondary search-result-card__profile-btn" (click)="goToProfile(result.id)">
+            <span class="material-symbols-outlined">person</span>
+          </button>
+        </div>
+      </div>
+      }
+    </div>
+  </div>
+  } @else {
+  <!-- Empty / Initial State -->
+  <div class="search-suggestions">
+    <p class="search-suggestions__title">People you might know</p>
+    <div class="search-suggestions__list">
+      @for (result of allResults().slice(0, 3); track result.id) {
+      <div class="search-suggestion-chip" (click)="goToProfile(result.id)">
+        <div class="search-suggestion-chip__avatar" [style.background]="result.avatarColor">
+          {{ result.initials }}
+        </div>
+        <div class="search-suggestion-chip__info">
+          <span class="search-suggestion-chip__name">{{ result.firstname }} {{ result.lastname }}</span>
+          <span class="search-suggestion-chip__username">@{{ result.username }}</span>
+        </div>
+        @if (result.mutualConnections > 0) {
+        <span class="search-suggestion-chip__mutual">{{ result.mutualConnections }} mutual</span>
+        }
+      </div>
+      }
+    </div>
+  </div>
+  }
+
+</div>

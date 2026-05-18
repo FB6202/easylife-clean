@@ -1,0 +1,63 @@
+@use '../../../../styles/variables' as *;
+@use '../../../../styles/mixins' as *;
+
+.nav {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--color-border-light);
+
+  &__inner {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 $space-6;
+    height: 64px;
+    @include flex-between;
+    gap: $space-6;
+  }
+
+  &__logo img {
+    height: 32px;
+    width: auto;
+  }
+
+  &__links {
+    @include flex-start;
+    gap: $space-6;
+    flex: 1;
+    justify-content: center;
+  }
+
+  &__link {
+    font-size: $font-size-sm;
+    font-weight: $font-weight-medium;
+    color: var(--color-text-secondary);
+    transition: color $transition-fast;
+    &:hover {
+      color: var(--color-primary);
+    }
+  }
+
+  &__actions {
+    @include flex-start;
+    gap: $space-3;
+
+    .btn-login-nav {
+      @include btn-base;
+      background: transparent;
+      color: var(--color-text-secondary);
+      border: none;
+      font-size: $font-size-xs;
+      &:hover {
+        color: var(--color-primary);
+      }
+    }
+
+    .btn-primary {
+      font-size: $font-size-sm;
+      padding: $space-2 $space-6;
+    }
+  }
+}

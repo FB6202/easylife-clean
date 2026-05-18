@@ -1,0 +1,116 @@
+<!-- Navbar -->
+<app-navbar />
+
+<!-- Register Form -->
+<main class="register-page">
+  <div class="register-card">
+    <!-- Logo Icon -->
+    <div class="register-card__icon">
+      <span class="material-symbols-outlined">check_circle</span>
+    </div>
+
+    <h1 class="register-card__title">Create your account</h1>
+    <p class="register-card__subtitle">Start organizing your life today.</p>
+
+    <form class="register-form" (ngSubmit)="onSubmit()">
+      <!-- First + Last Name -->
+      <div class="register-form__row">
+        <div class="form-group">
+          <label for="firstname">First Name</label>
+          <input id="firstname" type="text" placeholder="Jane" [(ngModel)]="form().firstname" name="firstname"
+            required />
+        </div>
+        <div class="form-group">
+          <label for="lastname">Last Name</label>
+          <input id="lastname" type="text" placeholder="Doe" [(ngModel)]="form().lastname" name="lastname" required />
+        </div>
+      </div>
+
+      <!-- Username -->
+      <div class="form-group">
+        <label for="username">Username</label>
+        <div class="input-icon-wrapper">
+          <span class="input-icon">&#64;</span>
+          <input id="username" type="text" placeholder="janedoe" [(ngModel)]="form().username" name="username"
+            required />
+        </div>
+      </div>
+
+      <!-- Email -->
+      <div class="form-group">
+        <label for="email">Email address</label>
+        <input id="email" type="email" placeholder="jane@example.com" [(ngModel)]="form().email" name="email"
+          required />
+      </div>
+
+      <!-- Mobile Number -->
+      <div class="form-group">
+        <label for="mobileNumber">
+          Mobile Number
+          <span class="form-group__optional">optional - for AI agent</span>
+        </label>
+        <div class="input-icon-wrapper">
+          <span class="input-icon">
+            <span class="material-symbols-outlined" style="font-size: 16px">phone_iphone</span>
+          </span>
+          <input id="mobileNumber" type="tel" placeholder="+49 151 00000000" [(ngModel)]="form().mobileNumber"
+            name="mobileNumber" />
+        </div>
+      </div>
+
+      <!-- Password -->
+      <div class="form-group">
+        <label for="password">Password</label>
+        <div class="input-icon-wrapper input-icon-wrapper--right">
+          <input id="password" [type]="showPassword() ? 'text' : 'password'" placeholder="••••••••"
+            [(ngModel)]="form().password" name="password" required />
+          <button type="button" class="input-icon-btn" (click)="togglePassword()">
+            <span class="material-symbols-outlined">
+              {{ showPassword() ? 'visibility_off' : 'visibility' }}
+            </span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Confirm Password -->
+      <div class="form-group">
+        <label for="confirmPassword">Confirm password</label>
+        <div class="input-icon-wrapper input-icon-wrapper--right">
+          <input id="confirmPassword" [type]="showConfirmPassword() ? 'text' : 'password'" placeholder="••••••••"
+            [(ngModel)]="form().confirmPassword" name="confirmPassword" required />
+          <button type="button" class="input-icon-btn" (click)="toggleConfirmPassword()">
+            <span class="material-symbols-outlined">
+              {{ showConfirmPassword() ? 'visibility_off' : 'visibility' }}
+            </span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Terms -->
+      <div class="register-form__terms">
+        <input type="checkbox" id="terms" [checked]="agreedToTerms()" (change)="agreedToTerms.set(!agreedToTerms())" />
+        <label for="terms">
+          I agree to the
+          <a href="#" class="terms-link">Terms of Service</a>
+          and
+          <a href="#" class="terms-link">Privacy Policy</a>
+        </label>
+      </div>
+
+      <!-- Submit -->
+      <button type="submit" class="btn-primary w-full register-form__submit" [disabled]="!agreedToTerms()">
+        Create Account
+      </button>
+    </form>
+
+    <div class="register-card__divider"></div>
+
+    <p class="register-card__login">
+      Already have an account?
+      <a routerLink="/login" class="register-card__login-link">Login</a>
+    </p>
+  </div>
+</main>
+
+<!-- Footer (gleiche wie Welcome) -->
+<app-footer />

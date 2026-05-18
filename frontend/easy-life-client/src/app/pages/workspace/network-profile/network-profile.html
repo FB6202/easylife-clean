@@ -1,0 +1,148 @@
+<div class="nprofile-page">
+
+  <!-- Back -->
+  <button class="nprofile-back" (click)="goBack()">
+    <span class="material-symbols-outlined">arrow_back</span>
+    Back to Search
+  </button>
+
+  <!-- Hero -->
+  <div class="nprofile-hero">
+    <div class="nprofile-hero__avatar" [style.background]="profile.avatarColor">
+      {{ profile.initials }}
+    </div>
+    <div class="nprofile-hero__info">
+      <div class="nprofile-hero__name-row">
+        <h1 class="nprofile-hero__name">{{ profile.firstname }} {{ profile.lastname }}</h1>
+        <span class="nprofile-hero__username">@{{ profile.username }}</span>
+      </div>
+      <p class="nprofile-hero__bio">{{ profile.bio }}</p>
+      <div class="nprofile-hero__stats">
+        <div class="nprofile-stat">
+          <span class="nprofile-stat__num">{{ profile.followersCount }}</span>
+          <span class="nprofile-stat__label">Followers</span>
+        </div>
+        <div class="nprofile-stat">
+          <span class="nprofile-stat__num">{{ profile.followingCount }}</span>
+          <span class="nprofile-stat__label">Following</span>
+        </div>
+        <div class="nprofile-stat">
+          <span class="nprofile-stat__num">{{ profile.publicGoals }}</span>
+          <span class="nprofile-stat__label">Public Goals</span>
+        </div>
+        <div class="nprofile-stat">
+          <span class="nprofile-stat__num">{{ profile.publicCategories }}</span>
+          <span class="nprofile-stat__label">Categories</span>
+        </div>
+      </div>
+      <p class="nprofile-hero__joined">
+        <span class="material-symbols-outlined">calendar_today</span>
+        {{ profile.joinedAt }}
+      </p>
+    </div>
+    <div class="nprofile-hero__actions">
+      @if (profile.followStatus === 'FOLLOWING') {
+      <button class="btn-secondary nprofile-follow-btn nprofile-follow-btn--following" (click)="toggleFollow()">
+        <span class="material-symbols-outlined">how_to_reg</span>
+        Following
+      </button>
+      } @else {
+      <button class="btn-primary nprofile-follow-btn" (click)="toggleFollow()">
+        <span class="material-symbols-outlined">person_add</span>
+        Follow
+      </button>
+      }
+    </div>
+  </div>
+
+  <!-- Tabs -->
+  <div class="nprofile-tabs">
+    <button [class]="'nprofile-tab ' + (activeTab() === 'goals' ? 'nprofile-tab--active' : '')"
+      (click)="activeTab.set('goals')">
+      <span class="material-symbols-outlined">flag</span>
+      Goals
+      <span class="nprofile-tab__count">{{ goals.length }}</span>
+    </button>
+    <button [class]="'nprofile-tab ' + (activeTab() === 'categories' ? 'nprofile-tab--active' : '')"
+      (click)="activeTab.set('categories')">
+      <span class="material-symbols-outlined">category</span>
+      Categories
+      <span class="nprofile-tab__count">{{ categories.length }}</span>
+    </button>
+    <button [class]="'nprofile-tab ' + (activeTab() === 'contacts' ? 'nprofile-tab--active' : '')"
+      (click)="activeTab.set('contacts')">
+      <span class="material-symbols-outlined">people</span>
+      Contacts
+      <span class="nprofile-tab__count">{{ contacts.length }}</span>
+    </button>
+  </div>
+
+  <!-- Goals Tab -->
+  @if (activeTab() === 'goals') {
+  <div class="nprofile-goals">
+    @for (goal of goals; track goal.id) {
+    <div class="nprofile-goal-card">
+      <div class="nprofile-goal-card__icon" [style.background]="goal.color + '18'">
+        <span class="material-symbols-outlined" [style.color]="goal.color">{{ goal.icon }}</span>
+      </div>
+      <div class="nprofile-goal-card__info">
+        <div class="nprofile-goal-card__title-row">
+          <h3 class="nprofile-goal-card__title">{{ goal.title }}</h3>
+          <span [class]="'nprofile-goal-card__status nprofile-goal-card__status--' + goal.status.toLowerCase()">
+            {{ goal.status }}
+          </span>
+        </div>
+        <p class="nprofile-goal-card__desc">{{ goal.description }}</p>
+        <div class="nprofile-goal-card__progress-row">
+          <div class="progress-bar progress-bar-sm" style="flex:1">
+            <div class="progress-fill" [style.width.%]="goal.pct"></div>
+          </div>
+          <span class="nprofile-goal-card__pct">{{ goal.pct }}%</span>
+        </div>
+        <span class="nprofile-goal-card__deadline">
+          <span class="material-symbols-outlined">calendar_today</span>
+          {{ goal.deadline }}
+        </span>
+      </div>
+    </div>
+    }
+  </div>
+  }
+
+  <!-- Categories Tab -->
+  @if (activeTab() === 'categories') {
+  <div class="nprofile-categories">
+    @for (cat of categories; track cat.id) {
+    <div class="nprofile-cat-card">
+      <div class="nprofile-cat-card__icon" [style.background]="cat.color + '18'">
+        <span class="material-symbols-outlined" [style.color]="cat.color">{{ cat.icon }}</span>
+      </div>
+      <div class="nprofile-cat-card__info">
+        <h3 class="nprofile-cat-card__name">{{ cat.name }}</h3>
+        <p class="nprofile-cat-card__desc">{{ cat.description }}</p>
+      </div>
+      <div class="nprofile-cat-card__bar" [style.background]="cat.color"></div>
+    </div>
+    }
+  </div>
+  }
+
+  <!-- Contacts Tab -->
+  @if (activeTab() === 'contacts') {
+  <div class="nprofile-contacts">
+    @for (contact of contacts; track contact.id) {
+    <div class="nprofile-contact-card">
+      <div class="nprofile-contact-card__avatar" [style.background]="contact.avatarColor">
+        {{ contact.initials }}
+      </div>
+      <div class="nprofile-contact-card__info">
+        <h3 class="nprofile-contact-card__name">{{ contact.firstname }} {{ contact.lastname }}</h3>
+        <p class="nprofile-contact-card__position">{{ contact.position }} · {{ contact.company }}</p>
+      </div>
+      <span class="nprofile-contact-card__type">{{ contact.relationshipType }}</span>
+    </div>
+    }
+  </div>
+  }
+
+</div>

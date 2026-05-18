@@ -1,0 +1,1072 @@
+@use '../../../../styles/variables' as *;
+@use '../../../../styles/mixins' as *;
+
+// ── Greeting ───────────────────────────────────────────────
+.dash-greeting {
+  @include flex-between;
+  margin-bottom: $space-6;
+  gap: $space-4;
+  flex-wrap: wrap;
+  align-items: flex-end;
+
+  &__text {
+    @include flex-col;
+    gap: $space-2;
+  }
+
+  &__label {
+    font-size: $font-size-xs;
+    font-weight: $font-weight-semibold;
+    color: var(--color-primary);
+    letter-spacing: 0.1em;
+  }
+
+  &__title {
+    font-size: $font-size-4xl;
+    font-weight: $font-weight-bold;
+    color: var(--color-text-primary);
+    @include flex-start;
+    gap: $space-3;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+
+  &__icon {
+    font-size: 32px;
+    color: var(--color-primary);
+    font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 32;
+  }
+
+  &__subtitle {
+    font-size: $font-size-base;
+    color: var(--color-text-secondary);
+    max-width: 520px;
+  }
+
+  &__meta {
+    @include flex-start;
+    gap: $space-2;
+    font-size: $font-size-sm;
+    color: var(--color-text-muted);
+    white-space: nowrap;
+
+    .material-symbols-outlined {
+      font-size: 16px;
+    }
+  }
+}
+
+.dash-greeting__right {
+  @include flex-col;
+  align-items: flex-end;
+  gap: $space-3;
+}
+
+.dash-actions {
+  @include flex-start;
+  gap: $space-3;
+  align-items: center;
+}
+
+// ── AI Button ──────────────────────────────────────────────
+.dash-ai-btn {
+  @include flex-start;
+  gap: $space-2;
+  padding: $space-2 $space-5;
+  background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+  color: white;
+  border: none;
+  border-radius: $radius-pill;
+  font-family: $font-family;
+  font-size: $font-size-sm;
+  font-weight: $font-weight-semibold;
+  cursor: pointer;
+  transition: all $transition-base;
+  box-shadow: 0 2px 8px rgba(30, 41, 59, 0.3);  
+
+  .material-symbols-outlined {
+    font-size: 18px;
+    font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 20;
+    animation: pulse-star 2s ease-in-out infinite;
+  }
+
+  &:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(30, 41, 59, 0.45);
+  }
+
+  &:active {
+    transform: translateY(0);
+  }
+}
+
+@keyframes pulse-star {
+
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  50% {
+    opacity: 0.85;
+    transform: scale(1.12);
+  }
+}
+
+// ── Widget Manager ─────────────────────────────────────────
+.widget-manager {
+  position: relative;
+  z-index: 50;
+
+  &__trigger {
+    @include flex-start;
+    gap: $space-2;
+    padding: $space-2 $space-4;
+    background: var(--color-bg-card);
+    border: 1px solid var(--color-border);
+    border-radius: $radius-pill;
+    font-family: $font-family;
+    font-size: $font-size-sm;
+    font-weight: $font-weight-medium;
+    color: var(--color-text-secondary);
+    cursor: pointer;
+    transition: all $transition-fast;
+
+    .material-symbols-outlined {
+      font-size: 18px;
+    }
+
+    &:hover {
+      border-color: var(--color-primary);
+      color: var(--color-primary);
+      background: var(--color-primary-light);
+    }
+
+    &--active {
+      border-color: var(--color-primary);
+      color: var(--color-primary);
+      background: var(--color-primary-light);
+    }
+  }
+
+  &__count {
+    background: var(--color-primary);
+    color: white;
+    font-size: 11px;
+    font-weight: $font-weight-bold;
+    padding: 1px 6px;
+    border-radius: $radius-pill;
+    margin-left: 2px;
+  }
+
+  &__arrow {
+    font-size: 16px;
+    color: var(--color-primary);
+    transition: transform $transition-fast;
+  }
+
+  &__panel {
+    position: absolute;
+    top: calc(100% + $space-2);
+    right: 0;
+    width: 280px;
+    background: var(--color-bg-card);
+    border: 1px solid var(--color-border);
+    border-radius: $radius-xl;
+    box-shadow: var(--shadow-lg);
+    overflow: hidden;
+    animation: dropdown-open 0.15s ease-out;
+    z-index: 100;
+
+    @keyframes dropdown-open {
+      from {
+        opacity: 0;
+        transform: translateY(-6px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+  }
+
+  &__panel-header {
+    @include flex-start;
+    gap: $space-2;
+    padding: $space-4 $space-5;
+    font-size: $font-size-xs;
+    font-weight: $font-weight-bold;
+    color: var(--color-text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    border-bottom: 1px solid var(--color-border-light);
+
+    .material-symbols-outlined {
+      font-size: 15px;
+      color: var(--color-primary);
+    }
+  }
+
+  &__list {
+    @include flex-col;
+    max-height: 340px;
+    overflow-y: auto;
+    @include scrollbar-thin;
+  }
+
+  &__item {
+    @include flex-between;
+    padding: $space-3 $space-5;
+    cursor: pointer;
+    transition: background $transition-fast;
+    border-bottom: 1px solid var(--color-border-light);
+
+    &:last-child {
+      border-bottom: none;
+    }
+
+    &:hover {
+      background: var(--color-bg-hover);
+    }
+
+    &--enabled {
+      .widget-manager__item-label {
+        color: var(--color-text-primary);
+        font-weight: $font-weight-medium;
+      }
+    }
+  }
+
+  &__item-left {
+    @include flex-start;
+    gap: $space-3;
+  }
+
+  &__item-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: $radius-md;
+    background: var(--color-bg-input);
+    @include flex-center;
+    transition: all $transition-fast;
+
+    .material-symbols-outlined {
+      font-size: 16px;
+      color: var(--color-text-muted);
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 20;
+    }
+
+    &--enabled {
+      background: var(--color-primary-light);
+
+      .material-symbols-outlined {
+        color: var(--color-primary);
+        font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 20;
+      }
+    }
+  }
+
+  &__item-label {
+    font-size: $font-size-sm;
+    color: var(--color-text-muted);
+    transition: color $transition-fast;
+  }
+
+  &__toggle {
+    width: 36px;
+    height: 20px;
+    border-radius: $radius-pill;
+    background: var(--color-border);
+    position: relative;
+    transition: background $transition-base;
+    flex-shrink: 0;
+
+    &--on {
+      background: var(--color-primary);
+    }
+  }
+
+  &__toggle-knob {
+    position: absolute;
+    width: 14px;
+    height: 14px;
+    border-radius: $radius-full;
+    background: white;
+    top: 3px;
+    left: 3px;
+    transition: transform $transition-base;
+    box-shadow: var(--shadow-sm);
+
+    .widget-manager__toggle--on & {
+      transform: translateX(16px);
+    }
+  }
+
+  &__panel-footer {
+    @include flex-start;
+    gap: $space-2;
+    padding: $space-3 $space-5;
+    font-size: $font-size-xs;
+    color: var(--color-text-muted);
+    border-top: 1px solid var(--color-border-light);
+    background: var(--color-bg-input);
+
+    .material-symbols-outlined {
+      font-size: 14px;
+    }
+  }
+}
+
+.widget-manager-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 49;
+}
+
+// ── Grid ───────────────────────────────────────────────────
+.dash-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: $space-5;
+
+  @media (max-width: 1200px) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  @include below-md {
+    grid-template-columns: 1fr;
+  }
+}
+
+// ── Widget Base ────────────────────────────────────────────
+.dash-widget {
+  @include card($space-5);
+  @include flex-col;
+  gap: $space-4;
+  cursor: pointer;
+  transition: box-shadow $transition-base, transform $transition-base;
+
+  &:hover {
+    box-shadow: var(--shadow-md);
+    transform: translateY(-2px);
+  }
+
+  &__header {
+    @include flex-between;
+    align-items: center;
+    gap: $space-3;
+  }
+
+  &__header-left {
+    @include flex-start;
+    gap: $space-3;
+    align-items: center;
+    min-width: 0;
+  }
+
+  &__icon-wrap {
+    width: 40px;
+    height: 40px;
+    border-radius: $radius-md;
+    @include flex-center;
+    flex-shrink: 0;
+
+    .material-symbols-outlined {
+      font-size: 20px;
+      font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 20;
+    }
+
+    &--tasks {
+      background: var(--color-success-subtle);
+      color: var(--color-primary);
+    }
+
+    &--calendar {
+      background: var(--color-info-subtle);
+      color: var(--color-info);
+    }
+
+    &--goals {
+      background: var(--color-warning-subtle);
+      color: var(--color-warning);
+    }
+
+    &--weekplan {
+      background: var(--color-purple-subtle);
+      color: #9c27b0;
+    }
+
+    &--categories {
+      background: var(--color-teal-subtle);
+      color: #00bcd4;
+    }
+
+    &--notifications {
+      background: var(--color-pink-subtle);
+      color: #e91e63;
+    }
+
+    &--journal {
+      background: rgba(121, 85, 72, 0.12);
+      color: #795548;
+    }
+
+    &--network {
+      background: var(--color-info-subtle);
+      color: var(--color-info);
+    }
+
+    &--following {
+      background: var(--color-purple-subtle);
+      color: #9c27b0;
+    }
+  }
+
+  &__title {
+    font-size: $font-size-base;
+    font-weight: $font-weight-bold;
+    color: var(--color-text-primary);
+  }
+
+  &__subtitle {
+    font-size: $font-size-xs;
+    color: var(--color-text-muted);
+    margin-top: 1px;
+  }
+
+  &__arrow {
+    font-size: 18px;
+    color: var(--color-text-muted);
+    flex-shrink: 0;
+    transition: transform $transition-fast, color $transition-fast;
+  }
+
+  &:hover &__arrow {
+    transform: translateX(3px);
+    color: var(--color-primary);
+  }
+
+  &__list {
+    @include flex-col;
+    gap: $space-3;
+  }
+
+  &--tasks {
+    border-top: 3px solid var(--color-primary);
+  }
+
+  &--calendar {
+    border-top: 3px solid var(--color-info);
+  }
+
+  &--goals {
+    border-top: 3px solid var(--color-warning);
+  }
+
+  &--weekplan {
+    border-top: 3px solid #9c27b0;
+  }
+
+  &--categories {
+    border-top: 3px solid #00bcd4;
+  }
+
+  &--notifications {
+    border-top: 3px solid #e91e63;
+  }
+
+  &--journal {
+    border-top: 3px solid #795548;
+  }
+
+  &--network {
+    border-top: 3px solid var(--color-info);
+  }
+
+  &--following {
+    border-top: 3px solid #9c27b0;
+  }
+}
+
+// ── Task Items ─────────────────────────────────────────────
+.dash-task-item {
+  @include flex-start;
+  gap: $space-3;
+  padding: $space-3;
+  background: var(--color-bg-input);
+  border-radius: $radius-md;
+  align-items: flex-start;
+
+  &__status {
+    font-size: 18px;
+    flex-shrink: 0;
+    margin-top: 1px;
+    font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 20;
+
+    &.status--open {
+      color: var(--color-text-muted);
+    }
+
+    &.status--in-progress {
+      color: var(--color-reminder);
+    }
+
+    &.status--done {
+      color: var(--color-primary);
+    }
+  }
+
+  &__info {
+    @include flex-col;
+    gap: 3px;
+    flex: 1;
+    min-width: 0;
+  }
+
+  &__title {
+    font-size: $font-size-sm;
+    font-weight: $font-weight-medium;
+    color: var(--color-text-primary);
+    @include truncate;
+  }
+
+  &__due {
+    font-size: $font-size-xs;
+    font-weight: $font-weight-medium;
+
+    &--overdue {
+      color: var(--color-danger);
+    }
+
+    &--today {
+      color: var(--color-warning);
+    }
+
+    &--soon {
+      color: var(--color-text-muted);
+    }
+
+    &--normal {
+      color: var(--color-text-muted);
+    }
+  }
+
+  &__priority {
+    font-size: 10px;
+    font-weight: $font-weight-bold;
+    padding: 2px $space-2;
+    border-radius: $radius-pill;
+    flex-shrink: 0;
+
+    &.priority--critical {
+      background: var(--color-priority-critical-subtle);
+      color: var(--color-priority-critical-text);
+    }
+
+    &.priority--high {
+      background: var(--color-priority-high-subtle);
+      color: var(--color-priority-high-text);
+    }
+
+    &.priority--medium {
+      background: var(--color-priority-medium-subtle);
+      color: var(--color-priority-medium-text);
+    }
+
+    &.priority--low {
+      background: var(--color-priority-low-subtle);
+      color: var(--color-priority-low-text);
+    }
+
+    &.priority--optional {
+      background: var(--color-priority-optional-subtle);
+      color: var(--color-priority-optional-text);
+    }
+  }
+}
+
+// ── Event Items ────────────────────────────────────────────
+.dash-event-item {
+  @include flex-start;
+  gap: $space-3;
+  align-items: stretch;
+
+  &__bar {
+    width: 3px;
+    border-radius: $radius-pill;
+    flex-shrink: 0;
+    min-height: 40px;
+  }
+
+  &__info {
+    @include flex-col;
+    gap: $space-1;
+    flex: 1;
+    min-width: 0;
+  }
+
+  &__title {
+    font-size: $font-size-sm;
+    font-weight: $font-weight-semibold;
+    color: var(--color-text-primary);
+    @include truncate;
+  }
+
+  &__meta {
+    @include flex-start;
+    gap: $space-3;
+    flex-wrap: wrap;
+  }
+
+  &__time,
+  &__location {
+    @include flex-start;
+    gap: $space-1;
+    font-size: $font-size-xs;
+    color: var(--color-text-muted);
+
+    .material-symbols-outlined {
+      font-size: 12px;
+    }
+  }
+}
+
+// ── Goal Items ─────────────────────────────────────────────
+.dash-goal-item {
+  @include flex-start;
+  gap: $space-3;
+  align-items: flex-start;
+
+  &__icon {
+    font-size: 22px;
+    flex-shrink: 0;
+    margin-top: 2px;
+    font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+  }
+
+  &__info {
+    @include flex-col;
+    gap: $space-2;
+    flex: 1;
+    min-width: 0;
+  }
+
+  &__title-row {
+    @include flex-between;
+    gap: $space-2;
+  }
+
+  &__title {
+    font-size: $font-size-sm;
+    font-weight: $font-weight-medium;
+    color: var(--color-text-primary);
+    @include truncate;
+  }
+
+  &__pct {
+    font-size: $font-size-sm;
+    font-weight: $font-weight-bold;
+    color: var(--color-primary);
+    flex-shrink: 0;
+  }
+
+  &__bar {
+    height: 4px;
+    border-radius: $radius-pill;
+  }
+
+  &__deadline {
+    @include flex-start;
+    gap: $space-1;
+    font-size: $font-size-xs;
+    color: var(--color-text-muted);
+
+    .material-symbols-outlined {
+      font-size: 12px;
+    }
+  }
+}
+
+// ── Week Plan ──────────────────────────────────────────────
+.dash-weekplan-body {
+  @include flex-col;
+  gap: $space-3;
+  padding: $space-4;
+  background: var(--color-bg-input);
+  border-radius: $radius-md;
+
+  &__status-row {
+    @include flex-between;
+    align-items: center;
+  }
+
+  &__status {
+    @include flex-start;
+    gap: $space-1;
+    font-size: $font-size-xs;
+    font-weight: $font-weight-bold;
+    color: var(--color-primary);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+
+    .material-symbols-outlined {
+      font-size: 14px;
+      font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 20;
+    }
+  }
+
+  &__items {
+    font-size: $font-size-xs;
+    font-weight: $font-weight-semibold;
+    color: var(--color-text-muted);
+  }
+
+  &__title {
+    font-size: $font-size-base;
+    font-weight: $font-weight-bold;
+    color: var(--color-text-primary);
+    @include truncate;
+  }
+
+  &__intention {
+    font-size: $font-size-xs;
+    color: var(--color-text-secondary);
+    font-style: italic;
+    @include truncate(2);
+    line-height: 1.5;
+  }
+
+  &__progress {
+    @include flex-col;
+    gap: $space-2;
+  }
+
+  &__progress-info {
+    @include flex-between;
+    font-size: $font-size-xs;
+    color: var(--color-text-muted);
+  }
+
+  &__pct {
+    font-weight: $font-weight-bold;
+    color: var(--color-primary);
+  }
+}
+
+// ── Category Items ─────────────────────────────────────────
+.dash-cat-item {
+  @include flex-start;
+  gap: $space-3;
+  align-items: center;
+
+  &__icon {
+    width: 36px;
+    height: 36px;
+    border-radius: $radius-md;
+    @include flex-center;
+    flex-shrink: 0;
+
+    .material-symbols-outlined {
+      font-size: 18px;
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 20;
+    }
+  }
+
+  &__info {
+    @include flex-col;
+    gap: 2px;
+    flex: 1;
+    min-width: 0;
+  }
+
+  &__name {
+    font-size: $font-size-sm;
+    font-weight: $font-weight-semibold;
+    color: var(--color-text-primary);
+    @include truncate;
+  }
+
+  &__count {
+    font-size: $font-size-xs;
+    color: var(--color-text-muted);
+  }
+
+  &__bar-wrap {
+    width: 4px;
+    height: 36px;
+    border-radius: $radius-pill;
+    overflow: hidden;
+    flex-shrink: 0;
+  }
+
+  &__bar {
+    width: 100%;
+    height: 100%;
+    border-radius: $radius-pill;
+    opacity: 0.5;
+  }
+}
+
+// ── Notification Items ─────────────────────────────────────
+.dash-notif-badge {
+  background: var(--color-pink-text);
+  color: white;
+  font-size: 11px;
+  font-weight: $font-weight-bold;
+  padding: 2px $space-2;
+  border-radius: $radius-pill;
+  min-width: 20px;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.dash-notif-item {
+  @include flex-start;
+  gap: $space-3;
+  padding: $space-3;
+  border-radius: $radius-md;
+  transition: background $transition-fast;
+  align-items: flex-start;
+  position: relative;
+
+  &--unread {
+    background: var(--color-bg-input);
+  }
+
+  &__icon {
+    width: 32px;
+    height: 32px;
+    border-radius: $radius-md;
+    @include flex-center;
+    flex-shrink: 0;
+
+    .material-symbols-outlined {
+      font-size: 16px;
+      font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 20;
+    }
+
+    &.type--reminder {
+      background: var(--color-reminder-subtle);
+      color: var(--color-reminder-text);
+    }
+
+    &.type--info {
+      background: var(--color-info-subtle);
+      color: var(--color-info-text);
+    }
+
+    &.type--warning {
+      background: var(--color-warning-subtle);
+      color: var(--color-warning-text);
+    }
+
+    &.type--success {
+      background: var(--color-success-subtle);
+      color: var(--color-success-text);
+    }
+  }
+
+  &__info {
+    @include flex-col;
+    gap: 2px;
+    flex: 1;
+    min-width: 0;
+  }
+
+  &__title {
+    font-size: $font-size-sm;
+    font-weight: $font-weight-semibold;
+    color: var(--color-text-primary);
+    @include truncate;
+  }
+
+  &__msg {
+    font-size: $font-size-xs;
+    color: var(--color-text-secondary);
+    @include truncate(2);
+    line-height: 1.5;
+  }
+
+  &__time {
+    font-size: $font-size-xs;
+    color: var(--color-text-muted);
+    margin-top: 2px;
+  }
+
+  &__dot {
+    width: 8px;
+    height: 8px;
+    border-radius: $radius-full;
+    background: var(--color-pink-text);
+    flex-shrink: 0;
+    margin-top: $space-1;
+  }
+}
+
+// ── Journal Items ──────────────────────────────────────────
+.dash-journal-item {
+  @include flex-start;
+  gap: $space-3;
+  padding: $space-3;
+  background: var(--color-bg-input);
+  border-radius: $radius-md;
+  align-items: flex-start;
+
+  &__mood {
+    font-size: 22px;
+    flex-shrink: 0;
+    font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+  }
+
+  &__info {
+    @include flex-col;
+    gap: 3px;
+    flex: 1;
+    min-width: 0;
+  }
+
+  &__title {
+    font-size: $font-size-sm;
+    font-weight: $font-weight-medium;
+    color: var(--color-text-primary);
+    @include truncate;
+  }
+
+  &__meta {
+    font-size: $font-size-xs;
+    color: var(--color-text-muted);
+  }
+}
+
+// ── Contact Items ──────────────────────────────────────────
+.dash-contact-item {
+  @include flex-start;
+  gap: $space-3;
+  padding: $space-2;
+  border-radius: $radius-md;
+  transition: background $transition-fast;
+
+  &:hover {
+    background: var(--color-bg-input);
+  }
+
+  &__avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: $radius-full;
+    @include flex-center;
+    color: white;
+    font-size: $font-size-xs;
+    font-weight: $font-weight-bold;
+    flex-shrink: 0;
+  }
+
+  &__info {
+    @include flex-col;
+    gap: 2px;
+    flex: 1;
+    min-width: 0;
+  }
+
+  &__name {
+    font-size: $font-size-sm;
+    font-weight: $font-weight-semibold;
+    color: var(--color-text-primary);
+    @include truncate;
+  }
+
+  &__position {
+    font-size: $font-size-xs;
+    color: var(--color-text-muted);
+    @include truncate;
+  }
+}
+
+// ── Following Stats ────────────────────────────────────────
+.dash-following-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: $space-3;
+  padding: $space-4;
+  background: var(--color-bg-input);
+  border-radius: $radius-md;
+}
+
+.dash-following-stat {
+  @include flex-col;
+  align-items: center;
+  gap: 2px;
+
+  &__num {
+    font-size: $font-size-2xl;
+    font-weight: $font-weight-bold;
+    color: var(--color-text-primary);
+    line-height: 1;
+  }
+
+  &__label {
+    font-size: $font-size-xs;
+    color: var(--color-text-muted);
+    white-space: nowrap;
+  }
+
+  &--pending &__num {
+    color: var(--color-warning);
+  }
+}
+
+.dash-following-search {
+  @include flex-center;
+  gap: $space-2;
+  width: 100%;
+  padding: $space-3;
+  background: none;
+  border: 1px dashed var(--color-border);
+  border-radius: $radius-md;
+  font-family: $font-family;
+  font-size: $font-size-sm;
+  font-weight: $font-weight-medium;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  transition: all $transition-fast;
+
+  .material-symbols-outlined {
+    font-size: 18px;
+  }
+
+  &:hover {
+    border-color: var(--color-primary);
+    color: var(--color-primary);
+    background: var(--color-primary-light);
+  }
+}
+
+// ── Empty State ────────────────────────────────────────────
+.dash-empty {
+  grid-column: 1 / -1;
+  @include flex-col;
+  @include flex-center;
+  gap: $space-3;
+  padding: $space-16;
+  text-align: center;
+
+  .material-symbols-outlined {
+    font-size: 48px;
+    color: var(--color-text-muted);
+    opacity: 0.3;
+    font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 48;
+  }
+
+  &__title {
+    font-size: $font-size-lg;
+    font-weight: $font-weight-semibold;
+    color: var(--color-text-secondary);
+  }
+
+  &__text {
+    font-size: $font-size-sm;
+    color: var(--color-text-muted);
+  }
+}

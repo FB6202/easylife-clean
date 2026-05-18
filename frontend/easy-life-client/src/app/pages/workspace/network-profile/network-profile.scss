@@ -1,0 +1,393 @@
+@use '../../../../styles/variables' as *;
+@use '../../../../styles/mixins' as *;
+
+.nprofile-page {
+  @include flex-col;
+  gap: $space-5;
+  max-width: 800px;
+}
+
+// ── Back ───────────────────────────────────────────────────
+.nprofile-back {
+  @include flex-start;
+  gap: $space-2;
+  @include btn-ghost;
+  border: 1px solid var(--color-border);
+  border-radius: $radius-md;
+  padding: $space-2 $space-4;
+  width: fit-content;
+  font-size: $font-size-sm;
+  font-weight: $font-weight-medium;
+
+  .material-symbols-outlined {
+    font-size: 18px;
+  }
+
+  &:hover {
+    border-color: var(--color-primary);
+    color: var(--color-primary);
+    background: var(--color-primary-light);
+  }
+}
+
+// ── Hero ───────────────────────────────────────────────────
+.nprofile-hero {
+  @include card($space-6);
+  @include flex-start;
+  gap: $space-6;
+  align-items: flex-start;
+  flex-wrap: wrap;
+
+  &__avatar {
+    width: 80px;
+    height: 80px;
+    border-radius: $radius-full;
+    @include flex-center;
+    color: white;
+    font-size: $font-size-2xl;
+    font-weight: $font-weight-bold;
+    flex-shrink: 0;
+  }
+
+  &__info {
+    @include flex-col;
+    gap: $space-3;
+    flex: 1;
+    min-width: 0;
+  }
+
+  &__name-row {
+    @include flex-start;
+    gap: $space-3;
+    align-items: baseline;
+    flex-wrap: wrap;
+  }
+
+  &__name {
+    font-size: $font-size-2xl;
+    font-weight: $font-weight-bold;
+    color: var(--color-text-primary);
+  }
+
+  &__username {
+    font-size: $font-size-base;
+    color: var(--color-text-muted);
+  }
+
+  &__bio {
+    font-size: $font-size-sm;
+    color: var(--color-text-secondary);
+    line-height: 1.6;
+    max-width: 480px;
+  }
+
+  &__stats {
+    @include flex-start;
+    gap: $space-6;
+    flex-wrap: wrap;
+  }
+
+  &__joined {
+    @include flex-start;
+    gap: $space-2;
+    font-size: $font-size-xs;
+    color: var(--color-text-muted);
+
+    .material-symbols-outlined {
+      font-size: 14px;
+    }
+  }
+
+  &__actions {
+    flex-shrink: 0;
+  }
+}
+
+.nprofile-stat {
+  @include flex-col;
+  align-items: center;
+  gap: 2px;
+
+  &__num {
+    font-size: $font-size-xl;
+    font-weight: $font-weight-bold;
+    color: var(--color-text-primary);
+  }
+
+  &__label {
+    font-size: $font-size-xs;
+    color: var(--color-text-muted);
+    white-space: nowrap;
+  }
+}
+
+.nprofile-follow-btn {
+  &--following {
+    border-color: var(--color-primary);
+    color: var(--color-primary);
+  }
+}
+
+// ── Tabs ───────────────────────────────────────────────────
+.nprofile-tabs {
+  @include flex-start;
+  gap: 0;
+  border-bottom: 2px solid var(--color-border);
+}
+
+.nprofile-tab {
+  @include flex-start;
+  gap: $space-2;
+  padding: $space-3 $space-5;
+  border: none;
+  background: none;
+  font-family: $font-family;
+  font-size: $font-size-sm;
+  font-weight: $font-weight-medium;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  transition: all $transition-fast;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -2px;
+
+  .material-symbols-outlined {
+    font-size: 18px;
+  }
+
+  &__count {
+    background: var(--color-bg-input);
+    color: var(--color-text-muted);
+    font-size: 11px;
+    font-weight: $font-weight-bold;
+    padding: 1px 6px;
+    border-radius: $radius-pill;
+  }
+
+  &:hover {
+    color: var(--color-text-primary);
+  }
+
+  &--active {
+    color: var(--color-primary);
+    border-bottom-color: var(--color-primary);
+    font-weight: $font-weight-semibold;
+
+    .nprofile-tab__count {
+      background: var(--color-primary-light);
+      color: var(--color-primary);
+    }
+  }
+}
+
+// ── Goals ──────────────────────────────────────────────────
+.nprofile-goals {
+  @include flex-col;
+  gap: $space-3;
+}
+
+.nprofile-goal-card {
+  @include flex-start;
+  gap: $space-4;
+  padding: $space-5;
+  background: var(--color-bg-card);
+  border: 1px solid var(--color-border);
+  border-radius: $radius-lg;
+  align-items: flex-start;
+
+  &__icon {
+    width: 48px;
+    height: 48px;
+    border-radius: $radius-md;
+    @include flex-center;
+    flex-shrink: 0;
+
+    .material-symbols-outlined {
+      font-size: 24px;
+    }
+  }
+
+  &__info {
+    @include flex-col;
+    gap: $space-2;
+    flex: 1;
+    min-width: 0;
+  }
+
+  &__title-row {
+    @include flex-between;
+    gap: $space-3;
+    align-items: flex-start;
+  }
+
+  &__title {
+    font-size: $font-size-base;
+    font-weight: $font-weight-bold;
+    color: var(--color-text-primary);
+  }
+
+  &__status {
+    font-size: $font-size-xs;
+    font-weight: $font-weight-bold;
+    padding: 2px $space-2;
+    border-radius: $radius-pill;
+    white-space: nowrap;
+    flex-shrink: 0;
+
+    &--active {
+      background: var(--color-success-subtle);
+      color: var(--color-success-text);
+    }
+
+    &--completed {
+      background: var(--color-info-subtle);
+      color: var(--color-info-text);
+    }
+  }
+
+  &__desc {
+    font-size: $font-size-sm;
+    color: var(--color-text-secondary);
+    line-height: 1.5;
+  }
+
+  &__progress-row {
+    @include flex-start;
+    gap: $space-3;
+    align-items: center;
+  }
+
+  &__pct {
+    font-size: $font-size-sm;
+    font-weight: $font-weight-bold;
+    color: var(--color-primary);
+    flex-shrink: 0;
+  }
+
+  &__deadline {
+    @include flex-start;
+    gap: $space-1;
+    font-size: $font-size-xs;
+    color: var(--color-text-muted);
+
+    .material-symbols-outlined {
+      font-size: 13px;
+    }
+  }
+}
+
+// ── Categories ─────────────────────────────────────────────
+.nprofile-categories {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: $space-3;
+
+  @include below-md {
+    grid-template-columns: 1fr;
+  }
+}
+
+.nprofile-cat-card {
+  @include flex-start;
+  gap: $space-4;
+  padding: $space-4;
+  background: var(--color-bg-card);
+  border: 1px solid var(--color-border);
+  border-radius: $radius-lg;
+  position: relative;
+  overflow: hidden;
+
+  &__icon {
+    width: 44px;
+    height: 44px;
+    border-radius: $radius-md;
+    @include flex-center;
+    flex-shrink: 0;
+
+    .material-symbols-outlined {
+      font-size: 22px;
+    }
+  }
+
+  &__info {
+    @include flex-col;
+    gap: 3px;
+    flex: 1;
+    min-width: 0;
+  }
+
+  &__name {
+    font-size: $font-size-sm;
+    font-weight: $font-weight-bold;
+    color: var(--color-text-primary);
+  }
+
+  &__desc {
+    font-size: $font-size-xs;
+    color: var(--color-text-muted);
+    @include truncate(2);
+    line-height: 1.4;
+  }
+
+  &__bar {
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 3px;
+    border-radius: $radius-pill 0 0 $radius-pill;
+  }
+}
+
+// ── Contacts ───────────────────────────────────────────────
+.nprofile-contacts {
+  @include flex-col;
+  gap: $space-3;
+}
+
+.nprofile-contact-card {
+  @include flex-start;
+  gap: $space-4;
+  padding: $space-4;
+  background: var(--color-bg-card);
+  border: 1px solid var(--color-border);
+  border-radius: $radius-lg;
+
+  &__avatar {
+    width: 44px;
+    height: 44px;
+    border-radius: $radius-full;
+    @include flex-center;
+    color: white;
+    font-size: $font-size-sm;
+    font-weight: $font-weight-bold;
+    flex-shrink: 0;
+  }
+
+  &__info {
+    @include flex-col;
+    gap: 3px;
+    flex: 1;
+    min-width: 0;
+  }
+
+  &__name {
+    font-size: $font-size-sm;
+    font-weight: $font-weight-bold;
+    color: var(--color-text-primary);
+  }
+
+  &__position {
+    font-size: $font-size-xs;
+    color: var(--color-text-muted);
+  }
+
+  &__type {
+    font-size: $font-size-xs;
+    font-weight: $font-weight-medium;
+    padding: 2px $space-2;
+    border-radius: $radius-pill;
+    background: var(--color-neutral-subtle);
+    color: var(--color-neutral-text);
+    white-space: nowrap;
+  }
+}

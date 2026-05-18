@@ -1,0 +1,232 @@
+@use '../../../../styles/variables' as *;
+@use '../../../../styles/mixins' as *;
+
+.pagination-wrapper {
+  @include flex-between;
+  align-items: center;
+  padding: $space-4 $space-6;
+  gap: $space-4;
+  flex-wrap: wrap;
+  min-height: 56px;
+}
+
+// ── Left ────────────────────────────────────────────────────
+.pagination-left {
+  @include flex-start;
+  gap: $space-4;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.pagination-size {
+  @include flex-start;
+  gap: $space-2;
+  align-items: center;
+
+  &__label {
+    font-size: $font-size-xs;
+    color: var(--color-text-muted);
+    white-space: nowrap;
+  }
+
+  &__options {
+    @include flex-start;
+    border: 1px solid var(--color-border);
+    border-radius: $radius-md;
+    overflow: visible;
+    position: relative;
+  }
+
+  &__btn {
+    padding: 5px $space-3;
+    border: none;
+    border-right: 1px solid var(--color-border);
+    background: none;
+    font-family: $font-family;
+    font-size: $font-size-xs;
+    font-weight: $font-weight-medium;
+    color: var(--color-text-muted);
+    cursor: pointer;
+    transition: all $transition-fast;
+    min-width: 34px;
+    height: 30px;
+    text-align: center;
+    @include flex-center;
+
+    &:last-child {
+      border-right: none;
+    }
+
+    &:hover:not(&--active) {
+      background: var(--color-bg-hover);
+      color: var(--color-text-primary);
+    }
+
+    &--active {
+      background: var(--color-primary);
+      color: white;
+      font-weight: $font-weight-bold;
+    }
+
+    &--custom {
+      min-width: 34px;
+
+      .material-symbols-outlined {
+        font-size: 14px;
+      }
+
+      &:hover:not(.pagination-size__btn--active) {
+        color: var(--color-primary);
+      }
+    }
+  }
+
+  &__custom-wrap {
+    display: flex;
+    align-items: center;
+    border-right: none;
+  }
+
+  &__custom-input {
+    width: 52px;
+    height: 30px;
+    border: none;
+    border-left: 1px solid var(--color-border);
+    border-radius: 0 $radius-md $radius-md 0;
+    background: var(--color-bg-card);
+    font-family: $font-family;
+    font-size: $font-size-xs;
+    font-weight: $font-weight-semibold;
+    color: var(--color-primary);
+    text-align: center;
+    outline: none;
+    padding: 0 $space-2;
+
+    &:focus {
+      background: var(--color-primary-light);
+    }
+
+    // Remove number input arrows
+    &::-webkit-outer-spin-button,
+    &::-webkit-inner-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+
+    -moz-appearance: textfield;
+  }
+}
+
+.pagination-info {
+  font-size: $font-size-xs;
+  color: var(--color-text-muted);
+  white-space: nowrap;
+}
+
+// ── Center ──────────────────────────────────────────────────
+.pagination-pages {
+  @include flex-start;
+  gap: $space-1;
+  align-items: center;
+}
+
+.pagination-btn {
+  min-width: 32px;
+  height: 32px;
+  border-radius: $radius-md;
+  border: 1px solid transparent;
+  background: none;
+  font-family: $font-family;
+  font-size: $font-size-sm;
+  font-weight: $font-weight-medium;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  transition: all $transition-fast;
+  @include flex-center;
+
+  &:hover:not(:disabled):not(&--active) {
+    background: var(--color-bg-hover);
+    border-color: var(--color-border);
+    color: var(--color-text-primary);
+  }
+
+  &--active {
+    background: var(--color-primary);
+    color: white;
+    font-weight: $font-weight-bold;
+    border-color: var(--color-primary);
+  }
+
+  &--nav {
+    border: 1px solid var(--color-border);
+    background: var(--color-bg-card);
+    color: var(--color-text-secondary);
+
+    .material-symbols-outlined {
+      font-size: 18px;
+    }
+
+    &:hover:not(:disabled) {
+      border-color: var(--color-primary);
+      color: var(--color-primary);
+      background: var(--color-primary-light);
+    }
+
+    &:disabled {
+      opacity: 0.35;
+      cursor: not-allowed;
+    }
+  }
+}
+
+.pagination-ellipsis {
+  font-size: $font-size-sm;
+  color: var(--color-text-muted);
+  padding: 0 $space-1;
+  user-select: none;
+  letter-spacing: 0.05em;
+  @include flex-center;
+  height: 32px;
+}
+
+// ── Right ───────────────────────────────────────────────────
+.pagination-right {
+  @include flex-start;
+  gap: $space-3;
+  align-items: center;
+}
+
+.pagination-ai-btn {
+  @include flex-start;
+  gap: $space-2;
+  padding: $space-2 $space-4;
+  background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+  color: white;
+  border: none;
+  border-radius: $radius-pill;
+  font-family: $font-family;
+  font-size: $font-size-xs;
+  font-weight: $font-weight-semibold;
+  cursor: pointer;
+  transition: all $transition-base;
+  box-shadow: 0 2px 12px rgba(30, 41, 59, 0.3);
+  white-space: nowrap;
+
+  .material-symbols-outlined {
+    font-size: 15px;
+    font-variation-settings:
+      'FILL' 1,
+      'wght' 400,
+      'GRAD' 0,
+      'opsz' 20;
+  }
+
+  &:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 16px rgba(30, 41, 59, 0.45);
+  }
+
+  &:active {
+    transform: translateY(0);
+  }
+}

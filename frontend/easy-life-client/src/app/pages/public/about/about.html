@@ -1,0 +1,206 @@
+<app-navbar />
+
+<main class="about-page">
+  <!-- Hero -->
+  <section class="about-hero">
+    <div class="about-hero__inner">
+      <span class="about-hero__label">About Easy Life</span>
+      <h1 class="about-hero__title">
+        One app.<br />
+        <span class="about-hero__accent">Everything you need.</span>
+      </h1>
+      <p class="about-hero__subtitle">
+        We got tired of switching between five apps just to manage one day. So we built something
+        better.
+      </p>
+    </div>
+  </section>
+
+  <!-- Stats -->
+  <section class="about-stats">
+    <div class="about-stats__inner">
+      @for (stat of stats; track stat.label) {
+        <div class="stat-card">
+          <div class="stat-card__icon">
+            <span class="material-symbols-outlined">{{ stat.icon }}</span>
+          </div>
+          <span class="stat-card__value">{{ stat.value }}</span>
+          <span class="stat-card__label">{{ stat.label }}</span>
+        </div>
+      }
+    </div>
+  </section>
+
+  <!-- Problem -->
+  <section class="about-problem">
+    <div class="about-problem__inner">
+      <div class="about-problem__text">
+        <span class="about-problem__label">The problem</span>
+        <h2 class="about-problem__title">Too many apps.<br />Not enough clarity.</h2>
+        <p>
+          Tasks in one app. Goals in another. Calendar somewhere else. Documents scattered across
+          folders. Contacts in your phone. And none of them talking to each other.
+        </p>
+        <p>
+          The result? You spend more time managing your tools than actually getting things done. You
+          lose the big picture. You forget what matters.
+        </p>
+        <p>We lived this problem every day — until we decided to fix it.</p>
+      </div>
+      <div class="about-problem__visual">
+        <div class="app-chaos">
+          <div class="app-chaos__item app-chaos__item--1">
+            <span class="material-symbols-outlined">check_circle</span>
+            <span>Tasks</span>
+          </div>
+          <div class="app-chaos__item app-chaos__item--2">
+            <span class="material-symbols-outlined">flag</span>
+            <span>Goals</span>
+          </div>
+          <div class="app-chaos__item app-chaos__item--3">
+            <span class="material-symbols-outlined">calendar_month</span>
+            <span>Calendar</span>
+          </div>
+          <div class="app-chaos__item app-chaos__item--4">
+            <span class="material-symbols-outlined">description</span>
+            <span>Documents</span>
+          </div>
+          <div class="app-chaos__item app-chaos__item--5">
+            <span class="material-symbols-outlined">people</span>
+            <span>Contacts</span>
+          </div>
+          <div class="app-chaos__center">
+            <span class="material-symbols-outlined">close</span>
+          </div>
+          <div class="app-chaos__arrow app-chaos__arrow--1"></div>
+          <div class="app-chaos__arrow app-chaos__arrow--2"></div>
+          <div class="app-chaos__arrow app-chaos__arrow--3"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Solution -->
+  <section class="about-solution">
+    <div class="about-solution__inner">
+      <div class="about-solution__visual">
+        <div class="solution-hub">
+          <div class="solution-hub__center">
+            <img src="images/easy-life-logo-light-no-bg.png" alt="Easy Life" />
+          </div>
+          <div class="solution-hub__item solution-hub__item--1">
+            <span class="material-symbols-outlined">check_circle</span>
+          </div>
+          <div class="solution-hub__item solution-hub__item--2">
+            <span class="material-symbols-outlined">flag</span>
+          </div>
+          <div class="solution-hub__item solution-hub__item--3">
+            <span class="material-symbols-outlined">calendar_month</span>
+          </div>
+          <div class="solution-hub__item solution-hub__item--4">
+            <span class="material-symbols-outlined">description</span>
+          </div>
+          <div class="solution-hub__item solution-hub__item--5">
+            <span class="material-symbols-outlined">auto_awesome</span>
+          </div>
+        </div>
+      </div>
+      <div class="about-solution__text">
+        <span class="about-solution__label">The solution</span>
+        <h2 class="about-solution__title">Everything connected.<br />Finally.</h2>
+        <p>
+          Easy Life brings all the pieces together in one place. Your tasks know about your goals.
+          Your calendar connects to your week plan. Your AI agent sees the full picture and helps
+          you make sense of it all.
+        </p>
+        <p>
+          Not just a to-do app. Not just a planner. A complete productivity ecosystem — built around
+          how people actually think and work.
+        </p>
+        <a routerLink="/register" class="btn-primary btn-lg">
+          <span class="material-symbols-outlined">rocket_launch</span>
+          Try it for free
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Values -->
+  <section class="about-values">
+    <div class="about-values__inner">
+      <div class="about-values__header">
+        <span class="about-values__label">Our values</span>
+        <h2 class="about-values__title">What we stand for</h2>
+      </div>
+      <div class="about-values__grid">
+        @for (value of values; track value.title) {
+          <div class="value-card">
+            <div class="value-card__icon">
+              <span class="material-symbols-outlined">{{ value.icon }}</span>
+            </div>
+            <h3 class="value-card__title">{{ value.title }}</h3>
+            <p class="value-card__desc">{{ value.description }}</p>
+          </div>
+        }
+      </div>
+    </div>
+  </section>
+
+  <!-- Team -->
+  <section class="about-team">
+    <div class="about-team__inner">
+      <div class="about-team__text">
+        <span class="about-team__label">The team</span>
+        <h2 class="about-team__title">Built by two brothers.<br />Used by us every day.</h2>
+        <p>
+          We're Felix and Moritz — two brothers who got frustrated with the same problem and decided
+          to build the solution.
+        </p>
+        <p>
+          We're not a big company with a marketing team. We're two developers who genuinely use Easy
+          Life to manage our goals, track our weeks, and stay on top of life. Every feature we ship
+          is something we actually needed.
+        </p>
+        <p>We hope Easy Life makes your life a little easier too.</p>
+      </div>
+      <div class="about-team__cards">
+        <div class="team-card">
+          <div class="team-card__avatar" style="background: #43a047">F</div>
+          <div class="team-card__info">
+            <h3 class="team-card__name">Felix</h3>
+            <span class="team-card__role">Co-Founder & Developer</span>
+            <p class="team-card__bio">
+              Builds the product, obsesses over clean architecture and drinks too much coffee.
+            </p>
+          </div>
+        </div>
+        <div class="team-card">
+          <div class="team-card__avatar" style="background: #1976d2">M</div>
+          <div class="team-card__info">
+            <h3 class="team-card__name">Moritz</h3>
+            <span class="team-card__role">Co-Founder & Product</span>
+            <p class="team-card__bio">
+              Had the idea, shapes the vision and makes sure Felix doesn't over-engineer everything.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section class="about-cta">
+    <div class="about-cta__inner">
+      <h2 class="about-cta__title">Ready to simplify your life?</h2>
+      <p class="about-cta__subtitle">
+        Join us and start organizing everything in one place — for free.
+      </p>
+      <div class="about-cta__actions">
+        <a routerLink="/register" class="btn-primary btn-lg">Get Started Free</a>
+        <a routerLink="/pricing" class="btn-outlined btn-lg">View Pricing</a>
+      </div>
+    </div>
+  </section>
+</main>
+
+<app-footer />

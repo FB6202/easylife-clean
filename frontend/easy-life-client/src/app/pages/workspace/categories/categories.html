@@ -1,0 +1,383 @@
+<!-- Page Header -->
+<div class="categories-header">
+  <div class="categories-header__text">
+    <p class="categories-header__label">Categories</p>
+    <p class="categories-header__subtitle">
+      Group your tasks, goals and documents into meaningful categories.
+    </p>
+  </div>
+  <div class="categories-header__actions">
+    <button
+      class="btn-secondary"
+      [class.btn-secondary--active]="activeFilterCount() > 0"
+      (click)="showFilter.set(true)"
+    >
+      <span class="material-symbols-outlined">tune</span>
+      Filters
+      @if (activeFilterCount() > 0) {
+        <span class="filter-active-badge">{{ activeFilterCount() }}</span>
+      }
+    </button>
+    <button class="btn-primary" (click)="openCreate()">
+      <span class="material-symbols-outlined">add</span>
+      Create Category
+    </button>
+  </div>
+</div>
+
+<!-- Grid -->
+<div class="categories-container">
+  <div class="categories-grid">
+    @for (category of paginatedCategories(); track category.id) {
+      <div class="category-card" (click)="openEdit(category)">
+        <div class="category-card__bar" [style.background]="category.color"></div>
+        <div class="category-card__body">
+          <div class="category-card__top">
+            <div class="category-card__icon" [style.background]="category.color + '18'">
+              <span class="material-symbols-outlined" [style.color]="category.color">
+                {{ category.icon }}
+              </span>
+            </div>
+            <span
+              [class]="
+                'category-card__access ' +
+                (category.accessType === 'PUBLIC' ? 'access--public' : 'access--private')
+              "
+            >
+              <span class="material-symbols-outlined">
+                {{ category.accessType === 'PUBLIC' ? 'travel_explore' : 'lock' }}
+              </span>
+              {{ category.accessType.toLowerCase() }}
+            </span>
+          </div>
+          <h3 class="category-card__name">{{ category.name }}</h3>
+          <p class="category-card__desc">{{ category.description }}</p>
+          <div class="category-card__footer">
+            <span class="category-card__date">
+              <span class="material-symbols-outlined">calendar_today</span>
+              Created {{ category.createdAt }}
+            </span>
+            <button class="category-card__arrow" (click)="openEdit(category, $event)">
+              <span class="material-symbols-outlined">arrow_forward</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    }
+
+    <div class="category-card category-card--add" (click)="openCreate()">
+      <div class="category-card__add-inner">
+        <div class="category-card__add-icon">
+          <span class="material-symbols-outlined">add</span>
+        </div>
+        <span class="category-card__add-label">Add New</span>
+        <span class="category-card__add-sub">Define a category</span>
+      </div>
+    </div>
+  </div>
+
+  <app-pagination
+    [currentPage]="currentPage()"
+    [totalPages]="totalPages()"
+    [totalElements]="totalElements()"
+    [pageSize]="pageSize()"
+    (pageChange)="onPageChange($event)"
+    (pageSizeChange)="onPageSizeChange($event)"
+    (aiClick)="onAiClick()"
+  />
+</div>
+
+<!-- ══ FILTER PANEL ══════════════════════════════════════ -->
+@if (showFilter()) {
+  <app-filter-panel
+    title="Filter Categories"
+    [fields]="categoryFilterFields"
+    [initialValues]="activeFilters()"
+    (apply)="onFilterApply($event)"
+    (reset)="onFilterReset()"
+    (close)="showFilter.set(false)"
+  />
+}
+
+<!-- ══ CREATE MODAL ══════════════════════════════════════ -->
+@if (showCreateModal()) {
+  <div class="modal-overlay" (click)="showCreateModal.set(false)">
+    <div class="cat-modal" (click)="$event.stopPropagation()">
+      <div class="cat-modal__header">
+        <div>
+          <h2 class="cat-modal__title">New Category</h2>
+          <p class="cat-modal__subtitle">Organize your content into a meaningful group.</p>
+        </div>
+        <button class="cat-modal__close" (click)="showCreateModal.set(false)">
+          <span class="material-symbols-outlined">close</span>
+        </button>
+      </div>
+
+      <!-- Preview -->
+      <div class="cat-modal__preview">
+        <div class="cat-preview" [style.border-color]="createForm().color">
+          <div class="cat-preview__icon" [style.background]="createForm().color + '20'">
+            <span class="material-symbols-outlined" [style.color]="createForm().color">
+              {{ createForm().icon }}
+            </span>
+          </div>
+          <div class="cat-preview__info">
+            <span class="cat-preview__name">{{ createForm().name || 'Category name' }}</span>
+            <span class="cat-preview__desc">{{
+              createForm().description || 'Description...'
+            }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Name + Description -->
+      <div class="form-group">
+        <label>Name</label>
+        <input
+          type="text"
+          placeholder="e.g. Work, Health, Finance..."
+          [(ngModel)]="createForm().name"
+        />
+      </div>
+      <div class="form-group">
+        <label>Description</label>
+        <textarea
+          rows="2"
+          placeholder="What does this category contain?"
+          [(ngModel)]="createForm().description"
+        ></textarea>
+      </div>
+
+      <!-- Color Picker -->
+      <div class="form-group">
+        <label>Color</label>
+        <div class="color-picker-grid">
+          @for (color of availableColors; track color) {
+            <button
+              class="color-dot"
+              [style.background]="color"
+              [class.color-dot--active]="createForm().color === color"
+              (click)="createForm.update((f) => ({ ...f, color: color }))"
+              [title]="color"
+            >
+              @if (createForm().color === color) {
+                <span class="material-symbols-outlined">check</span>
+              }
+            </button>
+          }
+        </div>
+      </div>
+
+      <!-- Icon Picker -->
+      <div class="form-group">
+        <label>Icon</label>
+        <div class="icon-search">
+          <span class="material-symbols-outlined">search</span>
+          <input
+            type="text"
+            placeholder="Search icons..."
+            [value]="iconSearchQuery()"
+            (input)="iconSearchQuery.set($any($event.target).value)"
+          />
+        </div>
+        <div class="icon-picker-grid">
+          @for (icon of filteredIcons(); track icon) {
+            <button
+              [class]="'icon-btn ' + (createForm().icon === icon ? 'icon-btn--active' : '')"
+              [style.color]="createForm().icon === icon ? createForm().color : ''"
+              [style.border-color]="createForm().icon === icon ? createForm().color : ''"
+              (click)="createForm.update((f) => ({ ...f, icon: icon }))"
+              [title]="icon"
+            >
+              <span class="material-symbols-outlined">{{ icon }}</span>
+            </button>
+          }
+          @if (filteredIcons().length === 0) {
+            <p class="icon-picker-empty">No icons found</p>
+          }
+        </div>
+      </div>
+
+      <!-- Access -->
+      <div class="form-group">
+        <label>Access</label>
+        <div class="modal-access-toggle">
+          <button
+            [class]="'modal-access-btn ' + (createForm().accessType === 'PRIVATE' ? 'active' : '')"
+            (click)="createForm.update((f) => ({ ...f, accessType: 'PRIVATE' }))"
+          >
+            <span class="material-symbols-outlined">lock</span>
+            Private
+          </button>
+          <button
+            [class]="'modal-access-btn ' + (createForm().accessType === 'PUBLIC' ? 'active' : '')"
+            (click)="createForm.update((f) => ({ ...f, accessType: 'PUBLIC' }))"
+          >
+            <span class="material-symbols-outlined">travel_explore</span>
+            Public
+          </button>
+        </div>
+      </div>
+
+      <div class="cat-modal__footer">
+        <button class="btn-secondary" (click)="showCreateModal.set(false)">Cancel</button>
+        <button class="btn-primary" (click)="submitCreate()">Create Category</button>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- ══ EDIT MODAL ════════════════════════════════════════ -->
+@if (showEditModal() && selectedCategory()) {
+  <div class="modal-overlay" (click)="showEditModal.set(false)">
+    <div class="cat-modal" (click)="$event.stopPropagation()">
+      <div class="cat-modal__header">
+        <div>
+          <h2 class="cat-modal__title">Edit Category</h2>
+          <p class="cat-modal__subtitle">Update the details of this category.</p>
+        </div>
+        <div class="cat-modal__header-actions">
+          <button
+            class="cat-modal__action-btn cat-modal__action-btn--delete"
+            (click)="openDeleteConfirm(selectedCategory()!)"
+            title="Delete category"
+          >
+            <span class="material-symbols-outlined">delete</span>
+          </button>
+          <button class="cat-modal__close" (click)="showEditModal.set(false)">
+            <span class="material-symbols-outlined">close</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Preview -->
+      <div class="cat-modal__preview">
+        <div class="cat-preview" [style.border-color]="editForm().color">
+          <div class="cat-preview__icon" [style.background]="editForm().color + '20'">
+            <span class="material-symbols-outlined" [style.color]="editForm().color">
+              {{ editForm().icon }}
+            </span>
+          </div>
+          <div class="cat-preview__info">
+            <span class="cat-preview__name">{{ editForm().name || 'Category name' }}</span>
+            <span class="cat-preview__desc">{{ editForm().description || 'Description...' }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Name + Description -->
+      <div class="form-group">
+        <label>Name</label>
+        <input
+          type="text"
+          placeholder="e.g. Work, Health, Finance..."
+          [(ngModel)]="editForm().name"
+        />
+      </div>
+      <div class="form-group">
+        <label>Description</label>
+        <textarea
+          rows="2"
+          placeholder="What does this category contain?"
+          [(ngModel)]="editForm().description"
+        ></textarea>
+      </div>
+
+      <!-- Color Picker -->
+      <div class="form-group">
+        <label>Color</label>
+        <div class="color-picker-grid">
+          @for (color of availableColors; track color) {
+            <button
+              class="color-dot"
+              [style.background]="color"
+              [class.color-dot--active]="editForm().color === color"
+              (click)="editForm.update((f) => ({ ...f, color: color }))"
+              [title]="color"
+            >
+              @if (editForm().color === color) {
+                <span class="material-symbols-outlined">check</span>
+              }
+            </button>
+          }
+        </div>
+      </div>
+
+      <!-- Icon Picker -->
+      <div class="form-group">
+        <label>Icon</label>
+        <div class="icon-search">
+          <span class="material-symbols-outlined">search</span>
+          <input
+            type="text"
+            placeholder="Search icons..."
+            [value]="iconSearchQuery()"
+            (input)="iconSearchQuery.set($any($event.target).value)"
+          />
+        </div>
+        <div class="icon-picker-grid">
+          @for (icon of filteredIcons(); track icon) {
+            <button
+              [class]="'icon-btn ' + (editForm().icon === icon ? 'icon-btn--active' : '')"
+              [style.color]="editForm().icon === icon ? editForm().color : ''"
+              [style.border-color]="editForm().icon === icon ? editForm().color : ''"
+              (click)="editForm.update((f) => ({ ...f, icon: icon }))"
+              [title]="icon"
+            >
+              <span class="material-symbols-outlined">{{ icon }}</span>
+            </button>
+          }
+          @if (filteredIcons().length === 0) {
+            <p class="icon-picker-empty">No icons found</p>
+          }
+        </div>
+      </div>
+
+      <!-- Access -->
+      <div class="form-group">
+        <label>Access</label>
+        <div class="modal-access-toggle">
+          <button
+            [class]="'modal-access-btn ' + (editForm().accessType === 'PRIVATE' ? 'active' : '')"
+            (click)="editForm.update((f) => ({ ...f, accessType: 'PRIVATE' }))"
+          >
+            <span class="material-symbols-outlined">lock</span>
+            Private
+          </button>
+          <button
+            [class]="'modal-access-btn ' + (editForm().accessType === 'PUBLIC' ? 'active' : '')"
+            (click)="editForm.update((f) => ({ ...f, accessType: 'PUBLIC' }))"
+          >
+            <span class="material-symbols-outlined">travel_explore</span>
+            Public
+          </button>
+        </div>
+      </div>
+
+      <div class="cat-modal__footer">
+        <button class="btn-secondary" (click)="showEditModal.set(false)">Cancel</button>
+        <button class="btn-primary" (click)="submitEdit()">Save Changes</button>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- ══ DELETE CONFIRM ════════════════════════════════════ -->
+@if (showDeleteConfirm() && selectedCategory()) {
+  <div class="modal-overlay" (click)="showDeleteConfirm.set(false)">
+    <div class="confirm-dialog" (click)="$event.stopPropagation()">
+      <div class="confirm-dialog__icon confirm-dialog__icon--danger">
+        <span class="material-symbols-outlined">delete</span>
+      </div>
+      <h3 class="confirm-dialog__title">Delete Category</h3>
+      <p class="confirm-dialog__text">
+        Are you sure you want to delete
+        <strong>"{{ selectedCategory()!.name }}"</strong>? This will not delete the items inside it.
+      </p>
+      <div class="confirm-dialog__actions">
+        <button class="btn-secondary" (click)="showDeleteConfirm.set(false)">Cancel</button>
+        <button class="btn-danger" (click)="confirmDelete()">Delete Category</button>
+      </div>
+    </div>
+  </div>
+}

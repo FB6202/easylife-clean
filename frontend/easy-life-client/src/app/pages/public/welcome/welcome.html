@@ -1,0 +1,69 @@
+<!-- Navbar -->
+<app-navbar />
+
+<!-- Hero -->
+<section class="hero">
+  <div class="hero__inner">
+    <div class="hero__content">
+      <h1 class="hero__headline">
+        Organize your life.<br />
+        <span class="hero__headline--accent">Achieve your goals.</span>
+      </h1>
+      <p class="hero__subtitle">
+        Easy Life brings your tasks, goals, calendar, documents and contacts together in one place —
+        powered by AI.
+      </p>
+      <div class="hero__actions">
+        <a routerLink="/register" class="btn-primary btn-lg">
+          <span class="material-symbols-outlined">rocket_launch</span>
+          Get Started — it's free
+        </a>
+        <a routerLink="/login" class="btn-outlined btn-lg">Login</a>
+      </div>
+    </div>
+
+    <!-- App Preview -->
+    <div class="hero__preview">
+      <div class="hero__preview-frame">
+        <img src="images/dashboard-ss.png" alt="Easy Life Dashboard" class="hero__preview-img" />
+        <!-- <div class="hero__preview-placeholder">
+          <span class="material-symbols-outlined">dashboard</span>
+          <p>Dashboard Preview</p>
+        </div> -->
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Features -->
+<section class="features" id="features">
+  <div class="features__inner">
+    <div class="features__header">
+      <span class="features__label">Features</span>
+      <h2 class="features__title">Everything you need to thrive</h2>
+    </div>
+    <div class="features__grid">
+      @for (feature of features; track feature.title) {
+        <div class="feature-card">
+          <div class="feature-card__icon">
+            <span class="material-symbols-outlined">{{ feature.icon }}</span>
+          </div>
+          <h3 class="feature-card__title">{{ feature.title }}</h3>
+          <p class="feature-card__desc">{{ feature.description }}</p>
+        </div>
+      }
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="cta">
+  <div class="cta__inner">
+    <h2 class="cta__title">Ready to make life easier?</h2>
+    <p class="cta__subtitle">Start organizing your life today — completely free.</p>
+    <a routerLink="/register" class="btn-primary btn-lg"> Get Started — it's free </a>
+  </div>
+</section>
+
+<!-- Footer -->
+<app-footer />

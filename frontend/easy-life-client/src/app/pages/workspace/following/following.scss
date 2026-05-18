@@ -1,0 +1,310 @@
+@use '../../../../styles/variables' as *;
+@use '../../../../styles/mixins' as *;
+
+// ── Header ─────────────────────────────────────────────────
+.following-header {
+  @include flex-between;
+  margin-bottom: $space-6;
+  gap: $space-4;
+  flex-wrap: wrap;
+
+  &__text {
+    @include flex-col;
+    gap: $space-1;
+  }
+
+  &__label {
+    font-size: $font-size-xs;
+    font-weight: $font-weight-semibold;
+    color: var(--color-primary);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+
+  &__subtitle {
+    font-size: $font-size-sm;
+    color: var(--color-text-secondary);
+  }
+
+  &__actions {
+    @include flex-start;
+    gap: $space-3;
+  }
+}
+
+// ── Pending Section ────────────────────────────────────────
+.pending-section {
+  margin-bottom: $space-6;
+
+  &__header {
+    @include flex-start;
+    gap: $space-3;
+    margin-bottom: $space-4;
+  }
+
+  &__title {
+    font-size: $font-size-lg;
+    font-weight: $font-weight-semibold;
+    color: var(--color-text-primary);
+  }
+
+  &__badge {
+    background: var(--color-primary);
+    color: white;
+    font-size: $font-size-xs;
+    font-weight: $font-weight-bold;
+    padding: 2px $space-2;
+    border-radius: $radius-pill;
+  }
+}
+
+.pending-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: $space-4;
+
+  @include below-md {
+    grid-template-columns: 1fr;
+  }
+}
+
+.pending-card {
+  @include card($space-4);
+  @include flex-between;
+  gap: $space-4;
+
+  &__user {
+    @include flex-start;
+    gap: $space-3;
+    min-width: 0;
+  }
+
+  &__info {
+    @include flex-col;
+    gap: 2px;
+    min-width: 0;
+  }
+
+  &__name {
+    font-size: $font-size-sm;
+    font-weight: $font-weight-semibold;
+    color: var(--color-text-primary);
+    @include truncate;
+  }
+
+  &__username {
+    font-size: $font-size-xs;
+    color: var(--color-text-muted);
+  }
+
+  &__actions {
+    @include flex-start;
+    gap: $space-2;
+    flex-shrink: 0;
+  }
+
+  &__btn {
+    width: 34px;
+    height: 34px;
+    border-radius: $radius-full;
+    border: none;
+    @include flex-center;
+    cursor: pointer;
+    transition: all $transition-fast;
+
+    .material-symbols-outlined {
+      font-size: 18px;
+    }
+
+    &--decline {
+      background: var(--color-danger-subtle);
+      color: var(--color-danger);
+
+      &:hover {
+        background: var(--color-danger-subtle);
+        filter: brightness(0.9);
+      }
+    }
+
+    &--accept {
+      background: var(--color-success-subtle);
+      color: var(--color-primary);
+
+      &:hover {
+        background: var(--color-success-subtle);
+        filter: brightness(0.9);
+      }
+    }
+  }
+}
+
+// ── Avatar ─────────────────────────────────────────────────
+.user-avatar {
+  width: 42px;
+  height: 42px;
+  border-radius: $radius-full;
+  @include flex-center;
+  font-size: $font-size-sm;
+  font-weight: $font-weight-bold;
+  color: white;
+  flex-shrink: 0;
+}
+
+// ── Container ──────────────────────────────────────────────
+.following-container {
+  @include card(0);
+  overflow: hidden;
+}
+
+// ── Tabs ───────────────────────────────────────────────────
+.following-tabs {
+  @include flex-start;
+  border-bottom: 1px solid var(--color-border);
+  padding: 0 $space-6;
+}
+
+.following-tab {
+  @include flex-start;
+  gap: $space-2;
+  padding: $space-4 $space-2;
+  margin-right: $space-6;
+  font-family: $font-family;
+  font-size: $font-size-sm;
+  font-weight: $font-weight-medium;
+  color: var(--color-text-muted);
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  cursor: pointer;
+  transition: all $transition-fast;
+  margin-bottom: -1px;
+
+  &:hover {
+    color: var(--color-text-primary);
+  }
+
+  &--active {
+    color: var(--color-primary);
+    border-bottom-color: var(--color-primary);
+    font-weight: $font-weight-semibold;
+  }
+
+  &__count {
+    background: var(--color-bg-input);
+    color: var(--color-text-muted);
+    font-size: $font-size-xs;
+    font-weight: $font-weight-semibold;
+    padding: 1px $space-2;
+    border-radius: $radius-pill;
+
+    .following-tab--active & {
+      background: var(--color-primary-light);
+      color: var(--color-primary);
+    }
+  }
+}
+
+// ── Follow List ────────────────────────────────────────────
+.following-list {
+  @include flex-col;
+}
+
+.follow-row {
+  @include flex-between;
+  padding: $space-4 $space-6;
+  border-bottom: 1px solid var(--color-border-light);
+  gap: $space-4;
+  transition: background $transition-fast;
+
+  &:last-child {
+    border-bottom: none;
+  }
+
+  &:hover {
+    background: var(--color-bg-hover);
+  }
+
+  &__user {
+    @include flex-start;
+    gap: $space-3;
+    flex: 1;
+    min-width: 0;
+  }
+
+  &__info {
+    @include flex-col;
+    gap: 2px;
+    min-width: 0;
+  }
+
+  &__name {
+    font-size: $font-size-sm;
+    font-weight: $font-weight-semibold;
+    color: var(--color-text-primary);
+  }
+
+  &__username {
+    font-size: $font-size-xs;
+    color: var(--color-text-muted);
+  }
+
+  &__actions {
+    @include flex-start;
+    gap: $space-2;
+    flex-shrink: 0;
+  }
+}
+
+// ── Follow Status ──────────────────────────────────────────
+.follow-status {
+  font-size: $font-size-xs;
+  font-weight: $font-weight-bold;
+  padding: 2px $space-2;
+  border-radius: $radius-pill;
+  letter-spacing: 0.04em;
+
+  &--accepted {
+    background: var(--color-success-subtle);
+    color: var(--color-primary);
+    border: 1px solid var(--color-success-border);
+  }
+
+  &--pending {
+    background: var(--color-reminder-subtle);
+    color: var(--color-reminder-text);
+    border: 1px solid var(--color-reminder-border);
+  }
+}
+
+// ── Unfollow Button ────────────────────────────────────────
+.follow-btn-unfollow {
+  @include btn-base;
+  background: transparent;
+  color: var(--color-danger);
+  border: 1px solid var(--color-danger-border);
+  font-size: $font-size-xs !important;
+  padding: $space-1 $space-3 !important;
+
+  &:hover {
+    background: var(--color-danger-subtle);
+    border-color: var(--color-danger);
+  }
+}
+
+.btn-secondary--active {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+  background: var(--color-primary-light);
+}
+
+.filter-active-badge {
+  background: var(--color-primary);
+  color: white;
+  font-size: 11px;
+  font-weight: $font-weight-bold;
+  padding: 1px 6px;
+  border-radius: $radius-pill;
+  margin-left: $space-1;
+  min-width: 18px;
+  text-align: center;
+}

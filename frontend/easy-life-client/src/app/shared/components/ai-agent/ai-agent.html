@@ -1,0 +1,141 @@
+@if (agent.isOpen()) {
+<div class="agent-widget" [class.agent-widget--minimized]="agent.isMinimized()">
+
+  <!-- ── Header ─────────────────────────────────────── -->
+  <div class="agent-header" (click)="agent.isMinimized() && agent.minimize()">
+    <div class="agent-header__left">
+      <div class="agent-header__avatar">
+        <span class="material-symbols-outlined">auto_awesome</span>
+      </div>
+      <div class="agent-header__info">
+        <span class="agent-header__name">AI Assistant</span>
+        @if (!agent.isMinimized()) {
+        <span class="agent-header__status">
+          <span class="agent-header__dot"></span>
+          Online
+        </span>
+        }
+      </div>
+    </div>
+    <div class="agent-header__actions">
+      <button class="agent-header__btn" (click)="agent.clearHistory(); $event.stopPropagation()"
+        title="New conversation">
+        <span class="material-symbols-outlined">add_comment</span>
+      </button>
+      <button class="agent-header__btn" (click)="agent.minimize(); $event.stopPropagation()" title="Minimize">
+        <span class="material-symbols-outlined">{{ agent.isMinimized() ? 'expand_less' : 'remove' }}</span>
+      </button>
+      <button class="agent-header__btn agent-header__btn--close" (click)="agent.close(); $event.stopPropagation()"
+        title="Close">
+        <span class="material-symbols-outlined">close</span>
+      </button>
+    </div>
+  </div>
+
+  @if (!agent.isMinimized()) {
+
+  <!-- ── Messages ───────────────────────────────────── -->
+  <div class="agent-messages">
+    @for (msg of agent.messages(); track trackById($index, msg)) {
+
+    <!-- Assistant -->
+    @if (msg.role === 'assistant') {
+    <div class="agent-msg agent-msg--assistant">
+      <div class="agent-msg__avatar">
+        <span class="material-symbols-outlined">auto_awesome</span>
+      </div>
+      <div class="agent-msg__body">
+        <div class="agent-msg__bubble">
+          @if (msg.isStreaming && msg.content.length === 0) {
+          <div class="agent-typing">
+            <span></span><span></span><span></span>
+          </div>
+          } @else {
+          <p class="agent-msg__text">{{ msg.content }}</p>
+          @if (msg.isStreaming) {
+          <span class="agent-msg__cursor"></span>
+          }
+          }
+        </div>
+        <span class="agent-msg__time">{{ formatTime(msg.timestamp) }}</span>
+      </div>
+    </div>
+    }
+
+    <!-- User -->
+    @if (msg.role === 'user') {
+    <div class="agent-msg agent-msg--user">
+      <div class="agent-msg__body">
+        @if (msg.attachments && msg.attachments.length > 0) {
+        <div class="agent-msg__attachments">
+          @for (att of msg.attachments; track att.name) {
+          <div class="agent-msg__attachment">
+            <span class="material-symbols-outlined">{{ getFileIcon(att.type) }}</span>
+            <span class="agent-msg__attachment-name">{{ att.name }}</span>
+          </div>
+          }
+        </div>
+        }
+        @if (msg.content) {
+        <div class="agent-msg__bubble">
+          <p class="agent-msg__text">{{ msg.content }}</p>
+        </div>
+        }
+        <span class="agent-msg__time">{{ formatTime(msg.timestamp) }}</span>
+      </div>
+    </div>
+    }
+
+    }
+    <div #messagesEnd></div>
+  </div>
+
+  <!-- ── Input Area ─────────────────────────────────── -->
+  <div class="agent-input-area">
+
+    <!-- Attachment Previews -->
+    @if (attachments().length > 0) {
+    <div class="agent-attachments-preview">
+      @for (att of attachments(); track att.name; let i = $index) {
+      <div class="agent-attach-chip">
+        <span class="material-symbols-outlined agent-attach-chip__icon">{{ getFileIcon(att.type) }}</span>
+        <span class="agent-attach-chip__name">{{ att.name }}</span>
+        <button class="agent-attach-chip__remove" (click)="removeAttachment(i)">
+          <span class="material-symbols-outlined">close</span>
+        </button>
+      </div>
+      }
+    </div>
+    }
+
+    <!-- Input Row -->
+    <div class="agent-input" [class.agent-input--recording]="isRecording()">
+      <button class="agent-input__btn" (click)="openFilePicker()" title="Attach file">
+        <span class="material-symbols-outlined">attach_file</span>
+      </button>
+
+      <textarea #textarea class="agent-input__textarea" [(ngModel)]="inputText" (ngModelChange)="inputText.set($event)"
+        (keydown)="onKeydown($event)" (input)="onInput($event)"
+        placeholder="{{ isRecording() ? 'Listening...' : 'Ask anything...' }}" rows="1" [disabled]="agent.isLoading()">
+      </textarea>
+
+      <button class="agent-input__btn agent-input__btn--mic" [class.agent-input__btn--recording]="isRecording()"
+        (click)="toggleVoice()" title="{{ isRecording() ? 'Stop recording' : 'Voice input' }}">
+        <span class="material-symbols-outlined">{{ isRecording() ? 'stop' : 'mic' }}</span>
+      </button>
+
+      <button class="agent-input__send" [disabled]="!canSend()" (click)="send()" title="Send">
+        <span class="material-symbols-outlined">arrow_upward</span>
+      </button>
+    </div>
+
+    <p class="agent-input__hint">Enter to send · Shift+Enter for new line</p>
+  </div>
+
+  <!-- Hidden file input -->
+  <input #fileInput type="file" multiple accept=".pdf,.doc,.docx,.xls,.xlsx,.txt,.csv,.png,.jpg,.jpeg,.webp"
+    style="display:none" (change)="onFileSelected($event)" />
+
+  }
+</div>
+}

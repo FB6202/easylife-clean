@@ -1,0 +1,15 @@
+# Build output
+backend/app/target/
+
+# Secrets & lokale Config
+backend/app/src/main/resources/application-dev.yaml
+easylife-dev_accessKeys.csv
+
+# Dependencies
+frontend/easy-life-client/node_modules/
+frontend/easy-life-client/.angular/
+
+# Repomix
+repomix*.xml
+frontend/easy-life-client/repomix*.xml
+backend/app/repomix*.xml

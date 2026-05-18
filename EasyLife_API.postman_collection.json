@@ -1,0 +1,1170 @@
+{
+  "info": {
+    "name": "Easy Life API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": "Vollständige API Collection · Hauptuser felix_mueller (userId=1)"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:8080" },
+    { "key": "userId",  "value": "1" }
+  ],
+  "item": [
+
+    {
+      "name": "👤 Users",
+      "item": [
+        {
+          "name": "GET · findById",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/api/users/{{userId}}", "host": ["{{baseUrl}}"], "path": ["api","users","{{userId}}"] }
+          }
+        },
+        {
+          "name": "GET · findByKeycloakId",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/api/users/keycloak/kc-felix-0001", "host": ["{{baseUrl}}"], "path": ["api","users","keycloak","kc-felix-0001"] }
+          }
+        },
+        {
+          "name": "GET · search",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/users/search?query=sarah&requesterId={{userId}}",
+              "host": ["{{baseUrl}}"], "path": ["api","users","search"],
+              "query": [
+                { "key": "query",       "value": "sarah" },
+                { "key": "requesterId", "value": "{{userId}}" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "POST · register",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{baseUrl}}/api/users/register", "host": ["{{baseUrl}}"], "path": ["api","users","register"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"keycloakId\": \"kc-test-9999\",\n  \"username\": \"test_user\",\n  \"email\": \"test@easylife.app\",\n  \"firstname\": \"Test\",\n  \"lastname\": \"User\",\n  \"mobileNumber\": \"+49 151 99999999\"\n}"
+            }
+          }
+        },
+        {
+          "name": "PUT · updateProfile",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{baseUrl}}/api/users/{{userId}}/profile", "host": ["{{baseUrl}}"], "path": ["api","users","{{userId}}","profile"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"firstname\": \"Felix\",\n  \"lastname\": \"Müller\",\n  \"bio\": \"Building Easy Life — a productivity suite for intentional people.\",\n  \"profileImagePath\": null,\n  \"mobileNumber\": \"+49 151 12345678\"\n}"
+            }
+          }
+        },
+        {
+          "name": "PUT · updateAddress",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{baseUrl}}/api/users/{{userId}}/address", "host": ["{{baseUrl}}"], "path": ["api","users","{{userId}}","address"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"country\": \"Germany\",\n  \"street\": \"Königsallee\",\n  \"number\": \"42\",\n  \"additionalAddressInfo\": null,\n  \"zipCode\": \"40212\",\n  \"city\": \"Düsseldorf\"\n}"
+            }
+          }
+        },
+        {
+          "name": "PUT · updateSettings",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{baseUrl}}/api/users/{{userId}}/settings", "host": ["{{baseUrl}}"], "path": ["api","users","{{userId}}","settings"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"language\": \"DE\",\n  \"webColorTheme\": \"LIGHT\",\n  \"mobileColorTheme\": \"SYSTEM\",\n  \"emailNotifications\": true,\n  \"pushNotifications\": true\n}"
+            }
+          }
+        },
+        {
+          "name": "POST · profileImage presigned-url",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{baseUrl}}/api/users/{{userId}}/profile-image/presigned-url?fileName=avatar.jpg&contentType=image%2Fjpeg",
+              "host": ["{{baseUrl}}"], "path": ["api","users","{{userId}}","profile-image","presigned-url"],
+              "query": [
+                { "key": "fileName",    "value": "avatar.jpg" },
+                { "key": "contentType", "value": "image/jpeg" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "PATCH · profileImage confirm",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{baseUrl}}/api/users/{{userId}}/profile-image/confirm", "host": ["{{baseUrl}}"], "path": ["api","users","{{userId}}","profile-image","confirm"] },
+            "body": { "mode": "raw", "raw": "\"felix_mueller/profiles/1/abc12345_avatar.jpg\"" }
+          }
+        }
+      ]
+    },
+
+    {
+      "name": "🏷️ Categories",
+      "item": [
+        {
+          "name": "GET · findAll",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/categories?userId={{userId}}",
+              "host": ["{{baseUrl}}"], "path": ["api","v1","categories"],
+              "query": [{ "key": "userId", "value": "{{userId}}" }]
+            }
+          }
+        },
+        {
+          "name": "GET · findById",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/categories/1?userId={{userId}}",
+              "host": ["{{baseUrl}}"], "path": ["api","v1","categories","1"],
+              "query": [{ "key": "userId", "value": "{{userId}}" }]
+            }
+          }
+        },
+        {
+          "name": "GET · findAll PUBLIC",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/categories/access-type?userId={{userId}}&accessType=PUBLIC",
+              "host": ["{{baseUrl}}"], "path": ["api","v1","categories","access-type"],
+              "query": [
+                { "key": "userId",     "value": "{{userId}}" },
+                { "key": "accessType", "value": "PUBLIC" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "POST · create",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/categories?userId={{userId}}",
+              "host": ["{{baseUrl}}"], "path": ["api","v1","categories"],
+              "query": [{ "key": "userId", "value": "{{userId}}" }]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Reisen\",\n  \"description\": \"Reisepläne, Ausflüge und Abenteuer.\",\n  \"color\": \"#00bcd4\",\n  \"icon\": \"flight\",\n  \"accessType\": \"PRIVATE\"\n}"
+            }
+          }
+        },
+        {
+          "name": "PUT · update",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/categories/1?userId={{userId}}",
+              "host": ["{{baseUrl}}"], "path": ["api","v1","categories","1"],
+              "query": [{ "key": "userId", "value": "{{userId}}" }]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Work & Projekte\",\n  \"description\": \"Alles rund um Easy Life und Arbeitsprojekte.\",\n  \"color\": \"#1976d2\",\n  \"icon\": \"work\",\n  \"accessType\": \"PUBLIC\"\n}"
+            }
+          }
+        },
+        {
+          "name": "DELETE · delete",
+          "request": {
+            "method": "DELETE",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/categories/1?userId={{userId}}",
+              "host": ["{{baseUrl}}"], "path": ["api","v1","categories","1"],
+              "query": [{ "key": "userId", "value": "{{userId}}" }]
+            }
+          }
+        }
+      ]
+    },
+
+    {
+      "name": "🎯 Goals",
+      "item": [
+        {
+          "name": "GET · findAll",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/goals?userId={{userId}}&page=0&size=20",
+              "host": ["{{baseUrl}}"], "path": ["api","v1","goals"],
+              "query": [
+                { "key": "userId", "value": "{{userId}}" },
+                { "key": "page",   "value": "0" },
+                { "key": "size",   "value": "20" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "GET · findById",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/goals/1?userId={{userId}}",
+              "host": ["{{baseUrl}}"], "path": ["api","v1","goals","1"],
+              "query": [{ "key": "userId", "value": "{{userId}}" }]
+            }
+          }
+        },
+        {
+          "name": "POST · create",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/goals?userId={{userId}}",
+              "host": ["{{baseUrl}}"], "path": ["api","v1","goals"],
+              "query": [{ "key": "userId", "value": "{{userId}}" }]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Spanisch B1 erreichen\",\n  \"description\": \"Spanisch auf B1-Niveau bringen durch tägliches Üben.\",\n  \"measurableTarget\": \"B1-Zertifikat bestehen\",\n  \"targetValue\": 100,\n  \"targetUnit\": \"%\",\n  \"currentProgress\": 0,\n  \"deadline\": \"2026-12-31\",\n  \"status\": \"ACTIVE\",\n  \"accessType\": \"PUBLIC\",\n  \"categoryIds\": [5]\n}"
+            }
+          }
+        },
+        {
+          "name": "PUT · update",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/goals/1?userId={{userId}}",
+              "host": ["{{baseUrl}}"], "path": ["api","v1","goals","1"],
+              "query": [{ "key": "userId", "value": "{{userId}}" }]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Easy Life MVP launchen\",\n  \"description\": \"Vollständige erste Version von Easy Life fertigstellen.\",\n  \"measurableTarget\": \"Alle Core-Features live & stabil\",\n  \"targetValue\": 100,\n  \"targetUnit\": \"%\",\n  \"currentProgress\": 70,\n  \"deadline\": \"2026-06-30\",\n  \"status\": \"ACTIVE\",\n  \"accessType\": \"PUBLIC\",\n  \"categoryIds\": [1, 6]\n}"
+            }
+          }
+        },
+        {
+          "name": "PATCH · updateProgress",
+          "request": {
+            "method": "PATCH",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/goals/1/progress?progress=70&userId={{userId}}",
+              "host": ["{{baseUrl}}"], "path": ["api","v1","goals","1","progress"],
+              "query": [
+                { "key": "progress", "value": "70" },
+                { "key": "userId",   "value": "{{userId}}" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "POST · image presigned-url",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/goals/1/image/presigned-url?userId={{userId}}&fileName=goal-cover.jpg&contentType=image%2Fjpeg",
+              "host": ["{{baseUrl}}"], "path": ["api","v1","goals","1","image","presigned-url"],
+              "query": [
+                { "key": "userId",      "value": "{{userId}}" },
+                { "key": "fileName",    "value": "goal-cover.jpg" },
+                { "key": "contentType", "value": "image/jpeg" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "PATCH · image confirm",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/goals/1/image/confirm?userId={{userId}}",
+              "host": ["{{baseUrl}}"], "path": ["api","v1","goals","1","image","confirm"],
+              "query": [{ "key": "userId", "value": "{{userId}}" }]
+            },
+            "body": { "mode": "raw", "raw": "\"felix_mueller/goals/1/abc12345_goal-cover.jpg\"" }
+          }
+        },
+        {
+          "name": "DELETE · delete",
+          "request": {
+            "method": "DELETE",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/goals/1?userId={{userId}}",
+              "host": ["{{baseUrl}}"], "path": ["api","v1","goals","1"],
+              "query": [{ "key": "userId", "value": "{{userId}}" }]
+            }
+          }
+        },
+        {
+          "name": "── Tasks ──",
+          "item": [
+            {
+              "name": "POST · addTask",
+              "request": {
+                "method": "POST",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/goals/1/tasks?userId={{userId}}",
+                  "host": ["{{baseUrl}}"], "path": ["api","v1","goals","1","tasks"],
+                  "query": [{ "key": "userId", "value": "{{userId}}" }]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"title\": \"CI/CD Pipeline aufsetzen\",\n  \"description\": \"GitHub Actions für automatisches Deployment\",\n  \"done\": false,\n  \"progressContribution\": 10,\n  \"dueDate\": \"2026-06-01\"\n}"
+                }
+              }
+            },
+            {
+              "name": "PUT · updateTask",
+              "request": {
+                "method": "PUT",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/goals/1/tasks/1?userId={{userId}}",
+                  "host": ["{{baseUrl}}"], "path": ["api","v1","goals","1","tasks","1"],
+                  "query": [{ "key": "userId", "value": "{{userId}}" }]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"title\": \"Backend API vollständig\",\n  \"description\": \"Alle Endpunkte implementiert und getestet\",\n  \"done\": true,\n  \"progressContribution\": 20,\n  \"dueDate\": \"2026-05-15\"\n}"
+                }
+              }
+            },
+            {
+              "name": "DELETE · deleteTask",
+              "request": {
+                "method": "DELETE",
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/goals/1/tasks/1?userId={{userId}}",
+                  "host": ["{{baseUrl}}"], "path": ["api","v1","goals","1","tasks","1"],
+                  "query": [{ "key": "userId", "value": "{{userId}}" }]
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+
+    {
+      "name": "✅ Todos",
+      "item": [
+        {
+          "name": "GET · findAll",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/todos?userId={{userId}}&page=0&size=20",
+              "host": ["{{baseUrl}}"], "path": ["api","v1","todos"],
+              "query": [
+                { "key": "userId", "value": "{{userId}}" },
+                { "key": "page",   "value": "0" },
+                { "key": "size",   "value": "20" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "GET · findAll (filter: OPEN + HIGH)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/todos?userId={{userId}}&status=OPEN&priority=HIGH&page=0&size=20",
+              "host": ["{{baseUrl}}"], "path": ["api","v1","todos"],
+              "query": [
+                { "key": "userId",   "value": "{{userId}}" },
+                { "key": "status",   "value": "OPEN" },
+                { "key": "priority", "value": "HIGH" },
+                { "key": "page",     "value": "0" },
+                { "key": "size",     "value": "20" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "GET · findById",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/todos/1?userId={{userId}}",
+              "host": ["{{baseUrl}}"], "path": ["api","v1","todos","1"],
+              "query": [{ "key": "userId", "value": "{{userId}}" }]
+            }
+          }
+        },
+        {
+          "name": "POST · create",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/todos?userId={{userId}}",
+              "host": ["{{baseUrl}}"], "path": ["api","v1","todos"],
+              "query": [{ "key": "userId", "value": "{{userId}}" }]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Postman Collection testen\",\n  \"description\": \"Alle Endpoints einmal durchfeuern\",\n  \"priority\": \"HIGH\",\n  \"status\": \"IN_PROGRESS\",\n  \"accessType\": \"PRIVATE\",\n  \"dueDate\": \"2026-05-13\",\n  \"categoryIds\": [1]\n}"
+            }
+          }
+        },
+        {
+          "name": "PUT · update",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/todos/1?userId={{userId}}",
+              "host": ["{{baseUrl}}"], "path": ["api","v1","todos","1"],
+              "query": [{ "key": "userId", "value": "{{userId}}" }]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"UserSearch Endpoint testen\",\n  \"description\": \"Alle Edge Cases prüfen\",\n  \"priority\": \"HIGH\",\n  \"status\": \"DONE\",\n  \"accessType\": \"PRIVATE\",\n  \"dueDate\": \"2026-05-14\",\n  \"categoryIds\": [1, 6]\n}"
+            }
+          }
+        },
+        {
+          "name": "DELETE · delete",
+          "request": {
+            "method": "DELETE",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/todos/1?userId={{userId}}",
+              "host": ["{{baseUrl}}"], "path": ["api","v1","todos","1"],
+              "query": [{ "key": "userId", "value": "{{userId}}" }]
+            }
+          }
+        }
+      ]
+    },
+
+    {
+      "name": "📓 Journal",
+      "item": [
+        {
+          "name": "GET · findAll",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/journal?userId={{userId}}&page=0&size=20",
+              "host": ["{{baseUrl}}"], "path": ["api","v1","journal"],
+              "query": [
+                { "key": "userId", "value": "{{userId}}" },
+                { "key": "page",   "value": "0" },
+                { "key": "size",   "value": "20" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "GET · findById",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/journal/1?userId={{userId}}",
+              "host": ["{{baseUrl}}"], "path": ["api","v1","journal","1"],
+              "query": [{ "key": "userId", "value": "{{userId}}" }]
+            }
+          }
+        },
+        {
+          "name": "GET · findByDate",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/journal/date/2026-05-11?userId={{userId}}",
+              "host": ["{{baseUrl}}"], "path": ["api","v1","journal","date","2026-05-11"],
+              "query": [{ "key": "userId", "value": "{{userId}}" }]
+            }
+          }
+        },
+        {
+          "name": "POST · create",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/journal?userId={{userId}}",
+              "host": ["{{baseUrl}}"], "path": ["api","v1","journal"],
+              "query": [{ "key": "userId", "value": "{{userId}}" }]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Erster API-Test erfolgreich\",\n  \"wentWell\": \"Postman Collection komplett durchgetestet. Alle Endpoints grün.\",\n  \"wentBad\": \"Ein paar kleine Bugs gefunden die schnell gefixt wurden.\",\n  \"learnings\": \"Immer zuerst mit echten Daten testen bevor das Frontend gebaut wird.\",\n  \"gratitude\": \"Dass der Backend-Start endlich reibungslos klappt.\",\n  \"mood\": \"GREAT\",\n  \"entryDate\": \"2026-05-12\",\n  \"categoryIds\": [1],\n  \"weekPlanId\": 1\n}"
+            }
+          }
+        },
+        {
+          "name": "PUT · update",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/journal/1?userId={{userId}}",
+              "host": ["{{baseUrl}}"], "path": ["api","v1","journal","1"],
+              "query": [{ "key": "userId", "value": "{{userId}}" }]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Produktiver Start in die Woche (updated)\",\n  \"wentWell\": \"UserSearch Endpoint fertig implementiert.\",\n  \"wentBad\": \"Deployment hat beim ersten Versuch nicht geklappt.\",\n  \"learnings\": \"Immer zuerst lokal testen.\",\n  \"gratitude\": \"Gutes Team.\",\n  \"mood\": \"GREAT\",\n  \"entryDate\": \"2026-05-11\",\n  \"categoryIds\": [1, 6],\n  \"weekPlanId\": 1\n}"
+            }
+          }
+        },
+        {
+          "name": "DELETE · delete",
+          "request": {
+            "method": "DELETE",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/journal/1?userId={{userId}}",
+              "host": ["{{baseUrl}}"], "path": ["api","v1","journal","1"],
+              "query": [{ "key": "userId", "value": "{{userId}}" }]
+            }
+          }
+        }
+      ]
+    },
+
+    {
+      "name": "📅 Calendar",
+      "item": [
+        {
+          "name": "GET · findAll",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/calendar?userId={{userId}}",
+              "host": ["{{baseUrl}}"], "path": ["api","v1","calendar"],
+              "query": [{ "key": "userId", "value": "{{userId}}" }]
+            }
+          }
+        },
+        {
+          "name": "GET · findById",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/calendar/1?userId={{userId}}",
+              "host": ["{{baseUrl}}"], "path": ["api","v1","calendar","1"],
+              "query": [{ "key": "userId", "value": "{{userId}}" }]
+            }
+          }
+        },
+        {
+          "name": "GET · findByRange",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/calendar/range?userId={{userId}}&start=2026-05-01T00:00:00&end=2026-05-31T23:59:59",
+              "host": ["{{baseUrl}}"], "path": ["api","v1","calendar","range"],
+              "query": [
+                { "key": "userId", "value": "{{userId}}" },
+                { "key": "start",  "value": "2026-05-01T00:00:00" },
+                { "key": "end",    "value": "2026-05-31T23:59:59" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "GET · findByType (APPOINTMENT)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/calendar/type?userId={{userId}}&eventType=APPOINTMENT",
+              "host": ["{{baseUrl}}"], "path": ["api","v1","calendar","type"],
+              "query": [
+                { "key": "userId",    "value": "{{userId}}" },
+                { "key": "eventType", "value": "APPOINTMENT" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "POST · create",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/calendar?userId={{userId}}",
+              "host": ["{{baseUrl}}"], "path": ["api","v1","calendar"],
+              "query": [{ "key": "userId", "value": "{{userId}}" }]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Frontend Planning Session\",\n  \"description\": \"Angular Services Architektur besprechen\",\n  \"location\": \"Discord\",\n  \"eventColor\": \"#1976d2\",\n  \"startDateTime\": \"2026-05-14T10:00:00\",\n  \"endDateTime\": \"2026-05-14T11:30:00\",\n  \"allDay\": false,\n  \"eventType\": \"APPOINTMENT\",\n  \"recurrence\": \"NONE\",\n  \"accessType\": \"PRIVATE\",\n  \"categoryIds\": [1]\n}"
+            }
+          }
+        },
+        {
+          "name": "PUT · update",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/calendar/1?userId={{userId}}",
+              "host": ["{{baseUrl}}"], "path": ["api","v1","calendar","1"],
+              "query": [{ "key": "userId", "value": "{{userId}}" }]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Weekly Team Sync (updated)\",\n  \"description\": \"Wöchentliches Entwickler-Meeting\",\n  \"location\": \"Google Meet\",\n  \"eventColor\": \"#1976d2\",\n  \"startDateTime\": \"2026-05-13T10:00:00\",\n  \"endDateTime\": \"2026-05-13T11:00:00\",\n  \"allDay\": false,\n  \"eventType\": \"APPOINTMENT\",\n  \"recurrence\": \"WEEKLY\",\n  \"accessType\": \"PRIVATE\",\n  \"categoryIds\": [1]\n}"
+            }
+          }
+        },
+        {
+          "name": "DELETE · delete",
+          "request": {
+            "method": "DELETE",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/calendar/1?userId={{userId}}",
+              "host": ["{{baseUrl}}"], "path": ["api","v1","calendar","1"],
+              "query": [{ "key": "userId", "value": "{{userId}}" }]
+            }
+          }
+        }
+      ]
+    },
+
+    {
+      "name": "📄 Documents",
+      "item": [
+        {
+          "name": "GET · findAll",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/documents?userId={{userId}}&page=0&size=20",
+              "host": ["{{baseUrl}}"], "path": ["api","v1","documents"],
+              "query": [
+                { "key": "userId", "value": "{{userId}}" },
+                { "key": "page",   "value": "0" },
+                { "key": "size",   "value": "20" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "GET · findById",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/documents/1?userId={{userId}}",
+              "host": ["{{baseUrl}}"], "path": ["api","v1","documents","1"],
+              "query": [{ "key": "userId", "value": "{{userId}}" }]
+            }
+          }
+        },
+        {
+          "name": "POST · presigned-url (Upload starten)",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/documents/presigned-url?userId={{userId}}&fileName=test-doc.pdf&contentType=application%2Fpdf",
+              "host": ["{{baseUrl}}"], "path": ["api","v1","documents","presigned-url"],
+              "query": [
+                { "key": "userId",      "value": "{{userId}}" },
+                { "key": "fileName",    "value": "test-doc.pdf" },
+                { "key": "contentType", "value": "application/pdf" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "POST · confirm-upload (nach S3 Upload)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/documents/confirm-upload?userId={{userId}}&filePath=felix_mueller%2Fdocuments%2Ftest-doc.pdf",
+              "host": ["{{baseUrl}}"], "path": ["api","v1","documents","confirm-upload"],
+              "query": [
+                { "key": "userId",   "value": "{{userId}}" },
+                { "key": "filePath", "value": "felix_mueller/documents/test-doc.pdf" }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Test Dokument\",\n  \"description\": \"Ein Test-PDF für die API\",\n  \"fileType\": \"pdf\",\n  \"fileSizeBytes\": 123456,\n  \"accessType\": \"PRIVATE\",\n  \"categoryIds\": [1]\n}"
+            }
+          }
+        },
+        {
+          "name": "PUT · update",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/documents/1?userId={{userId}}",
+              "host": ["{{baseUrl}}"], "path": ["api","v1","documents","1"],
+              "query": [{ "key": "userId", "value": "{{userId}}" }]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Easy Life Pitch Deck (updated)\",\n  \"description\": \"Aktualisierter Pitch für Investoren.\",\n  \"fileType\": \"pdf\",\n  \"fileSizeBytes\": 4200000,\n  \"accessType\": \"PRIVATE\",\n  \"categoryIds\": [1, 2]\n}"
+            }
+          }
+        },
+        {
+          "name": "DELETE · delete",
+          "request": {
+            "method": "DELETE",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/documents/1?userId={{userId}}",
+              "host": ["{{baseUrl}}"], "path": ["api","v1","documents","1"],
+              "query": [{ "key": "userId", "value": "{{userId}}" }]
+            }
+          }
+        }
+      ]
+    },
+
+    {
+      "name": "👥 Contacts",
+      "item": [
+        {
+          "name": "GET · findAll",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/contacts?userId={{userId}}&page=0&size=20",
+              "host": ["{{baseUrl}}"], "path": ["api","v1","contacts"],
+              "query": [
+                { "key": "userId", "value": "{{userId}}" },
+                { "key": "page",   "value": "0" },
+                { "key": "size",   "value": "20" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "GET · findById",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/contacts/1?userId={{userId}}",
+              "host": ["{{baseUrl}}"], "path": ["api","v1","contacts","1"],
+              "query": [{ "key": "userId", "value": "{{userId}}" }]
+            }
+          }
+        },
+        {
+          "name": "POST · create",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/contacts?userId={{userId}}",
+              "host": ["{{baseUrl}}"], "path": ["api","v1","contacts"],
+              "query": [{ "key": "userId", "value": "{{userId}}" }]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"firstname\": \"Max\",\n  \"lastname\": \"Mustermann\",\n  \"company\": \"Muster GmbH\",\n  \"position\": \"CTO\",\n  \"email\": \"max@muster.de\",\n  \"phone\": \"+49 211 55555555\",\n  \"linkedinUrl\": null,\n  \"websiteUrl\": \"muster.de\",\n  \"notes\": \"Kennenlernen auf der Tech-Konferenz.\",\n  \"tags\": \"tech,startup\",\n  \"relationshipType\": \"COLLEAGUE\",\n  \"lastContactedAt\": \"2026-05-12\",\n  \"categoryIds\": [1]\n}"
+            }
+          }
+        },
+        {
+          "name": "PUT · update",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/contacts/1?userId={{userId}}",
+              "host": ["{{baseUrl}}"], "path": ["api","v1","contacts","1"],
+              "query": [{ "key": "userId", "value": "{{userId}}" }]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"firstname\": \"David\",\n  \"lastname\": \"Müller\",\n  \"company\": null,\n  \"position\": \"Co-Founder\",\n  \"email\": \"david@easylife.app\",\n  \"phone\": \"+49 151 11111111\",\n  \"linkedinUrl\": null,\n  \"websiteUrl\": null,\n  \"notes\": \"Bruder & Co-Founder von Easy Life.\",\n  \"tags\": \"family,co-founder\",\n  \"relationshipType\": \"FRIEND\",\n  \"lastContactedAt\": \"2026-05-12\",\n  \"categoryIds\": [1, 3]\n}"
+            }
+          }
+        },
+        {
+          "name": "DELETE · delete",
+          "request": {
+            "method": "DELETE",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/contacts/1?userId={{userId}}",
+              "host": ["{{baseUrl}}"], "path": ["api","v1","contacts","1"],
+              "query": [{ "key": "userId", "value": "{{userId}}" }]
+            }
+          }
+        },
+        {
+          "name": "── Notes ──",
+          "item": [
+            {
+              "name": "POST · addNote",
+              "request": {
+                "method": "POST",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/contacts/2/notes?userId={{userId}}",
+                  "host": ["{{baseUrl}}"], "path": ["api","v1","contacts","2","notes"],
+                  "query": [{ "key": "userId", "value": "{{userId}}" }]
+                },
+                "body": { "mode": "raw", "raw": "{\n  \"content\": \"Call für nächste Woche vereinbart.\"\n}" }
+              }
+            },
+            {
+              "name": "PUT · updateNote",
+              "request": {
+                "method": "PUT",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/contacts/2/notes/1?userId={{userId}}",
+                  "host": ["{{baseUrl}}"], "path": ["api","v1","contacts","2","notes","1"],
+                  "query": [{ "key": "userId", "value": "{{userId}}" }]
+                },
+                "body": { "mode": "raw", "raw": "{\n  \"content\": \"Pitch Deck bis 19. Mai schicken.\"\n}" }
+              }
+            },
+            {
+              "name": "DELETE · deleteNote",
+              "request": {
+                "method": "DELETE",
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/contacts/2/notes/1?userId={{userId}}",
+                  "host": ["{{baseUrl}}"], "path": ["api","v1","contacts","2","notes","1"],
+                  "query": [{ "key": "userId", "value": "{{userId}}" }]
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+
+    {
+      "name": "🔗 Network / Follows",
+      "item": [
+        {
+          "name": "GET · getFollowers",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/follows/followers?userId={{userId}}",
+              "host": ["{{baseUrl}}"], "path": ["api","v1","follows","followers"],
+              "query": [{ "key": "userId", "value": "{{userId}}" }]
+            }
+          }
+        },
+        {
+          "name": "GET · getFollowing",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/follows/following?userId={{userId}}",
+              "host": ["{{baseUrl}}"], "path": ["api","v1","follows","following"],
+              "query": [{ "key": "userId", "value": "{{userId}}" }]
+            }
+          }
+        },
+        {
+          "name": "GET · getPendingRequests",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/follows/pending?userId={{userId}}",
+              "host": ["{{baseUrl}}"], "path": ["api","v1","follows","pending"],
+              "query": [{ "key": "userId", "value": "{{userId}}" }]
+            }
+          }
+        },
+        {
+          "name": "GET · isFollowing (felix → sarah)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/follows/is-following?followerId={{userId}}&followingId=2",
+              "host": ["{{baseUrl}}"], "path": ["api","v1","follows","is-following"],
+              "query": [
+                { "key": "followerId",  "value": "{{userId}}" },
+                { "key": "followingId", "value": "2" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "POST · sendFollowRequest (felix → new user)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/follows?followerId={{userId}}",
+              "host": ["{{baseUrl}}"], "path": ["api","v1","follows"],
+              "query": [{ "key": "followerId", "value": "{{userId}}" }]
+            },
+            "body": { "mode": "raw", "raw": "{\n  \"followingId\": 4\n}" }
+          }
+        },
+        {
+          "name": "PATCH · acceptFollowRequest (jan's request, id=4)",
+          "request": {
+            "method": "PATCH",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/follows/4/accept?userId={{userId}}",
+              "host": ["{{baseUrl}}"], "path": ["api","v1","follows","4","accept"],
+              "query": [{ "key": "userId", "value": "{{userId}}" }]
+            }
+          }
+        },
+        {
+          "name": "PATCH · declineFollowRequest (jan's request, id=4)",
+          "request": {
+            "method": "PATCH",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/follows/4/decline?userId={{userId}}",
+              "host": ["{{baseUrl}}"], "path": ["api","v1","follows","4","decline"],
+              "query": [{ "key": "userId", "value": "{{userId}}" }]
+            }
+          }
+        },
+        {
+          "name": "DELETE · unfollow (felix entfolgt lena)",
+          "request": {
+            "method": "DELETE",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/follows/4?followerId={{userId}}",
+              "host": ["{{baseUrl}}"], "path": ["api","v1","follows","4"],
+              "query": [{ "key": "followerId", "value": "{{userId}}" }]
+            }
+          }
+        }
+      ]
+    },
+
+    {
+      "name": "🔔 Notifications",
+      "item": [
+        {
+          "name": "GET · findAll",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/notifications?userId={{userId}}&page=0&size=20",
+              "host": ["{{baseUrl}}"], "path": ["api","v1","notifications"],
+              "query": [
+                { "key": "userId", "value": "{{userId}}" },
+                { "key": "page",   "value": "0" },
+                { "key": "size",   "value": "20" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "GET · findAllUnread",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/notifications/unread?userId={{userId}}",
+              "host": ["{{baseUrl}}"], "path": ["api","v1","notifications","unread"],
+              "query": [{ "key": "userId", "value": "{{userId}}" }]
+            }
+          }
+        },
+        {
+          "name": "GET · countUnread",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/notifications/unread/count?userId={{userId}}",
+              "host": ["{{baseUrl}}"], "path": ["api","v1","notifications","unread","count"],
+              "query": [{ "key": "userId", "value": "{{userId}}" }]
+            }
+          }
+        },
+        {
+          "name": "PATCH · markAsRead (id=1)",
+          "request": {
+            "method": "PATCH",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/notifications/1/read?userId={{userId}}",
+              "host": ["{{baseUrl}}"], "path": ["api","v1","notifications","1","read"],
+              "query": [{ "key": "userId", "value": "{{userId}}" }]
+            }
+          }
+        },
+        {
+          "name": "PATCH · markAllAsRead",
+          "request": {
+            "method": "PATCH",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/notifications/read-all?userId={{userId}}",
+              "host": ["{{baseUrl}}"], "path": ["api","v1","notifications","read-all"],
+              "query": [{ "key": "userId", "value": "{{userId}}" }]
+            }
+          }
+        },
+        {
+          "name": "DELETE · delete (id=1)",
+          "request": {
+            "method": "DELETE",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/notifications/1?userId={{userId}}",
+              "host": ["{{baseUrl}}"], "path": ["api","v1","notifications","1"],
+              "query": [{ "key": "userId", "value": "{{userId}}" }]
+            }
+          }
+        }
+      ]
+    },
+
+    {
+      "name": "📆 WeekPlans",
+      "item": [
+        {
+          "name": "GET · findAll",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/weekplans?userId={{userId}}&page=0&size=10",
+              "host": ["{{baseUrl}}"], "path": ["api","v1","weekplans"],
+              "query": [
+                { "key": "userId", "value": "{{userId}}" },
+                { "key": "page",   "value": "0" },
+                { "key": "size",   "value": "10" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "GET · findById",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/weekplans/1?userId={{userId}}",
+              "host": ["{{baseUrl}}"], "path": ["api","v1","weekplans","1"],
+              "query": [{ "key": "userId", "value": "{{userId}}" }]
+            }
+          }
+        },
+        {
+          "name": "POST · create",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/weekplans?userId={{userId}}",
+              "host": ["{{baseUrl}}"], "path": ["api","v1","weekplans"],
+              "query": [{ "key": "userId", "value": "{{userId}}" }]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"KW 21 — Frontend Services\",\n  \"intention\": \"Alle HTTP Services fertigstellen und erste echte API-Calls testen.\",\n  \"startDate\": \"2026-05-18\",\n  \"endDate\": \"2026-05-24\",\n  \"status\": \"DRAFT\",\n  \"categoryIds\": [1, 6],\n  \"items\": [\n    { \"title\": \"AuthService bauen\", \"description\": null, \"done\": false, \"dueDate\": \"2026-05-19\" },\n    { \"title\": \"GoalService bauen\",  \"description\": null, \"done\": false, \"dueDate\": \"2026-05-20\" }\n  ]\n}"
+            }
+          }
+        },
+        {
+          "name": "PATCH · updateStatus → ACTIVE",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/weekplans/1/status?userId={{userId}}",
+              "host": ["{{baseUrl}}"], "path": ["api","v1","weekplans","1","status"],
+              "query": [{ "key": "userId", "value": "{{userId}}" }]
+            },
+            "body": { "mode": "raw", "raw": "\"ACTIVE\"" }
+          }
+        },
+        {
+          "name": "PATCH · updateReflection",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/weekplans/1/reflection?userId={{userId}}",
+              "host": ["{{baseUrl}}"], "path": ["api","v1","weekplans","1","reflection"],
+              "query": [{ "key": "userId", "value": "{{userId}}" }]
+            },
+            "body": { "mode": "raw", "raw": "\"Gute Woche. Alle Services fertig, erste echte Daten im Frontend sichtbar.\"" }
+          }
+        },
+        {
+          "name": "DELETE · delete",
+          "request": {
+            "method": "DELETE",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/weekplans/1?userId={{userId}}",
+              "host": ["{{baseUrl}}"], "path": ["api","v1","weekplans","1"],
+              "query": [{ "key": "userId", "value": "{{userId}}" }]
+            }
+          }
+        },
+        {
+          "name": "── Items ──",
+          "item": [
+            {
+              "name": "POST · addItem",
+              "request": {
+                "method": "POST",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/weekplans/1/items?userId={{userId}}",
+                  "host": ["{{baseUrl}}"], "path": ["api","v1","weekplans","1","items"],
+                  "query": [{ "key": "userId", "value": "{{userId}}" }]
+                },
+                "body": { "mode": "raw", "raw": "{\n  \"title\": \"NotificationService bauen\",\n  \"description\": null,\n  \"done\": false,\n  \"dueDate\": \"2026-05-15\"\n}" }
+              }
+            },
+            {
+              "name": "PATCH · toggleItem (id=1)",
+              "request": {
+                "method": "PATCH",
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/weekplans/1/items/1/toggle?userId={{userId}}",
+                  "host": ["{{baseUrl}}"], "path": ["api","v1","weekplans","1","items","1","toggle"],
+                  "query": [{ "key": "userId", "value": "{{userId}}" }]
+                }
+              }
+            },
+            {
+              "name": "PUT · updateItem (id=1)",
+              "request": {
+                "method": "PUT",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/weekplans/1/items/1?userId={{userId}}",
+                  "host": ["{{baseUrl}}"], "path": ["api","v1","weekplans","1","items","1"],
+                  "query": [{ "key": "userId", "value": "{{userId}}" }]
+                },
+                "body": { "mode": "raw", "raw": "{\n  \"title\": \"HTTP Services für Users + Auth\",\n  \"description\": \"UserService, AuthService mit echten API-Calls\",\n  \"done\": true,\n  \"dueDate\": \"2026-05-13\"\n}" }
+              }
+            },
+            {
+              "name": "DELETE · removeItem (id=1)",
+              "request": {
+                "method": "DELETE",
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/weekplans/1/items/1?userId={{userId}}",
+                  "host": ["{{baseUrl}}"], "path": ["api","v1","weekplans","1","items","1"],
+                  "query": [{ "key": "userId", "value": "{{userId}}" }]
+                }
+              }
+            }
+          ]
+        }
+      ]
+    }
+
+  ]
+}

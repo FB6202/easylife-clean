@@ -1,0 +1,77 @@
+<div class="workspace" [class.sidebar-collapsed]="sidebarCollapsed()">
+  <aside class="sidebar">
+    <div class="sidebar__logo">
+      <img src="images/easy-life-logo-light-no-bg.png" alt="Easy Life" />
+    </div>
+
+    <nav class="sidebar__nav">
+      <div class="sidebar__section">
+        <span class="sidebar__section-label">Management</span>
+        @for (item of managementItems; track item.route) {
+        <a [routerLink]="item.route" routerLinkActive="active" class="sidebar__item">
+          <span class="material-symbols-outlined sidebar__icon">{{ item.icon }}</span>
+          <span class="sidebar__label">{{ item.label }}</span>
+        </a>
+        }
+      </div>
+
+      <div class="sidebar__section">
+        <span class="sidebar__section-label">Account</span>
+        @for (item of accountItems; track item.route) {
+        <a [routerLink]="item.route" routerLinkActive="active" class="sidebar__item">
+          <span class="material-symbols-outlined sidebar__icon">{{ item.icon }}</span>
+          <span class="sidebar__label">{{ item.label }}</span>
+          @if (item.badge && unreadNotificationCount() > 0) {
+          <span class="sidebar__badge">
+            {{ unreadNotificationCount() > 99 ? '99+' : unreadNotificationCount() }}
+          </span>
+          }
+        </a>
+        }
+      </div>
+    </nav>
+
+    <div class="sidebar__footer">
+      <button class="sidebar__item sidebar__logout">
+        <span class="material-symbols-outlined sidebar__icon">logout</span>
+        <span class="sidebar__label">Logout</span>
+      </button>
+    </div>
+  </aside>
+
+  <div class="workspace__main">
+    <header class="topbar">
+      <div class="topbar__left">
+        <button class="topbar__toggle" (click)="toggleSidebar()">
+          <span class="material-symbols-outlined">menu</span>
+        </button>
+      </div>
+      <div class="topbar__right">
+        <div class="topbar__search">
+          <span class="material-symbols-outlined">search</span>
+          <input type="text" placeholder="Search..." />
+        </div>
+        <button class="topbar__icon-btn" (click)="showSettings.set(true)">
+          <span class="material-symbols-outlined">settings</span>
+        </button>
+        <div class="topbar__user" (click)="navigateToProfile('section-profile')">
+          <div class="topbar__user-info">
+            <span class="topbar__user-name">{{ username }}</span>
+            <span class="topbar__user-plan">Premium Plan</span>
+          </div>
+          <div class="topbar__avatar">{{ username.charAt(0).toUpperCase() }}</div>
+        </div>
+      </div>
+    </header>
+
+    <main class="workspace__content">
+      <router-outlet />
+    </main>
+  </div>
+  <app-ai-agent-widget />
+</div>
+
+@if (showSettings()) {
+<app-settings-modal (close)="showSettings.set(false)" (save)="showSettings.set(false)"
+  (navigateTo)="onSettingsNavigate($event)" />
+}

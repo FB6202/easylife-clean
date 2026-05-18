@@ -1,0 +1,596 @@
+<!-- Page Header -->
+<div class="cal-header">
+  <div class="cal-header__text">
+    <span class="cal-header__label">{{ headerLabel() }}</span>
+    <h1 class="cal-header__title">{{ headerTitle() }}</h1>
+    <p class="cal-header__subtitle">You have {{ upcomingCount() }} upcoming events.</p>
+  </div>
+  <div class="cal-header__actions">
+    <div class="cal-nav">
+      <button class="cal-nav__btn" (click)="prev()">
+        <span class="material-symbols-outlined">chevron_left</span>
+      </button>
+      <button class="cal-nav__today" (click)="goToday()">Today</button>
+      <button class="cal-nav__btn" (click)="next()">
+        <span class="material-symbols-outlined">chevron_right</span>
+      </button>
+    </div>
+    <div class="cal-view-toggle">
+      <button [class.active]="viewMode() === 'month'" (click)="setView('month')">Month</button>
+      <button [class.active]="viewMode() === 'week'" (click)="setView('week')">Week</button>
+      <button [class.active]="viewMode() === 'day'" (click)="setView('day')">Day</button>
+    </div>
+    <button class="btn-primary" (click)="openCreate()">
+      <span class="material-symbols-outlined">add</span>
+      Create Event
+    </button>
+  </div>
+</div>
+
+<!-- Filters -->
+<div class="cal-filters">
+  @for (et of eventTypes; track et.type) {
+  <button [class]="'cal-filter-btn ' + (activeFilter() === et.type ? 'cal-filter-btn--active' : '')"
+    (click)="setFilter(et.type)">
+    <span class="material-symbols-outlined">{{ et.icon }}</span>
+    {{ et.label }}
+  </button>
+  }
+</div>
+
+<!-- ── MONTH VIEW ─────────────────────────────────────── -->
+@if (viewMode() === 'month') {
+<div class="cal-body">
+  <div class="cal-grid">
+    <div class="cal-grid__header">
+      @for (day of weekDays; track day) {
+      <div class="cal-grid__day-label">{{ day }}</div>
+      }
+    </div>
+    <div class="cal-grid__cells">
+      @for (cell of calendarDays(); track $index) {
+      <div class="cal-cell" [class.cal-cell--other-month]="!cell.currentMonth" [class.cal-cell--today]="cell.isToday"
+        [class.cal-cell--selected]="isSelectedDay(cell.date)" [class.cal-cell--weekend]="isWeekend(cell.date)"
+        (click)="selectDay(cell.date)">
+        <span class="cal-cell__date">{{ cell.date.getDate() }}</span>
+        <div class="cal-cell__events">
+          @for (event of cell.events.slice(0, 3); track event.id) {
+          <div class="cal-event-chip" [style.background]="event.eventColor + '20'"
+            [style.border-left]="'3px solid ' + event.eventColor" [style.color]="event.eventColor"
+            (click)="openEdit(event, $event)">
+            {{ event.title }}
+          </div>
+          }
+          @if (cell.events.length > 3) {
+          <div class="cal-cell__more">+{{ cell.events.length - 3 }} more</div>
+          }
+        </div>
+      </div>
+      }
+    </div>
+  </div>
+
+  <!-- Day Panel -->
+  <div class="cal-today-panel">
+    <div class="cal-today-panel__header">
+      <div class="cal-today-panel__date">
+        <span class="cal-today-panel__day-name">{{ selectedDayLabel() }}</span>
+      </div>
+      @if (isSelectedDateToday()) {
+      <span class="cal-today-panel__badge">TODAY</span>
+      }
+    </div>
+    <div class="cal-today-panel__events">
+      @for (event of selectedDayEvents(); track event.id) {
+      <div class="cal-today-event" [style.border-left-color]="event.eventColor" (click)="openEdit(event)">
+        <div class="cal-today-event__top">
+          <h4 class="cal-today-event__title">{{ event.title }}</h4>
+          <span class="cal-today-event__access material-symbols-outlined">
+            {{ event.accessType === 'PRIVATE' ? 'lock' : 'travel_explore' }}
+          </span>
+        </div>
+        @if (!event.allDay && event.startDateTime) {
+        <div class="cal-today-event__meta">
+          <span class="material-symbols-outlined">schedule</span>
+          {{ event.startDateTime }}
+          @if (event.endDateTime) {
+          – {{ event.endDateTime }}
+          }
+        </div>
+        } @else if (event.allDay) {
+        <div class="cal-today-event__meta">
+          <span class="material-symbols-outlined">event</span>
+          All day
+        </div>
+        }
+        @if (event.location) {
+        <div class="cal-today-event__meta">
+          <span class="material-symbols-outlined">location_on</span>
+          {{ event.location }}
+        </div>
+        }
+        <div class="cal-today-event__type-row">
+          <span class="material-symbols-outlined cal-today-event__type-icon" [style.color]="event.eventColor">
+            {{ getEventTypeIcon(event.eventType) }}
+          </span>
+          <span class="cal-today-event__type-label">{{ event.eventType }}</span>
+        </div>
+      </div>
+      }
+      @if (selectedDayEvents().length === 0) {
+      <div class="cal-today-panel__empty">
+        <span class="material-symbols-outlined">event_available</span>
+        No events on this day
+      </div>
+      }
+    </div>
+    <button class="cal-today-panel__add" (click)="openCreate()">
+      <span class="material-symbols-outlined">add_circle</span>
+      Add Entry
+    </button>
+  </div>
+</div>
+}
+
+<!-- ── WEEK VIEW ──────────────────────────────────────── -->
+@if (viewMode() === 'week') {
+<div class="cal-week">
+  <div class="cal-week__header">
+    <div class="cal-week__time-col"></div>
+    @for (day of currentWeekDays(); track day.date) {
+    <div class="cal-week__day-col" [class.cal-week__day-col--today]="day.isToday">
+      <span class="cal-week__day-name">{{ formatDayShort(day.date) }}</span>
+      <span class="cal-week__day-num" [class.cal-week__day-num--today]="day.isToday">
+        {{ day.date.getDate() }}
+      </span>
+    </div>
+    }
+  </div>
+  <div class="cal-week__body">
+    <div class="cal-week__time-col">
+      @for (hour of hours; track hour) {
+      <div class="cal-week__hour-label">{{ formatHour(hour) }}</div>
+      }
+    </div>
+    @for (day of currentWeekDays(); track day.date) {
+    <div class="cal-week__day" [class.cal-week__day--today]="day.isToday">
+      @for (hour of hours; track hour) {
+      <div class="cal-week__slot"></div>
+      }
+      @for (event of day.events; track event.id) {
+      @if (!event.allDay && event.startDateTime) {
+      <div class="cal-week__event" [style.top.%]="getEventTopPercent(event.startDateTime)" [style.height.%]="
+                  event.endDateTime
+                    ? getEventHeightPercent(event.startDateTime, event.endDateTime)
+                    : 4
+                " [style.background]="event.eventColor + '20'" [style.border-left]="'3px solid ' + event.eventColor"
+        (click)="openEdit(event)">
+        <div class="cal-week__event-title" [style.color]="event.eventColor">
+          {{ event.title }}
+        </div>
+        <div class="cal-week__event-time">{{ event.startDateTime }}</div>
+      </div>
+      }
+      }
+    </div>
+    }
+  </div>
+</div>
+}
+
+<!-- ── DAY VIEW ───────────────────────────────────────── -->
+@if (viewMode() === 'day') {
+<div class="cal-day-view">
+  <div class="cal-day__grid">
+    @for (hour of hours; track hour) {
+    <div class="cal-day__row">
+      <div class="cal-day__hour-label">{{ formatHour(hour) }}</div>
+      <div class="cal-day__slot"></div>
+    </div>
+    }
+    @for (event of dayEvents(); track event.id) {
+    @if (!event.allDay && event.startDateTime) {
+    <div class="cal-day__event" [style.top.%]="getEventTopPercent(event.startDateTime)" [style.height.%]="
+              event.endDateTime
+                ? getEventHeightPercent(event.startDateTime, event.endDateTime)
+                : 4
+            " [style.background]="event.eventColor + '15'" [style.border-left]="'4px solid ' + event.eventColor"
+      (click)="openEdit(event)">
+      <div class="cal-day__event-title" [style.color]="event.eventColor">
+        {{ event.title }}
+      </div>
+      <div class="cal-day__event-meta">
+        {{ event.startDateTime }}
+        @if (event.endDateTime) {
+        – {{ event.endDateTime }}
+        }
+        @if (event.location) {
+        · {{ event.location }}
+        }
+      </div>
+    </div>
+    }
+    }
+  </div>
+</div>
+}
+
+<!-- ══ CREATE MODAL ══════════════════════════════════════ -->
+@if (showCreateModal()) {
+<div class="modal-overlay" (click)="showCreateModal.set(false); showCatDropdown.set(false)">
+  <div class="event-modal" (click)="$event.stopPropagation(); showCatDropdown.set(false)">
+    <div class="event-modal__header">
+      <div>
+        <h2 class="event-modal__title">New Event</h2>
+        <p class="event-modal__subtitle">Add an event to your calendar.</p>
+      </div>
+      <button class="event-modal__close" (click)="showCreateModal.set(false)">
+        <span class="material-symbols-outlined">close</span>
+      </button>
+    </div>
+
+    <!-- Color Bar Preview -->
+    <div class="event-modal__color-bar" [style.background]="createForm().eventColor"></div>
+
+    <!-- Title -->
+    <input class="event-modal__title-input" type="text" placeholder="Event Title" [(ngModel)]="createForm().title" />
+
+    <!-- Description -->
+    <div class="form-group">
+      <label>Description</label>
+      <textarea rows="2" placeholder="Add details..." [(ngModel)]="createForm().description"></textarea>
+    </div>
+
+    <!-- Location -->
+    <div class="form-group">
+      <label>Location</label>
+      <div class="input-with-icon">
+        <span class="material-symbols-outlined">location_on</span>
+        <input type="text" placeholder="Add location or link..." [(ngModel)]="createForm().location" />
+      </div>
+    </div>
+
+    <!-- All Day Toggle -->
+    <div class="event-modal__allday-row">
+      <label class="toggle-switch">
+        <input type="checkbox" [(ngModel)]="createForm().allDay" />
+        <span class="toggle-switch__slider"></span>
+      </label>
+      <span class="event-modal__allday-label">All day event</span>
+    </div>
+
+    <!-- Date + Time -->
+    <div class="event-modal__row">
+      <div class="form-group">
+        <label>Start</label>
+        <input [type]="createForm().allDay ? 'date' : 'datetime-local'" [(ngModel)]="createForm().startDateTime" />
+      </div>
+      @if (!createForm().allDay) {
+      <div class="form-group">
+        <label>End</label>
+        <input type="datetime-local" [(ngModel)]="createForm().endDateTime" />
+      </div>
+      }
+    </div>
+
+    <!-- Event Type -->
+    <div class="form-group">
+      <label>Type</label>
+      <div class="event-type-picker">
+        @for (et of eventTypes; track et.type) {
+        <button [class]="
+                'event-type-btn ' +
+                (createForm().eventType === et.type ? 'event-type-btn--active' : '')
+              " (click)="createForm.update((f) => ({ ...f, eventType: et.type }))">
+          <span class="material-symbols-outlined">{{ et.icon }}</span>
+          {{ et.label }}
+        </button>
+        }
+      </div>
+    </div>
+
+    <!-- Color -->
+    <!-- CREATE MODAL - Color -->
+    <div class="form-group">
+      <label>Color</label>
+      <div class="event-color-picker">
+        @for (color of createFormColors(); track color) {
+        <button class="color-dot" [style.background]="color"
+          [class.color-dot--active]="createForm().eventColor === color"
+          (click)="createForm.update((f) => ({ ...f, eventColor: color }))">
+          @if (createForm().eventColor === color) {
+          <span class="material-symbols-outlined">check</span>
+          }
+        </button>
+        }
+      </div>
+      @if (createForm().categoryIds.length > 0) {
+      <p class="event-color-hint">Colors based on selected categories</p>
+      }
+    </div>
+
+    <!-- Recurrence + Access -->
+    <div class="event-modal__row">
+      <div class="form-group">
+        <label>Recurrence</label>
+        <select [(ngModel)]="createForm().recurrence">
+          @for (r of recurrenceOptions; track r.value) {
+          <option [value]="r.value">{{ r.label }}</option>
+          }
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Access</label>
+        <div class="modal-access-toggle">
+          <button [class]="
+                'modal-access-btn ' + (createForm().accessType === 'PRIVATE' ? 'active' : '')
+              " (click)="createForm.update((f) => ({ ...f, accessType: 'PRIVATE' }))">
+            <span class="material-symbols-outlined">lock</span>
+            Private
+          </button>
+          <button [class]="'modal-access-btn ' + (createForm().accessType === 'PUBLIC' ? 'active' : '')"
+            (click)="createForm.update((f) => ({ ...f, accessType: 'PUBLIC' }))">
+            <span class="material-symbols-outlined">travel_explore</span>
+            Public
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Categories Dropdown -->
+    <div class="form-group" (click)="$event.stopPropagation()">
+      <label>Categories</label>
+      <div class="modal-cat-dropdown">
+        <button class="modal-cat-dropdown__trigger"
+          [class.modal-cat-dropdown__trigger--active]="createForm().categoryIds.length > 0"
+          [class.modal-cat-dropdown__trigger--open]="showCatDropdown()" (click)="toggleCatDropdown($event)">
+          <div class="modal-cat-dropdown__trigger-left">
+            @if (createForm().categoryIds.length > 0) {
+            <div class="modal-cat-dropdown__dots">
+              @for (color of getSelectedCatColors(createForm().categoryIds); track color) {
+              <span class="modal-cat-dropdown__dot" [style.background]="color"></span>
+              }
+            </div>
+            }
+            <span class="modal-cat-dropdown__label">
+              {{ getCatDropdownLabel(createForm().categoryIds) }}
+            </span>
+          </div>
+          <span class="material-symbols-outlined modal-cat-dropdown__arrow">
+            {{ showCatDropdown() ? 'expand_less' : 'expand_more' }}
+          </span>
+        </button>
+        @if (showCatDropdown()) {
+        <div class="modal-cat-dropdown__menu">
+          @for (cat of availableCategories(); track cat.id) {
+          <button class="modal-cat-dropdown__item"
+            [class.modal-cat-dropdown__item--selected]="createForm().categoryIds.includes(cat.id)"
+            (click)="toggleCreateCategory(cat.id)">
+            <div class="modal-cat-dropdown__item-check">
+              @if (createForm().categoryIds.includes(cat.id)) {
+              <span class="material-symbols-outlined">check</span>
+              }
+            </div>
+            <span class="material-symbols-outlined modal-cat-dropdown__item-icon" [style.color]="cat.color">{{ cat.icon
+              }}</span>
+            <span class="modal-cat-dropdown__item-label">{{ cat.name }}</span>
+          </button>
+          }
+          @if (createForm().categoryIds.length > 0) {
+          <div class="modal-cat-dropdown__footer">
+            <button class="modal-cat-dropdown__clear"
+              (click)="createForm.update(f => ({ ...f, categoryIds: [] })); $event.stopPropagation()">
+              <span class="material-symbols-outlined">close</span>Clear
+            </button>
+          </div>
+          }
+        </div>
+        }
+      </div>
+    </div>
+
+    <div class="event-modal__footer">
+      <button class="btn-secondary" (click)="showCreateModal.set(false)">Cancel</button>
+      <button class="btn-primary" (click)="submitCreate()">Create Event</button>
+    </div>
+  </div>
+</div>
+}
+
+<!-- ══ EDIT MODAL ════════════════════════════════════════ -->
+@if (showEditModal() && selectedEvent()) {
+<div class="modal-overlay" (click)="showEditModal.set(false); showEditCatDropdown.set(false)">
+  <div class="event-modal" (click)="$event.stopPropagation(); showEditCatDropdown.set(false)">
+    <div class="event-modal__header">
+      <div>
+        <h2 class="event-modal__title">Edit Event</h2>
+        <p class="event-modal__subtitle">Update your event details.</p>
+      </div>
+      <div class="event-modal__header-actions">
+        <button class="event-modal__action-btn event-modal__action-btn--delete" (click)="openDeleteConfirm()"
+          title="Delete event">
+          <span class="material-symbols-outlined">delete</span>
+        </button>
+        <button class="event-modal__close" (click)="showEditModal.set(false)">
+          <span class="material-symbols-outlined">close</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="event-modal__color-bar" [style.background]="editForm().eventColor"></div>
+
+    <input class="event-modal__title-input" type="text" placeholder="Event Title" [(ngModel)]="editForm().title" />
+
+    <div class="form-group">
+      <label>Description</label>
+      <textarea rows="2" placeholder="Add details..." [(ngModel)]="editForm().description"></textarea>
+    </div>
+
+    <div class="form-group">
+      <label>Location</label>
+      <div class="input-with-icon">
+        <span class="material-symbols-outlined">location_on</span>
+        <input type="text" placeholder="Add location or link..." [(ngModel)]="editForm().location" />
+      </div>
+    </div>
+
+    <div class="event-modal__allday-row">
+      <label class="toggle-switch">
+        <input type="checkbox" [(ngModel)]="editForm().allDay" />
+        <span class="toggle-switch__slider"></span>
+      </label>
+      <span class="event-modal__allday-label">All day event</span>
+    </div>
+
+    <div class="event-modal__row">
+      <div class="form-group">
+        <label>Start</label>
+        <input [type]="editForm().allDay ? 'date' : 'datetime-local'" [(ngModel)]="editForm().startDateTime" />
+      </div>
+      @if (!editForm().allDay) {
+      <div class="form-group">
+        <label>End</label>
+        <input type="datetime-local" [(ngModel)]="editForm().endDateTime" />
+      </div>
+      }
+    </div>
+
+    <div class="form-group">
+      <label>Type</label>
+      <div class="event-type-picker">
+        @for (et of eventTypes; track et.type) {
+        <button [class]="
+                'event-type-btn ' +
+                (editForm().eventType === et.type ? 'event-type-btn--active' : '')
+              " (click)="editForm.update((f) => ({ ...f, eventType: et.type }))">
+          <span class="material-symbols-outlined">{{ et.icon }}</span>
+          {{ et.label }}
+        </button>
+        }
+      </div>
+    </div>
+
+    <!-- EDIT MODAL - Color -->
+    <div class="form-group">
+      <label>Color</label>
+      <div class="event-color-picker">
+        @for (color of editFormColors(); track color) {
+        <button class="color-dot" [style.background]="color" [class.color-dot--active]="editForm().eventColor === color"
+          (click)="editForm.update((f) => ({ ...f, eventColor: color }))">
+          @if (editForm().eventColor === color) {
+          <span class="material-symbols-outlined">check</span>
+          }
+        </button>
+        }
+      </div>
+      @if (editForm().categoryIds.length > 0) {
+      <p class="event-color-hint">Colors based on selected categories</p>
+      }
+    </div>
+
+    <div class="event-modal__row">
+      <div class="form-group">
+        <label>Recurrence</label>
+        <select [(ngModel)]="editForm().recurrence">
+          @for (r of recurrenceOptions; track r.value) {
+          <option [value]="r.value">{{ r.label }}</option>
+          }
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Access</label>
+        <div class="modal-access-toggle">
+          <button [class]="'modal-access-btn ' + (editForm().accessType === 'PRIVATE' ? 'active' : '')"
+            (click)="editForm.update((f) => ({ ...f, accessType: 'PRIVATE' }))">
+            <span class="material-symbols-outlined">lock</span>
+            Private
+          </button>
+          <button [class]="'modal-access-btn ' + (editForm().accessType === 'PUBLIC' ? 'active' : '')"
+            (click)="editForm.update((f) => ({ ...f, accessType: 'PUBLIC' }))">
+            <span class="material-symbols-outlined">travel_explore</span>
+            Public
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Categories Dropdown -->
+    <div class="form-group" (click)="$event.stopPropagation()">
+      <label>Categories</label>
+      <div class="modal-cat-dropdown">
+        <button class="modal-cat-dropdown__trigger"
+          [class.modal-cat-dropdown__trigger--active]="editForm().categoryIds.length > 0"
+          [class.modal-cat-dropdown__trigger--open]="showEditCatDropdown()" (click)="toggleEditCatDropdown($event)">
+          <div class="modal-cat-dropdown__trigger-left">
+            @if (editForm().categoryIds.length > 0) {
+            <div class="modal-cat-dropdown__dots">
+              @for (color of getSelectedCatColors(editForm().categoryIds); track color) {
+              <span class="modal-cat-dropdown__dot" [style.background]="color"></span>
+              }
+            </div>
+            }
+            <span class="modal-cat-dropdown__label">
+              {{ getCatDropdownLabel(editForm().categoryIds) }}
+            </span>
+          </div>
+          <span class="material-symbols-outlined modal-cat-dropdown__arrow">
+            {{ showEditCatDropdown() ? 'expand_less' : 'expand_more' }}
+          </span>
+        </button>
+        @if (showEditCatDropdown()) {
+        <div class="modal-cat-dropdown__menu">
+          @for (cat of availableCategories(); track cat.id) {
+          <button class="modal-cat-dropdown__item"
+            [class.modal-cat-dropdown__item--selected]="editForm().categoryIds.includes(cat.id)"
+            (click)="toggleEditCategory(cat.id)">
+            <div class="modal-cat-dropdown__item-check">
+              @if (editForm().categoryIds.includes(cat.id)) {
+              <span class="material-symbols-outlined">check</span>
+              }
+            </div>
+            <span class="material-symbols-outlined modal-cat-dropdown__item-icon" [style.color]="cat.color">{{ cat.icon
+              }}</span>
+            <span class="modal-cat-dropdown__item-label">{{ cat.name }}</span>
+          </button>
+          }
+          @if (editForm().categoryIds.length > 0) {
+          <div class="modal-cat-dropdown__footer">
+            <button class="modal-cat-dropdown__clear"
+              (click)="editForm.update(f => ({ ...f, categoryIds: [] })); $event.stopPropagation()">
+              <span class="material-symbols-outlined">close</span>Clear
+            </button>
+          </div>
+          }
+        </div>
+        }
+      </div>
+    </div>
+
+    <div class="event-modal__footer">
+      <button class="btn-secondary" (click)="showEditModal.set(false)">Cancel</button>
+      <button class="btn-primary" (click)="submitEdit()">Save Changes</button>
+    </div>
+  </div>
+</div>
+}
+
+<!-- ══ DELETE CONFIRM ════════════════════════════════════ -->
+@if (showDeleteConfirm()) {
+<div class="modal-overlay" (click)="showDeleteConfirm.set(false)">
+  <div class="confirm-dialog" (click)="$event.stopPropagation()">
+    <div class="confirm-dialog__icon confirm-dialog__icon--danger">
+      <span class="material-symbols-outlined">delete</span>
+    </div>
+    <h3 class="confirm-dialog__title">Delete Event</h3>
+    <p class="confirm-dialog__text">
+      Are you sure you want to delete
+      <strong>"{{ selectedEvent()!.title }}"</strong>?
+      This action cannot be undone.
+    </p>
+    <div class="confirm-dialog__actions">
+      <button class="btn-secondary" (click)="showDeleteConfirm.set(false)">Cancel</button>
+      <button class="btn-danger" (click)="confirmDelete()">Delete Event</button>
+    </div>
+  </div>
+</div>
+}

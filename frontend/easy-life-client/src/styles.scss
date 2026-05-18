@@ -1,0 +1,6 @@
+@use 'styles/variables' as *;
+@use 'styles/mixins' as *;
+@use 'styles/base';
+
+// Google Fonts – Rubik (muss nach @use stehen)
+@import url('https://fonts.googleapis.com/css2?family=Rubik:ital,wght@0,300..900;1,300..900&display=swap');

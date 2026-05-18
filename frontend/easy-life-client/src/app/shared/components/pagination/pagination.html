@@ -1,0 +1,108 @@
+<div class="pagination-wrapper">
+  <!-- Left: Page Size + Info -->
+  <div class="pagination-left">
+    <div class="pagination-size">
+      <span class="pagination-size__label">Per page</span>
+      <div class="pagination-size__options">
+        @for (size of pageSizeOptions; track size) {
+          <button
+            [class]="
+              'pagination-size__btn ' +
+              (pageSize() === size && !isCustomSize() ? 'pagination-size__btn--active' : '')
+            "
+            (click)="onSizeChange(size)"
+          >
+            {{ size }}
+          </button>
+        }
+
+        <!-- Custom Input or Button -->
+        @if (showCustomInput()) {
+          <div class="pagination-size__custom-wrap">
+            <input
+              type="number"
+              class="pagination-size__custom-input"
+              placeholder="?"
+              [value]="customSizeInput()"
+              (input)="customSizeInput.set($any($event.target).value)"
+              (keydown)="onCustomSizeKeydown($event)"
+              (blur)="onCustomSizeConfirm()"
+              autofocus
+              min="1"
+              max="500"
+            />
+          </div>
+        } @else {
+          <button
+            [class]="
+              'pagination-size__btn pagination-size__btn--custom ' +
+              (isCustomSize() ? 'pagination-size__btn--active' : '')
+            "
+            (click)="onCustomSizeClick()"
+            title="Enter custom page size"
+          >
+            @if (isCustomSize()) {
+              {{ pageSize() }}
+            } @else {
+              <span class="material-symbols-outlined">edit</span>
+            }
+          </button>
+        }
+      </div>
+    </div>
+
+    <span class="pagination-info">
+      @if (totalElements() === 0) {
+        No results
+      } @else {
+        {{ startItem() }}–{{ endItem() }} of {{ totalElements() | number }}
+      }
+    </span>
+  </div>
+
+  <!-- Center: Page Buttons -->
+  @if (totalPages() > 1) {
+    <div class="pagination-pages">
+      <button
+        class="pagination-btn pagination-btn--nav"
+        [disabled]="currentPage() === 0"
+        (click)="prev()"
+      >
+        <span class="material-symbols-outlined">chevron_left</span>
+      </button>
+
+      @for (page of visiblePages(); track $index) {
+        @if (isEllipsis(page)) {
+          <span class="pagination-ellipsis">···</span>
+        } @else {
+          <button
+            [class]="
+              'pagination-btn ' + (currentPage() === asNumber(page) ? 'pagination-btn--active' : '')
+            "
+            (click)="goTo(asNumber(page))"
+          >
+            {{ asNumber(page) + 1 }}
+          </button>
+        }
+      }
+
+      <button
+        class="pagination-btn pagination-btn--nav"
+        [disabled]="currentPage() === totalPages() - 1"
+        (click)="next()"
+      >
+        <span class="material-symbols-outlined">chevron_right</span>
+      </button>
+    </div>
+  }
+
+  <!-- Right: AI Button -->
+  <div class="pagination-right">
+    @if (showAiButton()) {
+      <button class="pagination-ai-btn" (click)="onAiClick()">
+        <span class="material-symbols-outlined">auto_awesome</span>
+        Ask AI
+      </button>
+    }
+  </div>
+</div>

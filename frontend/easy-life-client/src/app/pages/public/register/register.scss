@@ -1,0 +1,266 @@
+@use '../../../../styles/variables' as *;
+@use '../../../../styles/mixins' as *;
+
+// ── Navbar (gleich wie welcome) ────────────────────────────
+.nav {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--color-border-light);
+
+  &__inner {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 $space-6;
+    height: 64px;
+    @include flex-between;
+    gap: $space-6;
+  }
+
+  &__logo img {
+    height: 32px;
+    width: auto;
+  }
+
+  &__links {
+    @include flex-start;
+    gap: $space-6;
+    flex: 1;
+    justify-content: center;
+  }
+
+  &__link {
+    font-size: $font-size-sm;
+    font-weight: $font-weight-medium;
+    color: var(--color-text-secondary);
+    transition: color $transition-fast;
+    &:hover {
+      color: var(--color-primary);
+    }
+  }
+
+  &__actions {
+    @include flex-start;
+    gap: $space-3;
+
+    .btn-login-nav {
+      @include btn-base;
+      background: transparent;
+      color: var(--color-text-secondary);
+      border: none;
+      font-size: $font-size-xs;
+      &:hover {
+        color: var(--color-primary);
+      }
+    }
+
+    .btn-primary {
+      font-size: $font-size-sm;
+      padding: $space-2 $space-6;
+    }
+  }
+}
+
+// ── Register Page ──────────────────────────────────────────
+.register-page {
+  min-height: calc(100vh - 64px - 60px);
+  background: var(--color-bg);
+  @include flex-center;
+  padding: $space-12 $space-4;
+}
+
+.register-card {
+  @include card($space-10);
+  width: 100%;
+  max-width: 560px;
+  @include flex-col;
+  align-items: center;
+  gap: $space-2;
+
+  &__icon {
+    width: 56px;
+    height: 56px;
+    border-radius: $radius-full;
+    background: var(--color-primary-light);
+    @include flex-center;
+    margin-bottom: $space-2;
+
+    .material-symbols-outlined {
+      font-size: 28px;
+      color: var(--color-primary);
+      font-variation-settings:
+        'FILL' 1,
+        'wght' 400,
+        'GRAD' 0,
+        'opsz' 24;
+    }
+  }
+
+  &__title {
+    font-size: $font-size-2xl;
+    font-weight: $font-weight-bold;
+    color: var(--color-text-primary);
+    text-align: center;
+  }
+
+  &__subtitle {
+    font-size: $font-size-sm;
+    color: var(--color-text-secondary);
+    text-align: center;
+    margin-bottom: $space-4;
+  }
+
+  &__divider {
+    width: 100%;
+    height: 1px;
+    background: var(--color-border);
+    margin: $space-2 0;
+  }
+
+  &__login {
+    font-size: $font-size-sm;
+    color: var(--color-text-secondary);
+    text-align: center;
+  }
+
+  &__login-link {
+    color: var(--color-primary);
+    font-weight: $font-weight-medium;
+    &:hover {
+      color: var(--color-primary-hover);
+    }
+  }
+}
+
+// ── Form ───────────────────────────────────────────────────
+.register-form {
+  width: 100%;
+  @include flex-col;
+  gap: $space-1;
+
+  &__row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: $space-4;
+  }
+
+  &__terms {
+    @include flex-start;
+    gap: $space-3;
+    margin: $space-2 0;
+
+    input[type='checkbox'] {
+      width: 18px;
+      height: 18px;
+      cursor: pointer;
+      accent-color: var(--color-primary);
+      flex-shrink: 0;
+    }
+
+    label {
+      font-size: $font-size-sm;
+      color: var(--color-text-secondary);
+      cursor: pointer;
+    }
+
+    .terms-link {
+      color: var(--color-primary);
+      font-weight: $font-weight-medium;
+      &:hover {
+        color: var(--color-primary-hover);
+      }
+    }
+  }
+
+  &__submit {
+    margin-top: $space-2;
+    padding: $space-4 !important;
+    font-size: $font-size-base !important;
+    border-radius: $radius-lg !important;
+    justify-content: center;
+  }
+}
+
+// ── Input with Icon ────────────────────────────────────────
+.input-icon-wrapper {
+  position: relative;
+  @include flex-start;
+
+  input {
+    @include input-base;
+    padding-left: $space-8;
+  }
+
+  .input-icon {
+    position: absolute;
+    left: $space-4;
+    color: var(--color-text-muted);
+    font-size: $font-size-sm;
+    pointer-events: none;
+    z-index: 1;
+  }
+
+  &--right {
+    input {
+      padding-left: $space-4;
+      padding-right: $space-10;
+    }
+
+    .input-icon-btn {
+      position: absolute;
+      right: $space-3;
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: $space-1;
+      color: var(--color-text-muted);
+      @include flex-center;
+      transition: color $transition-fast;
+
+      &:hover {
+        color: var(--color-text-primary);
+      }
+
+      .material-symbols-outlined {
+        font-size: 18px;
+      }
+    }
+  }
+}
+
+// ── Footer ─────────────────────────────────────────────────
+.footer {
+  background: #ffffff;
+  border-top: 1px solid var(--color-border-light);
+  padding: $space-6 0;
+
+  &__inner {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 $space-6;
+    @include flex-between;
+    flex-wrap: wrap;
+    gap: $space-4;
+  }
+
+  &__copy {
+    font-size: $font-size-xs;
+    color: var(--color-text-muted);
+  }
+
+  &__links {
+    @include flex-start;
+    gap: $space-5;
+  }
+
+  &__link {
+    font-size: $font-size-xs;
+    color: var(--color-text-muted);
+    transition: color $transition-fast;
+    &:hover {
+      color: var(--color-primary);
+    }
+  }
+}

@@ -1,0 +1,151 @@
+<div class="settings-overlay" (click)="onClose()">
+  <div class="settings-panel" (click)="$event.stopPropagation()">
+
+    <div class="settings-panel__header">
+      <div class="settings-panel__header-left">
+        <div class="settings-panel__icon">
+          <span class="material-symbols-outlined">settings</span>
+        </div>
+        <div>
+          <h2 class="settings-panel__title">Quick Settings</h2>
+          <p class="settings-panel__subtitle">Adjust your preferences instantly</p>
+        </div>
+      </div>
+      <button class="settings-panel__close" (click)="onClose()">
+        <span class="material-symbols-outlined">close</span>
+      </button>
+    </div>
+
+    <div class="settings-panel__body">
+
+      <div class="settings-section">
+        <div class="settings-section__label">
+          <span class="material-symbols-outlined">palette</span>
+          Appearance
+        </div>
+        <div class="settings-field">
+          <span class="settings-field__name">
+            <span class="material-symbols-outlined">computer</span>
+            Web Theme
+          </span>
+          <div class="settings-theme-toggle">
+            @for (theme of themes; track theme.value) {
+            <button
+              [class]="'settings-theme-btn ' + (settings().webColorTheme === theme.value ? 'settings-theme-btn--active' : '')"
+              (click)="setWebTheme(theme.value)">
+              <span class="material-symbols-outlined">{{ theme.icon }}</span>
+              {{ theme.label }}
+            </button>
+            }
+          </div>
+        </div>
+        <div class="settings-field">
+          <span class="settings-field__name">
+            <span class="material-symbols-outlined">phone_iphone</span>
+            Mobile Theme
+          </span>
+          <div class="settings-theme-toggle">
+            @for (theme of themes; track theme.value) {
+            <button
+              [class]="'settings-theme-btn ' + (settings().mobileColorTheme === theme.value ? 'settings-theme-btn--active' : '')"
+              (click)="setMobileTheme(theme.value)">
+              <span class="material-symbols-outlined">{{ theme.icon }}</span>
+              {{ theme.label }}
+            </button>
+            }
+          </div>
+        </div>
+      </div>
+
+      <div class="settings-section">
+        <div class="settings-section__label">
+          <span class="material-symbols-outlined">language</span>
+          Language
+        </div>
+        <div class="settings-field">
+          <span class="settings-field__name">
+            <span class="material-symbols-outlined">translate</span>
+            Display Language
+          </span>
+          <div class="settings-lang-toggle">
+            @for (lang of languages; track lang.value) {
+            <button
+              [class]="'settings-lang-btn ' + (settings().language === lang.value ? 'settings-lang-btn--active' : '')"
+              (click)="setLanguage(lang.value)">
+              <span class="settings-lang-btn__flag">{{ lang.flag }}</span>
+              {{ lang.label }}
+            </button>
+            }
+          </div>
+        </div>
+      </div>
+
+      <div class="settings-section">
+        <div class="settings-section__label">
+          <span class="material-symbols-outlined">notifications</span>
+          Notifications
+        </div>
+        <div class="settings-field settings-field--toggle">
+          <div class="settings-field__info">
+            <span class="settings-field__name">
+              <span class="material-symbols-outlined">email</span>
+              Email Notifications
+            </span>
+            <span class="settings-field__desc">Receive updates and reminders via email</span>
+          </div>
+          <label class="settings-toggle">
+            <input type="checkbox" [checked]="settings().emailNotifications" (change)="toggleEmail()" />
+            <span class="settings-toggle__slider"></span>
+          </label>
+        </div>
+        <div class="settings-field settings-field--toggle">
+          <div class="settings-field__info">
+            <span class="settings-field__name">
+              <span class="material-symbols-outlined">phone_iphone</span>
+              Push Notifications
+            </span>
+            <span class="settings-field__desc">Get push alerts on your mobile device</span>
+          </div>
+          <label class="settings-toggle">
+            <input type="checkbox" [checked]="settings().pushNotifications" (change)="togglePush()" />
+            <span class="settings-toggle__slider"></span>
+          </label>
+        </div>
+      </div>
+
+      <div class="settings-section">
+        <div class="settings-section__label">
+          <span class="material-symbols-outlined">open_in_new</span>
+          More Settings
+        </div>
+        <div class="settings-links">
+          <button class="settings-link" (click)="onEditProfile()">
+            <span class="material-symbols-outlined">person</span>
+            <span>Edit Profile</span>
+            <span class="material-symbols-outlined settings-link__arrow">chevron_right</span>
+          </button>
+          <button class="settings-link" (click)="onSecurity()">
+            <span class="material-symbols-outlined">security</span>
+            <span>Security & Privacy</span>
+            <span class="material-symbols-outlined settings-link__arrow">chevron_right</span>
+          </button>
+          <button class="settings-link" (click)="onBilling()">
+            <span class="material-symbols-outlined">card_membership</span>
+            <span>Subscription & Billing</span>
+            <span class="material-symbols-outlined settings-link__arrow">chevron_right</span>
+          </button>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="settings-panel__footer">
+      <button class="btn-secondary" (click)="onClose()">Cancel</button>
+      <button class="btn-primary" (click)="onSave()">
+        <span class="material-symbols-outlined">save</span>
+        Save Changes
+      </button>
+    </div>
+
+  </div>
+</div>

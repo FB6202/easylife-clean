@@ -1,0 +1,126 @@
+<app-navbar />
+
+<main class="pricing-page">
+  <!-- Header -->
+  <div class="pricing-header">
+    <span class="pricing-header__label">Pricing</span>
+    <h1 class="pricing-header__title">Simple, transparent pricing.</h1>
+    <p class="pricing-header__subtitle">
+      Start for free. Upgrade when you're ready. No hidden fees, cancel anytime.
+    </p>
+
+    <!-- Toggle -->
+    <div class="pricing-toggle">
+      <span [class.active]="!yearly()">Monthly</span>
+      <button class="pricing-toggle__btn" [class.yearly]="yearly()" (click)="yearly.set(!yearly())">
+        <span class="pricing-toggle__thumb"></span>
+      </button>
+      <span [class.active]="yearly()">
+        Yearly
+        <span class="pricing-toggle__save">Save 2 months</span>
+      </span>
+    </div>
+  </div>
+
+  <!-- Plans -->
+  <div class="pricing-grid">
+    @for (plan of plans; track plan.name) {
+      <div class="plan-card" [class.plan-card--highlighted]="plan.highlighted">
+        @if (plan.badge) {
+          <div class="plan-card__badge">{{ plan.badge }}</div>
+        }
+
+        <div class="plan-card__header">
+          <h2 class="plan-card__name">{{ plan.name }}</h2>
+          <p class="plan-card__desc">{{ plan.description }}</p>
+        </div>
+
+        <div class="plan-card__price">
+          @if (plan.price === 0) {
+            <span class="plan-card__amount">Free</span>
+          } @else {
+            <span class="plan-card__currency">€</span>
+            <span class="plan-card__amount">{{ getPrice(plan) | number: '1.2-2' }}</span>
+            <span class="plan-card__period">/mo</span>
+          }
+          @if (yearly() && plan.price > 0) {
+            <span class="plan-card__billed">billed yearly</span>
+          }
+        </div>
+
+        <a
+          routerLink="/register"
+          [class]="
+            plan.highlighted
+              ? 'btn-primary w-full plan-card__cta'
+              : 'btn-secondary w-full plan-card__cta'
+          "
+        >
+          {{ plan.cta }}
+        </a>
+
+        <div class="plan-card__divider"></div>
+
+        <ul class="plan-card__features">
+          @for (feature of plan.features; track feature.text) {
+            <li class="plan-feature" [class.plan-feature--disabled]="!feature.included">
+              <span class="material-symbols-outlined plan-feature__icon">
+                {{ feature.included ? 'check_circle' : 'cancel' }}
+              </span>
+              <span class="plan-feature__text">{{ feature.text }}</span>
+            </li>
+          }
+        </ul>
+      </div>
+    }
+  </div>
+
+  <!-- FAQ -->
+  <div class="pricing-faq">
+    <h2 class="pricing-faq__title">Frequently asked questions</h2>
+    <div class="pricing-faq__grid">
+      <div class="faq-item">
+        <div class="faq-item__icon">
+          <span class="material-symbols-outlined">help</span>
+        </div>
+        <h3 class="faq-item__q">Can I cancel anytime?</h3>
+        <p class="faq-item__a">
+          Yes — cancel anytime with no questions asked. Your data stays accessible until the end of
+          your billing period.
+        </p>
+      </div>
+      <div class="faq-item">
+        <div class="faq-item__icon">
+          <span class="material-symbols-outlined">warning</span>
+        </div>
+        <h3 class="faq-item__q">What happens when I hit the Free limit?</h3>
+        <p class="faq-item__a">
+          You'll be notified when approaching limits. Existing data stays safe — you just won't be
+          able to add more until you upgrade.
+        </p>
+      </div>
+      <div class="faq-item">
+        <div class="faq-item__icon">
+          <span class="material-symbols-outlined">lock</span>
+        </div>
+        <h3 class="faq-item__q">Is my data safe?</h3>
+        <p class="faq-item__a">
+          All data is encrypted at rest and in transit. We store everything on AWS with regular
+          backups and 99.9% uptime.
+        </p>
+      </div>
+      <div class="faq-item">
+        <div class="faq-item__icon">
+          <span class="material-symbols-outlined">swap_vert</span>
+        </div>
+        <h3 class="faq-item__q">Can I switch plans later?</h3>
+        <p class="faq-item__a">
+          Absolutely — upgrade or downgrade at any time. Upgrades take effect immediately,
+          downgrades at the end of your billing cycle.
+        </p>
+      </div>
+    </div>
+  </div>
+</main>
+
+<app-footer />

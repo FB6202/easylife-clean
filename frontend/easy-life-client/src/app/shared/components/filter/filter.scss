@@ -1,0 +1,555 @@
+@use '../../../../styles/variables' as *;
+@use '../../../../styles/mixins' as *;
+
+// ── Overlay ────────────────────────────────────────────────
+.filter-overlay {
+  position: fixed;
+  inset: 0;
+  background: var(--color-overlay-blur);
+  backdrop-filter: blur(3px);
+  z-index: 300;
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-end;
+  padding: $space-4;
+}
+
+// ── Panel ──────────────────────────────────────────────────
+.filter-panel {
+  background: var(--color-bg-card);
+  border-radius: $radius-xl;
+  box-shadow: var(--shadow-lg);
+  width: 100%;
+  max-width: 440px;
+  max-height: calc(100vh - $space-8);
+  overflow-y: auto;
+  @include scrollbar-thin;
+  @include flex-col;
+  animation: slide-in-right 0.2s ease-out;
+
+  @keyframes slide-in-right {
+    from {
+      opacity: 0;
+      transform: translateX(20px);
+    }
+
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+
+  &__header {
+    @include flex-between;
+    align-items: center;
+    gap: $space-4;
+    padding: $space-6 $space-6 $space-5;
+    border-bottom: 1px solid var(--color-border-light);
+    position: sticky;
+    top: 0;
+    background: var(--color-bg-card);
+    z-index: 2;
+    border-radius: $radius-xl $radius-xl 0 0;
+  }
+
+  &__header-left {
+    @include flex-start;
+    gap: $space-3;
+    align-items: center;
+  }
+
+  &__icon {
+    width: 40px;
+    height: 40px;
+    border-radius: $radius-md;
+    background: var(--color-primary-light);
+    @include flex-center;
+    flex-shrink: 0;
+
+    .material-symbols-outlined {
+      font-size: 20px;
+      color: var(--color-primary);
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 20;
+    }
+  }
+
+  &__title {
+    font-size: $font-size-lg;
+    font-weight: $font-weight-bold;
+    color: var(--color-text-primary);
+  }
+
+  &__active-hint {
+    font-size: $font-size-xs;
+    color: var(--color-text-muted);
+    margin-top: 1px;
+  }
+
+  &__close {
+    @include btn-ghost;
+    width: 36px;
+    height: 36px;
+    border-radius: $radius-md;
+    @include flex-center;
+    padding: 0;
+    flex-shrink: 0;
+
+    .material-symbols-outlined {
+      font-size: 20px;
+    }
+  }
+
+  &__fields {
+    @include flex-col;
+    gap: 0;
+    padding: $space-2 0;
+  }
+
+  &__footer {
+    @include flex-between;
+    align-items: center;
+    gap: $space-4;
+    padding: $space-5 $space-6;
+    border-top: 1px solid var(--color-border-light);
+    background: var(--color-bg-card);
+    border-radius: 0 0 $radius-xl $radius-xl;
+    position: sticky;
+    bottom: 0;
+  }
+
+  &__footer-actions {
+    @include flex-start;
+    gap: $space-3;
+  }
+
+  &__reset {
+    @include flex-start;
+    gap: $space-2;
+    background: none;
+    border: none;
+    font-family: $font-family;
+    font-size: $font-size-sm;
+    font-weight: $font-weight-medium;
+    color: var(--color-text-muted);
+    cursor: pointer;
+    padding: 0;
+    transition: color $transition-fast;
+
+    .material-symbols-outlined {
+      font-size: 16px;
+    }
+
+    &:hover {
+      color: var(--color-danger);
+    }
+  }
+
+  &__apply-badge {
+    background: white;
+    color: var(--color-primary);
+    font-size: 11px;
+    font-weight: $font-weight-bold;
+    padding: 1px 6px;
+    border-radius: $radius-pill;
+    margin-left: $space-1;
+  }
+}
+
+// ── Filter Field ───────────────────────────────────────────
+.filter-field {
+  @include flex-col;
+  gap: $space-3;
+  padding: $space-5 $space-6;
+  border-bottom: 1px solid var(--color-border-light);
+
+  &:last-child {
+    border-bottom: none;
+  }
+
+  &__label {
+    @include flex-start;
+    gap: $space-2;
+    font-size: $font-size-sm;
+    font-weight: $font-weight-semibold;
+    color: var(--color-text-primary);
+
+    .material-symbols-outlined {
+      font-size: 16px;
+      color: var(--color-primary);
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 20;
+    }
+  }
+
+  &__input-wrap {
+    position: relative;
+    @include flex-start;
+  }
+
+  &__input-icon {
+    position: absolute;
+    left: $space-3;
+    font-size: 16px;
+    color: var(--color-text-muted);
+    pointer-events: none;
+    z-index: 1;
+  }
+
+  &__input {
+    @include input-base;
+    padding-left: $space-10;
+    padding-right: $space-8;
+    width: 100%;
+  }
+
+  &__clear {
+    position: absolute;
+    right: $space-2;
+    @include btn-ghost;
+    width: 24px;
+    height: 24px;
+    border-radius: $radius-sm;
+    @include flex-center;
+    padding: 0;
+    color: var(--color-text-muted);
+
+    .material-symbols-outlined {
+      font-size: 15px;
+    }
+  }
+
+  &__select-wrap {
+    position: relative;
+    @include flex-start;
+  }
+
+  &__select {
+    @include input-base;
+    appearance: none;
+    padding-right: $space-8;
+    width: 100%;
+    cursor: pointer;
+  }
+
+  &__select-arrow {
+    position: absolute;
+    right: $space-3;
+    font-size: 18px;
+    color: var(--color-text-muted);
+    pointer-events: none;
+  }
+
+  &__date {
+    @include input-base;
+    width: 100%;
+    cursor: pointer;
+  }
+
+  &__date-range {
+    @include flex-start;
+    gap: $space-3;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+
+  &__date-sep {
+    font-size: $font-size-xs;
+    color: var(--color-text-muted);
+    white-space: nowrap;
+  }
+
+  &__pills {
+    @include flex-start;
+    gap: $space-2;
+    flex-wrap: wrap;
+  }
+}
+
+// ── Filter Pill ────────────────────────────────────────────
+.filter-pill {
+  @include flex-start;
+  gap: $space-2;
+  padding: $space-2 $space-3;
+  border-radius: $radius-pill;
+  border: 1px solid var(--color-border);
+  background: var(--color-bg-card);
+  font-family: $font-family;
+  font-size: $font-size-sm;
+  font-weight: $font-weight-medium;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  transition: all $transition-fast;
+
+  .material-symbols-outlined {
+    font-size: 15px;
+    font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 20;
+  }
+
+  &:hover {
+    border-color: var(--pill-color, var(--color-primary));
+    color: var(--pill-color, var(--color-primary));
+  }
+
+  &--active {
+    background: var(--pill-color, var(--color-primary));
+    border-color: var(--pill-color, var(--color-primary));
+    color: white;
+
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 20;
+    }
+  }
+}
+
+// ── Multiselect Dropdown ───────────────────────────────────
+.filter-dropdown {
+  position: relative;
+  width: 100%;
+
+  &__trigger {
+    @include flex-between;
+    width: 100%;
+    padding: $space-3 $space-4;
+    background: var(--color-bg-input);
+    border: 1px solid var(--color-border);
+    border-radius: $radius-md;
+    font-family: $font-family;
+    font-size: $font-size-sm;
+    color: var(--color-text-secondary);
+    cursor: pointer;
+    transition: all $transition-fast;
+    gap: $space-3;
+
+    &:hover {
+      border-color: var(--color-primary);
+      color: var(--color-text-primary);
+    }
+
+    &--active {
+      border-color: var(--color-primary);
+      color: var(--color-text-primary);
+      background: var(--color-bg-card);
+    }
+
+    &--open {
+      border-color: var(--color-primary);
+      border-bottom-left-radius: 0;
+      border-bottom-right-radius: 0;
+      border-bottom-color: transparent;
+    }
+  }
+
+  &__trigger-left {
+    @include flex-start;
+    gap: $space-2;
+    min-width: 0;
+    flex: 1;
+  }
+
+  &__selected-dots {
+    @include flex-start;
+    gap: 3px;
+    flex-shrink: 0;
+  }
+
+  &__dot {
+    width: 8px;
+    height: 8px;
+    border-radius: $radius-full;
+    flex-shrink: 0;
+  }
+
+  &__label {
+    font-size: $font-size-sm;
+    @include truncate;
+    text-align: left;
+  }
+
+  &__arrow {
+    font-size: 18px;
+    color: var(--color-text-muted);
+    flex-shrink: 0;
+    transition: color $transition-fast;
+
+    .filter-dropdown__trigger:hover & {
+      color: var(--color-primary);
+    }
+  }
+
+  &__menu {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: var(--color-bg-card);
+    border: 1px solid var(--color-primary);
+    border-top: none;
+    border-bottom-left-radius: $radius-md;
+    border-bottom-right-radius: $radius-md;
+    box-shadow: var(--shadow-md);
+    z-index: 10;
+    max-height: 220px;
+    overflow-y: auto;
+    @include scrollbar-thin;
+    animation: dropdown-open 0.15s ease-out;
+
+    @keyframes dropdown-open {
+      from {
+        opacity: 0;
+        transform: translateY(-4px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+  }
+
+  &__item {
+    @include flex-start;
+    gap: $space-3;
+    width: 100%;
+    padding: $space-3 $space-4;
+    border: none;
+    background: none;
+    font-family: $font-family;
+    font-size: $font-size-sm;
+    color: var(--color-text-primary);
+    cursor: pointer;
+    transition: background $transition-fast;
+    text-align: left;
+
+    &:hover {
+      background: var(--color-bg-hover);
+    }
+
+    &--selected {
+      background: var(--color-primary-light);
+      color: var(--color-primary);
+      font-weight: $font-weight-medium;
+    }
+  }
+
+  &__item-check {
+    width: 18px;
+    height: 18px;
+    border-radius: $radius-sm;
+    border: 1.5px solid var(--color-border);
+    @include flex-center;
+    flex-shrink: 0;
+    transition: all $transition-fast;
+
+    .material-symbols-outlined {
+      font-size: 13px;
+      color: var(--color-primary);
+    }
+
+    .filter-dropdown__item--selected & {
+      background: var(--color-primary);
+      border-color: var(--color-primary);
+
+      .material-symbols-outlined {
+        color: white;
+      }
+    }
+  }
+
+  &__item-icon {
+    font-size: 17px;
+    flex-shrink: 0;
+    font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 20;
+  }
+
+  &__item-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: $radius-full;
+    flex-shrink: 0;
+  }
+
+  &__item-label {
+    flex: 1;
+    text-align: left;
+  }
+
+  &__footer {
+    padding: $space-2 $space-4;
+    border-top: 1px solid var(--color-border-light);
+    position: sticky;
+    bottom: 0;
+    background: var(--color-bg-card);
+  }
+
+  &__clear {
+    @include flex-start;
+    gap: $space-2;
+    background: none;
+    border: none;
+    font-family: $font-family;
+    font-size: $font-size-xs;
+    font-weight: $font-weight-medium;
+    color: var(--color-text-muted);
+    cursor: pointer;
+    padding: $space-1 0;
+    transition: color $transition-fast;
+
+    .material-symbols-outlined {
+      font-size: 14px;
+    }
+
+    &:hover {
+      color: var(--color-danger);
+    }
+  }
+}
+
+// ── Toggle ─────────────────────────────────────────────────
+.filter-toggle {
+  @include flex-start;
+  gap: $space-3;
+  align-items: center;
+  cursor: pointer;
+  width: fit-content;
+
+  input {
+    display: none;
+  }
+
+  input:checked+.filter-toggle__slider {
+    background: var(--color-primary);
+
+    &::before {
+      transform: translateX(20px);
+    }
+  }
+
+  &__slider {
+    position: relative;
+    width: 44px;
+    height: 24px;
+    background: var(--color-border);
+    border-radius: $radius-pill;
+    transition: background $transition-base;
+    flex-shrink: 0;
+
+    &::before {
+      content: '';
+      position: absolute;
+      width: 18px;
+      height: 18px;
+      left: 3px;
+      top: 3px;
+      background: white;
+      border-radius: $radius-full;
+      transition: transform $transition-base;
+      box-shadow: var(--shadow-sm);
+    }
+  }
+
+  &__label {
+    font-size: $font-size-sm;
+    font-weight: $font-weight-medium;
+    color: var(--color-text-secondary);
+    min-width: 28px;
+  }
+}

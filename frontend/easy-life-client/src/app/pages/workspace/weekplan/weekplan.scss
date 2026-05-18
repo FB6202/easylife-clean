@@ -1,0 +1,927 @@
+@use '../../../../styles/variables' as *;
+@use '../../../../styles/mixins' as *;
+
+// ── Header ─────────────────────────────────────────────────
+.weekplan-header {
+  @include flex-between;
+  margin-bottom: $space-6;
+  gap: $space-4;
+  flex-wrap: wrap;
+
+  &__text {
+    @include flex-col;
+    gap: $space-1;
+  }
+
+  &__title {
+    font-size: $font-size-3xl;
+    font-weight: $font-weight-bold;
+    color: var(--color-text-primary);
+  }
+
+  &__subtitle {
+    font-size: $font-size-sm;
+    color: var(--color-text-secondary);
+  }
+
+  &__actions {
+    @include flex-start;
+    gap: $space-3;
+  }
+}
+
+// ── Container ──────────────────────────────────────────────
+.weekplan-container {
+  @include flex-col;
+  gap: $space-3;
+}
+
+// ── Week Card ──────────────────────────────────────────────
+.week-card {
+  @include card($space-6);
+  @include flex-col;
+  gap: $space-4;
+  cursor: pointer;
+  transition: box-shadow $transition-base, transform $transition-base;
+
+  &:hover {
+    box-shadow: var(--shadow-md);
+    transform: translateY(-1px);
+  }
+
+  &__header {
+    @include flex-between;
+    gap: $space-6;
+    align-items: flex-start;
+    flex-wrap: wrap;
+  }
+
+  &__header-left {
+    @include flex-start;
+    gap: $space-3;
+    flex-wrap: wrap;
+  }
+
+  &__status {
+    @include flex-start;
+    gap: $space-1;
+    font-size: $font-size-xs;
+    font-weight: $font-weight-bold;
+    padding: 3px $space-3;
+    border-radius: $radius-pill;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    white-space: nowrap;
+
+    .material-symbols-outlined {
+      font-size: 13px;
+      font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 20;
+    }
+
+    &.status--active {
+      background: var(--color-success-subtle);
+      color: var(--color-active);
+      border: 1px solid var(--color-success-border);
+    }
+
+    &.status--completed {
+      background: var(--color-info-subtle);
+      color: var(--color-completed);
+      border: 1px solid var(--color-info-border);
+    }
+
+    &.status--draft {
+      background: var(--color-neutral-subtle);
+      color: var(--color-draft);
+      border: 1px solid var(--color-neutral-border);
+    }
+
+    &.status--abandoned {
+      background: var(--color-neutral-subtle);
+      color: var(--color-abandoned);
+      border: 1px solid var(--color-neutral-border);
+    }
+  }
+
+  &__dates {
+    @include flex-start;
+    gap: $space-2;
+    font-size: $font-size-xs;
+    color: var(--color-text-muted);
+
+    .material-symbols-outlined {
+      font-size: 13px;
+    }
+  }
+
+  &__progress-block {
+    @include flex-col;
+    gap: $space-2;
+    min-width: 200px;
+  }
+
+  &__progress-header {
+    @include flex-between;
+    gap: $space-4;
+  }
+
+  &__progress-label {
+    font-size: $font-size-xs;
+    font-weight: $font-weight-semibold;
+    color: var(--color-text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+
+  &__progress-count {
+    font-size: $font-size-sm;
+    font-weight: $font-weight-bold;
+    color: var(--color-text-primary);
+  }
+
+  &__progress-bar {
+    width: 200px;
+  }
+
+  &__meta {
+    @include flex-between;
+    gap: $space-4;
+  }
+
+  &__created {
+    font-size: $font-size-xs;
+    color: var(--color-text-muted);
+    letter-spacing: 0.04em;
+  }
+
+  &__action {
+    font-size: $font-size-xs;
+    font-weight: $font-weight-semibold;
+    cursor: pointer;
+    transition: opacity $transition-fast;
+
+    &:hover {
+      opacity: 0.7;
+    }
+
+    &--active {
+      color: var(--color-primary);
+    }
+
+    &--completed {
+      color: var(--color-completed);
+    }
+
+    &--draft {
+      color: var(--color-text-muted);
+    }
+
+    &--abandoned {
+      color: var(--color-text-muted);
+    }
+  }
+
+  &__body {
+    @include flex-col;
+    gap: $space-3;
+  }
+
+  &__title {
+    font-size: $font-size-xl;
+    font-weight: $font-weight-bold;
+    color: var(--color-text-primary);
+  }
+
+  &__intention {
+    font-size: $font-size-sm;
+    color: var(--color-text-secondary);
+    font-style: italic;
+  }
+
+  &__items-preview {
+    @include flex-col;
+    gap: $space-1;
+    padding: $space-3 $space-4;
+    background: var(--color-bg-input);
+    border-radius: $radius-md;
+    border: 1px solid var(--color-border-light);
+  }
+
+  &__item {
+    @include flex-start;
+    gap: $space-2;
+    font-size: $font-size-xs;
+    color: var(--color-text-secondary);
+
+    .material-symbols-outlined {
+      font-size: 14px;
+      color: var(--color-text-muted);
+      flex-shrink: 0;
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 20;
+    }
+
+    &--done {
+      color: var(--color-text-muted);
+      text-decoration: line-through;
+
+      .material-symbols-outlined {
+        color: var(--color-primary);
+        font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 20;
+      }
+    }
+  }
+
+  &__items-more {
+    font-size: $font-size-xs;
+    color: var(--color-text-muted);
+    padding-left: $space-6;
+    font-style: italic;
+  }
+
+  &__footer {
+    @include flex-start;
+    gap: $space-6;
+    padding-top: $space-3;
+    border-top: 1px solid var(--color-border-light);
+    flex-wrap: wrap;
+  }
+
+  &__categories {
+    @include flex-start;
+    gap: $space-2;
+  }
+
+  &__cat-icon {
+    font-size: 18px;
+    font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 20;
+  }
+
+  &__reflection {
+    @include flex-start;
+    gap: $space-2;
+    font-size: $font-size-xs;
+    color: var(--color-text-secondary);
+    flex: 1;
+    min-width: 0;
+
+    .material-symbols-outlined {
+      font-size: 14px;
+      color: var(--color-text-muted);
+      flex-shrink: 0;
+    }
+
+    span:last-child {
+      @include truncate;
+    }
+
+    &--empty {
+      color: var(--color-text-muted);
+      font-style: italic;
+    }
+  }
+
+  &--abandoned {
+    opacity: 0.7;
+
+    .week-card__title {
+      text-decoration: line-through;
+      color: var(--color-text-muted);
+    }
+  }
+}
+
+// ── Pagination Wrapper ─────────────────────────────────────
+.weekplan-pagination {
+  @include card(0);
+  overflow: hidden;
+}
+
+// ══ MODAL OVERLAY ════════════════════════════════════════
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: var(--color-overlay);
+  backdrop-filter: blur(4px);
+  z-index: 200;
+  @include flex-center;
+  padding: $space-4;
+}
+
+// ══ WEEKPLAN MODAL ════════════════════════════════════════
+.weekplan-modal {
+  background: var(--color-bg-card);
+  border-radius: $radius-xl;
+  box-shadow: var(--shadow-lg);
+  width: 100%;
+  max-width: 580px;
+  max-height: 90vh;
+  overflow-y: auto;
+  @include scrollbar-thin;
+  @include flex-col;
+  gap: $space-5;
+  padding: $space-8;
+
+  &__header {
+    @include flex-between;
+    align-items: flex-start;
+    gap: $space-4;
+  }
+
+  &__header-actions {
+    @include flex-start;
+    gap: $space-2;
+  }
+
+  &__title {
+    font-size: $font-size-xl;
+    font-weight: $font-weight-bold;
+    color: var(--color-text-primary);
+  }
+
+  &__subtitle {
+    font-size: $font-size-sm;
+    color: var(--color-text-muted);
+    margin-top: 2px;
+  }
+
+  &__close {
+    @include btn-ghost;
+    border-radius: $radius-md;
+    padding: $space-1;
+    flex-shrink: 0;
+
+    .material-symbols-outlined {
+      font-size: 22px;
+    }
+  }
+
+  &__action-btn {
+    width: 36px;
+    height: 36px;
+    border-radius: $radius-md;
+    border: none;
+    @include flex-center;
+    cursor: pointer;
+    transition: all $transition-fast;
+
+    .material-symbols-outlined {
+      font-size: 18px;
+    }
+
+    &--delete {
+      background: var(--color-danger-subtle);
+      color: var(--color-danger);
+
+      &:hover {
+        background: var(--color-danger-subtle);
+        filter: brightness(0.9);
+      }
+    }
+  }
+
+  &__title-input {
+    width: 100%;
+    border: none;
+    border-bottom: 2px solid var(--color-border);
+    padding: $space-2 0;
+    font-family: $font-family;
+    font-size: $font-size-xl;
+    font-weight: $font-weight-semibold;
+    color: var(--color-text-primary);
+    background: transparent;
+    outline: none;
+    transition: border-color $transition-fast;
+
+    &::placeholder {
+      color: var(--color-text-muted);
+    }
+
+    &:focus {
+      border-color: var(--color-primary);
+    }
+  }
+
+  &__row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: $space-4;
+
+    @include below-md {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  &__section-label {
+    @include flex-start;
+    gap: $space-2;
+    font-size: $font-size-xs;
+    font-weight: $font-weight-bold;
+    color: var(--color-text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    padding: $space-2 0 $space-1;
+    border-top: 1px solid var(--color-border-light);
+
+    .material-symbols-outlined {
+      font-size: 15px;
+      color: var(--color-primary);
+    }
+  }
+
+  &__section-actions {
+    @include flex-start;
+    gap: $space-3;
+    margin-left: auto;
+  }
+
+  &__convert-all-btn {
+    @include flex-start;
+    gap: $space-1;
+    background: none;
+    border: none;
+    font-family: $font-family;
+    font-size: $font-size-xs;
+    font-weight: $font-weight-medium;
+    color: var(--color-text-muted);
+    cursor: pointer;
+    padding: 0;
+    transition: color $transition-fast;
+
+    .material-symbols-outlined {
+      font-size: 14px;
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 20;
+    }
+
+    &:hover {
+      color: var(--color-primary);
+
+      .material-symbols-outlined {
+        font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 20;
+      }
+    }
+  }
+
+  &__add-item-btn {
+    @include flex-start;
+    gap: $space-1;
+    background: none;
+    border: none;
+    font-family: $font-family;
+    font-size: $font-size-xs;
+    font-weight: $font-weight-semibold;
+    color: var(--color-primary);
+    cursor: pointer;
+    padding: 0;
+    transition: opacity $transition-fast;
+
+    .material-symbols-outlined {
+      font-size: 15px;
+    }
+
+    &:hover {
+      opacity: 0.7;
+    }
+  }
+
+  &__footer {
+    @include flex-between;
+    padding-top: $space-4;
+    border-top: 1px solid var(--color-border-light);
+  }
+}
+
+// ── Week Items List ────────────────────────────────────────
+.week-items-list {
+  @include flex-col;
+  gap: $space-2;
+}
+
+.week-item-row {
+  @include flex-start;
+  gap: $space-3;
+  padding: $space-2 $space-3;
+  background: var(--color-bg-input);
+  border: 1px solid var(--color-border);
+  border-radius: $radius-md;
+  transition: border-color $transition-fast, background $transition-fast;
+
+  &--task {
+    border-color: var(--color-primary);
+    background: var(--color-primary-subtle);
+  }
+
+  &__check {
+    flex-shrink: 0;
+
+    input[type='checkbox'] {
+      width: 15px;
+      height: 15px;
+      accent-color: var(--color-primary);
+      cursor: pointer;
+    }
+  }
+
+  &__title {
+    flex: 1;
+    border: none;
+    background: transparent;
+    font-family: $font-family;
+    font-size: $font-size-sm;
+    color: var(--color-text-primary);
+    outline: none;
+
+    &::placeholder {
+      color: var(--color-text-muted);
+    }
+
+    &--done {
+      text-decoration: line-through;
+      color: var(--color-text-muted);
+    }
+  }
+
+  &__date {
+    border: 1px solid var(--color-border);
+    border-radius: $radius-sm;
+    padding: $space-1 $space-2;
+    font-family: $font-family;
+    font-size: $font-size-xs;
+    color: var(--color-text-secondary);
+    background: var(--color-bg-card);
+    outline: none;
+
+    &:focus {
+      border-color: var(--color-primary);
+    }
+  }
+
+  &__task-toggle {
+    @include btn-ghost;
+    width: 28px;
+    height: 28px;
+    padding: 0;
+    border-radius: $radius-sm;
+    @include flex-center;
+    color: var(--color-text-muted);
+    flex-shrink: 0;
+    transition: all $transition-fast;
+
+    .material-symbols-outlined {
+      font-size: 18px;
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 20;
+    }
+
+    &:hover {
+      color: var(--color-primary);
+      background: var(--color-primary-subtle);
+    }
+
+    &--active {
+      color: var(--color-primary);
+
+      .material-symbols-outlined {
+        font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 20;
+      }
+    }
+  }
+
+  &__remove {
+    @include btn-ghost;
+    width: 24px;
+    height: 24px;
+    padding: 0;
+    border-radius: $radius-sm;
+    @include flex-center;
+    color: var(--color-text-muted);
+
+    .material-symbols-outlined {
+      font-size: 15px;
+    }
+
+    &:hover {
+      color: var(--color-danger);
+      background: var(--color-danger-subtle);
+    }
+  }
+}
+
+.week-items-empty {
+  font-size: $font-size-sm;
+  color: var(--color-text-muted);
+  text-align: center;
+  padding: $space-4;
+  background: var(--color-bg-input);
+  border-radius: $radius-md;
+  border: 1px dashed var(--color-border);
+}
+
+// ── Task Summary ───────────────────────────────────────────
+.week-items-task-summary {
+  @include flex-start;
+  gap: $space-2;
+  padding: $space-3 $space-4;
+  background: var(--color-success-subtle);
+  border: 1px solid var(--color-success-border);
+  border-radius: $radius-md;
+  font-size: $font-size-xs;
+  color: var(--color-primary);
+
+  .material-symbols-outlined {
+    font-size: 16px;
+    font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 20;
+    flex-shrink: 0;
+  }
+
+  strong {
+    font-weight: $font-weight-bold;
+  }
+}
+
+// ── Status Picker ──────────────────────────────────────────
+.modal-status-picker {
+  @include flex-start;
+  gap: $space-2;
+  flex-wrap: wrap;
+}
+
+.modal-status-btn {
+  @include flex-start;
+  gap: $space-2;
+  padding: $space-1 $space-3;
+  border-radius: $radius-pill;
+  border: 1px solid var(--color-border);
+  background: var(--color-bg-card);
+  font-family: $font-family;
+  font-size: $font-size-xs;
+  font-weight: $font-weight-medium;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  transition: all $transition-fast;
+
+  .material-symbols-outlined {
+    font-size: 14px;
+    font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 20;
+  }
+
+  &--active.active {
+    background: var(--color-success-subtle);
+    color: var(--color-success-text);
+    border-color: var(--color-success-border);
+
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 20;
+    }
+  }
+
+  &--completed.active {
+    background: var(--color-info-subtle);
+    color: var(--color-info-text);
+    border-color: var(--color-info-border);
+
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 20;
+    }
+  }
+
+  &--draft.active {
+    background: var(--color-neutral-subtle);
+    color: var(--color-neutral-text);
+    border-color: var(--color-neutral-border);
+  }
+
+  &--abandoned.active {
+    background: var(--color-neutral-subtle);
+    color: var(--color-neutral-text);
+    border-color: var(--color-neutral-border);
+  }
+
+  &:hover:not(.active) {
+    border-color: var(--color-primary);
+    color: var(--color-primary);
+  }
+}
+
+// ══ CONFIRM DIALOG ════════════════════════════════════════
+.confirm-dialog {
+  background: var(--color-bg-card);
+  border-radius: $radius-xl;
+  box-shadow: var(--shadow-lg);
+  width: 100%;
+  max-width: 420px;
+  padding: $space-8;
+  @include flex-col;
+  align-items: center;
+  text-align: center;
+  gap: $space-4;
+
+  &__icon {
+    width: 56px;
+    height: 56px;
+    border-radius: $radius-full;
+    @include flex-center;
+
+    .material-symbols-outlined {
+      font-size: 28px;
+      font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    }
+
+    &--danger {
+      background: var(--color-danger-subtle);
+      color: var(--color-danger);
+    }
+  }
+
+  &__title {
+    font-size: $font-size-xl;
+    font-weight: $font-weight-bold;
+    color: var(--color-text-primary);
+  }
+
+  &__text {
+    font-size: $font-size-sm;
+    color: var(--color-text-secondary);
+    line-height: 1.6;
+  }
+
+  &__actions {
+    @include flex-center;
+    gap: $space-3;
+    margin-top: $space-2;
+  }
+}
+
+.btn-danger {
+  @include btn-base;
+  background: var(--color-danger);
+  color: white;
+
+  &:hover:not(:disabled) {
+    background: var(--color-danger-hover);
+  }
+}
+
+.btn-secondary--active {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+  background: var(--color-primary-light);
+}
+
+.filter-active-badge {
+  background: var(--color-primary);
+  color: white;
+  font-size: 11px;
+  font-weight: $font-weight-bold;
+  padding: 1px 6px;
+  border-radius: $radius-pill;
+  margin-left: $space-1;
+  min-width: 18px;
+  text-align: center;
+}
+
+.form-group {
+  label {
+    display: flex;
+    align-items: center;
+    gap: $space-2;
+  }
+}
+
+// ── From Task Button ───────────────────────────────────────
+.weekplan-modal__from-task-btn {
+  @include flex-start;
+  gap: $space-1;
+  background: none;
+  border: 1px solid var(--color-border);
+  border-radius: $radius-md;
+  font-family: $font-family;
+  font-size: $font-size-xs;
+  font-weight: $font-weight-semibold;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  padding: $space-1 $space-2;
+  transition: all $transition-fast;
+
+  .material-symbols-outlined {
+    font-size: 14px;
+  }
+
+  &:hover,
+  &--open {
+    border-color: var(--color-primary);
+    color: var(--color-primary);
+    background: var(--color-primary-light);
+  }
+
+  .task-picker__chevron {
+    font-size: 16px;
+    margin-left: 2px;
+  }
+}
+
+// ── Task Picker Dropdown ───────────────────────────────────
+.task-picker {
+  position: relative;
+
+  &__dropdown {
+    position: absolute;
+    top: calc(100% + 6px);
+    right: 0;
+    width: 320px;
+    background: var(--color-bg-card);
+    border: 1px solid var(--color-border);
+    border-radius: $radius-lg;
+    box-shadow: var(--shadow-lg);
+    z-index: 100;
+    overflow: hidden;
+  }
+
+  &__search {
+    @include flex-start;
+    gap: $space-2;
+    padding: $space-3 $space-4;
+    border-bottom: 1px solid var(--color-border-light);
+    background: var(--color-bg-input);
+
+    .material-symbols-outlined {
+      font-size: 16px;
+      color: var(--color-text-muted);
+      flex-shrink: 0;
+    }
+
+    input {
+      flex: 1;
+      border: none;
+      background: transparent;
+      font-family: $font-family;
+      font-size: $font-size-sm;
+      color: var(--color-text-primary);
+      outline: none;
+
+      &::placeholder {
+        color: var(--color-text-muted);
+      }
+    }
+  }
+
+  &__list {
+    max-height: 240px;
+    overflow-y: auto;
+    @include scrollbar-thin;
+  }
+
+  &__item {
+    width: 100%;
+    @include flex-start;
+    gap: $space-3;
+    padding: $space-3 $space-4;
+    border: none;
+    background: none;
+    font-family: $font-family;
+    cursor: pointer;
+    transition: background $transition-fast;
+    text-align: left;
+
+    &:hover:not(:disabled) {
+      background: var(--color-bg-hover);
+    }
+
+    &--added {
+      opacity: 0.5;
+      cursor: default;
+    }
+  }
+
+  &__item-icon {
+    font-size: 16px;
+    flex-shrink: 0;
+    font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 20;
+  }
+
+  &__item-title {
+    flex: 1;
+    font-size: $font-size-sm;
+    color: var(--color-text-primary);
+    @include truncate;
+    text-align: left;
+  }
+
+  &__item-date {
+    font-size: $font-size-xs;
+    color: var(--color-text-muted);
+    flex-shrink: 0;
+    white-space: nowrap;
+  }
+
+  &__item-check {
+    font-size: 16px;
+    color: var(--color-primary);
+    flex-shrink: 0;
+  }
+
+  &__empty {
+    padding: $space-5 $space-4;
+    font-size: $font-size-sm;
+    color: var(--color-text-muted);
+    text-align: center;
+  }
+}

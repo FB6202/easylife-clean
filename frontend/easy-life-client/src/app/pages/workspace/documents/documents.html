@@ -1,0 +1,492 @@
+<!-- Page Header -->
+<div class="docs-header">
+  <div class="docs-header__text">
+    <p class="docs-header__label">Documents</p>
+    <p class="docs-header__subtitle">Manage and access all your files in one secure place.</p>
+  </div>
+  <div class="docs-header__actions">
+    <button class="btn-secondary" [class.btn-secondary--active]="activeFilterCount() > 0"
+      (click)="showFilter.set(true)">
+      <span class="material-symbols-outlined">tune</span>
+      Filters
+      @if (activeFilterCount() > 0) {
+      <span class="filter-active-badge">{{ activeFilterCount() }}</span>
+      }
+    </button>
+    <button class="btn-primary" (click)="openUpload()">
+      <span class="material-symbols-outlined">upload</span>
+      New Upload
+    </button>
+  </div>
+</div>
+
+<!-- Stats -->
+<div class="docs-stats">
+  <div class="docs-stat">
+    <div class="docs-stat__icon">
+      <span class="material-symbols-outlined">storage</span>
+    </div>
+    <div class="docs-stat__content">
+      <span class="docs-stat__label">Total Storage</span>
+      <span class="docs-stat__value">{{ totalStorageFormatted() }}</span>
+    </div>
+  </div>
+  <div class="docs-stat">
+    <div class="docs-stat__icon">
+      <span class="material-symbols-outlined">folder</span>
+    </div>
+    <div class="docs-stat__content">
+      <span class="docs-stat__label">Total Files</span>
+      <span class="docs-stat__value">{{ totalFiles() | number }}</span>
+    </div>
+  </div>
+</div>
+
+<!-- Documents Section -->
+<div class="docs-container">
+  <div class="docs-section-header">
+    <h2 class="docs-section-title">Documents</h2>
+    <div class="docs-view-toggle">
+      <button [class.active]="viewMode() === 'grid'" (click)="viewMode.set('grid')">
+        <span class="material-symbols-outlined">grid_view</span>
+      </button>
+      <button [class.active]="viewMode() === 'list'" (click)="viewMode.set('list')">
+        <span class="material-symbols-outlined">view_list</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Grid View -->
+  @if (viewMode() === 'grid') {
+  <div class="docs-grid">
+    @for (doc of paginatedDocuments(); track doc.id) {
+    <div class="doc-card" (click)="openEdit(doc)">
+      <div class="doc-card__top">
+        <div class="doc-card__file-icon" [style.color]="getFileColor(doc.fileType)">
+          <span class="material-symbols-outlined">{{ getFileIcon(doc.fileType) }}</span>
+        </div>
+        <span [class]="'doc-card__access ' + (doc.accessType === 'PUBLIC' ? 'access--public' : 'access--private')">
+          <span class="material-symbols-outlined">
+            {{ doc.accessType === 'PUBLIC' ? 'travel_explore' : 'lock' }}
+          </span>
+          {{ doc.accessType.toLowerCase() }}
+        </span>
+      </div>
+      <h3 class="doc-card__title">{{ doc.title }}</h3>
+      <div class="doc-card__footer">
+        <span class="doc-card__filetype">{{ doc.fileType.toUpperCase() }}</span>
+        <button class="doc-card__download" (click)="downloadDoc(doc, $event)">
+          <span class="material-symbols-outlined">download</span>
+        </button>
+      </div>
+    </div>
+    }
+    <div class="doc-card doc-card--add" (click)="openUpload()">
+      <div class="doc-card__add-inner">
+        <span class="material-symbols-outlined">add</span>
+        <span>Add Document</span>
+      </div>
+    </div>
+  </div>
+  }
+
+  <!-- List View -->
+  @if (viewMode() === 'list') {
+  <div class="docs-list" (click)="closeMenu()">
+    <div class="docs-list__header">
+      <span class="docs-list__col docs-list__col--name">Name</span>
+      <span class="docs-list__col docs-list__col--type">Type</span>
+      <span class="docs-list__col docs-list__col--size">Size</span>
+      <span class="docs-list__col docs-list__col--access">Access</span>
+      <span class="docs-list__col docs-list__col--date">Uploaded</span>
+      <span class="docs-list__col docs-list__col--actions"></span>
+    </div>
+    @for (doc of paginatedDocuments(); track doc.id) {
+    <div class="docs-list__row" (click)="openEdit(doc)">
+      <div class="docs-list__col docs-list__col--name">
+        <div class="doc-list-name">
+          <span class="material-symbols-outlined doc-list-name__icon" [style.color]="getFileColor(doc.fileType)">
+            {{ getFileIcon(doc.fileType) }}
+          </span>
+          <span class="doc-list-name__title">{{ doc.title }}</span>
+        </div>
+      </div>
+      <div class="docs-list__col docs-list__col--type">
+        <span class="doc-type-badge" [style.color]="getFileColor(doc.fileType)">
+          {{ doc.fileType.toUpperCase() }}
+        </span>
+      </div>
+      <div class="docs-list__col docs-list__col--size">{{ formatSize(doc.fileSizeBytes) }}</div>
+      <div class="docs-list__col docs-list__col--access">
+        <span [class]="'doc-access-badge ' + (doc.accessType === 'PUBLIC' ? 'access--public' : 'access--private')">
+          <span class="material-symbols-outlined">
+            {{ doc.accessType === 'PUBLIC' ? 'travel_explore' : 'lock' }}
+          </span>
+          {{ doc.accessType.toLowerCase() }}
+        </span>
+      </div>
+      <div class="docs-list__col docs-list__col--date">{{ doc.uploadedAt }}</div>
+      <div class="docs-list__col docs-list__col--actions" (click)="$event.stopPropagation()">
+        <button class="doc-action-btn" (click)="downloadDoc(doc, $event)">
+          <span class="material-symbols-outlined">download</span>
+        </button>
+        <div class="doc-row-menu">
+          <button class="doc-action-btn" (click)="toggleMenu(doc.id, $event)">
+            <span class="material-symbols-outlined">more_vert</span>
+          </button>
+          @if (openMenuId() === doc.id) {
+          <div class="doc-row-menu__dropdown">
+            <button class="doc-row-menu__item" (click)="openEdit(doc); closeMenu()">
+              <span class="material-symbols-outlined">edit</span>
+              Edit
+            </button>
+            <button class="doc-row-menu__item" (click)="quickToggleAccess(doc, $event)">
+              <span class="material-symbols-outlined">
+                {{ doc.accessType === 'PRIVATE' ? 'travel_explore' : 'lock' }}
+              </span>
+              Make {{ doc.accessType === 'PRIVATE' ? 'Public' : 'Private' }}
+            </button>
+            <div class="doc-row-menu__divider"></div>
+            <button class="doc-row-menu__item doc-row-menu__item--danger" (click)="quickDelete(doc, $event)">
+              <span class="material-symbols-outlined">delete</span>
+              Delete
+            </button>
+          </div>
+          }
+        </div>
+      </div>
+    </div>
+    }
+  </div>
+  }
+
+  <app-pagination [currentPage]="currentPage()" [totalPages]="totalPages()" [totalElements]="totalElements()"
+    [pageSize]="pageSize()" (pageChange)="onPageChange($event)" (pageSizeChange)="onPageSizeChange($event)"
+    (aiClick)="onAiClick()" />
+</div>
+
+<!-- ══ FILTER PANEL ══════════════════════════════════════ -->
+@if (showFilter()) {
+<app-filter-panel title="Filter Documents" [fields]="documentFilterFields" [initialValues]="activeFilters()"
+  (apply)="onFilterApply($event)" (reset)="onFilterReset()" (close)="showFilter.set(false)" />
+}
+
+<!-- ══ UPLOAD MODAL ══════════════════════════════════════ -->
+@if (showUploadModal()) {
+<div class="modal-overlay" (click)="showUploadModal.set(false); showCatDropdown.set(false)">
+  <div class="doc-modal" (click)="$event.stopPropagation(); showCatDropdown.set(false)">
+
+    <div class="doc-modal__header">
+      <div>
+        <h2 class="doc-modal__title">Upload Document</h2>
+        <p class="doc-modal__subtitle">Add a file to your document library.</p>
+      </div>
+      <button class="doc-modal__close" (click)="showUploadModal.set(false)">
+        <span class="material-symbols-outlined">close</span>
+      </button>
+    </div>
+
+    @if (!uploadedFile()) {
+    <label class="doc-dropzone" for="file-input">
+      <span class="material-symbols-outlined doc-dropzone__icon">upload_file</span>
+      <span class="doc-dropzone__label">Click to select a file</span>
+      <span class="doc-dropzone__hint">PDF, Word, Excel, Images, Video, Audio, Archives and more – max 500 MB</span>
+    </label>
+    <input id="file-input" type="file" class="doc-modal__file-input"
+      accept=".pdf,.docx,.doc,.xlsx,.xls,.pptx,.ppt,.txt,.csv,.png,.jpg,.jpeg,.webp,.gif,.svg,.heic,.mp4,.mov,.avi,.mkv,.webm,.mp3,.wav,.aac,.flac,.m4a,.zip,.rar,.7z,.tar,.json,.xml,.html,.css,.ts,.js"
+      (change)="onFileSelect($event)" />
+    } @else {
+    <div class="doc-file-selected">
+      <div class="doc-file-selected__info">
+        <span class="material-symbols-outlined doc-file-selected__icon">upload_file</span>
+        <div>
+          <p class="doc-file-selected__name">{{ uploadedFile()!.name }}</p>
+          <p class="doc-file-selected__size">{{ formatSize(uploadedFile()!.size) }}</p>
+        </div>
+      </div>
+      <button class="doc-file-selected__remove" (click)="uploadedFile.set(null); uploadPreviewUrl.set(null)">
+        <span class="material-symbols-outlined">close</span>
+      </button>
+    </div>
+
+    @if (uploadPreviewUrl()) {
+    <div class="doc-preview">
+      @if (uploadedFile()!.type.startsWith('image/')) {
+      <img [src]="uploadPreviewUrl()!" alt="Preview" class="doc-preview__img" />
+      } @else if (uploadedFile()!.type === 'application/pdf') {
+      <iframe [src]="uploadPreviewUrl()!" class="doc-preview__pdf" title="PDF Preview"></iframe>
+      } @else if (uploadedFile()!.type.startsWith('video/')) {
+      <video class="doc-preview__video" controls>
+        <source [src]="uploadPreviewUrl()!" />
+      </video>
+      } @else if (uploadedFile()!.type.startsWith('audio/')) {
+      <audio class="doc-preview__audio" controls>
+        <source [src]="uploadPreviewUrl()!" />
+      </audio>
+      }
+    </div>
+    }
+    }
+
+    <div class="form-group">
+      <label>Title</label>
+      <input type="text" placeholder="Document title..." [(ngModel)]="uploadForm().title" />
+    </div>
+
+    <div class="form-group">
+      <label>Description <span class="form-group__optional">optional</span></label>
+      <textarea rows="2" placeholder="Brief description of this document..."
+        [(ngModel)]="uploadForm().description"></textarea>
+    </div>
+
+    <!-- Categories Dropdown -->
+    <div class="form-group" (click)="$event.stopPropagation()">
+      <label>Categories</label>
+      <div class="modal-cat-dropdown">
+        <button class="modal-cat-dropdown__trigger"
+          [class.modal-cat-dropdown__trigger--active]="uploadForm().categoryIds.length > 0"
+          [class.modal-cat-dropdown__trigger--open]="showCatDropdown()" (click)="toggleCatDropdown($event)">
+          <div class="modal-cat-dropdown__trigger-left">
+            @if (uploadForm().categoryIds.length > 0) {
+            <div class="modal-cat-dropdown__dots">
+              @for (color of getSelectedCatColors(uploadForm().categoryIds); track color) {
+              <span class="modal-cat-dropdown__dot" [style.background]="color"></span>
+              }
+            </div>
+            }
+            <span class="modal-cat-dropdown__label">
+              {{ getCatDropdownLabel(uploadForm().categoryIds) }}
+            </span>
+          </div>
+          <span class="material-symbols-outlined modal-cat-dropdown__arrow">
+            {{ showCatDropdown() ? 'expand_less' : 'expand_more' }}
+          </span>
+        </button>
+        @if (showCatDropdown()) {
+        <div class="modal-cat-dropdown__menu">
+          @for (cat of availableCategories(); track cat.id) {
+          <button class="modal-cat-dropdown__item"
+            [class.modal-cat-dropdown__item--selected]="uploadForm().categoryIds.includes(cat.id)"
+            (click)="toggleUploadCategory(cat.id)">
+            <div class="modal-cat-dropdown__item-check">
+              @if (uploadForm().categoryIds.includes(cat.id)) {
+              <span class="material-symbols-outlined">check</span>
+              }
+            </div>
+            <span class="material-symbols-outlined modal-cat-dropdown__item-icon" [style.color]="cat.color">{{ cat.icon
+              }}</span>
+            <span class="modal-cat-dropdown__item-label">{{ cat.name }}</span>
+          </button>
+          }
+          @if (uploadForm().categoryIds.length > 0) {
+          <div class="modal-cat-dropdown__footer">
+            <button class="modal-cat-dropdown__clear"
+              (click)="uploadForm.update(f => ({ ...f, categoryIds: [] })); $event.stopPropagation()">
+              <span class="material-symbols-outlined">close</span>Clear
+            </button>
+          </div>
+          }
+        </div>
+        }
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>Access</label>
+      <div class="modal-access-toggle">
+        <button [class]="'modal-access-btn ' + (uploadForm().accessType === 'PRIVATE' ? 'active' : '')"
+          (click)="uploadForm.update(f => ({ ...f, accessType: 'PRIVATE' }))">
+          <span class="material-symbols-outlined">lock</span>Private
+        </button>
+        <button [class]="'modal-access-btn ' + (uploadForm().accessType === 'PUBLIC' ? 'active' : '')"
+          (click)="uploadForm.update(f => ({ ...f, accessType: 'PUBLIC' }))">
+          <span class="material-symbols-outlined">travel_explore</span>Public
+        </button>
+      </div>
+    </div>
+
+    <div class="doc-modal__footer">
+      <button class="btn-secondary" (click)="showUploadModal.set(false)">Cancel</button>
+      <button class="btn-primary" [disabled]="!uploadedFile()" (click)="submitUpload()">
+        <span class="material-symbols-outlined">upload</span>Upload
+      </button>
+    </div>
+  </div>
+</div>
+}
+
+<!-- ══ EDIT / DETAILS MODAL ══════════════════════════════ -->
+@if (showEditModal() && selectedDocument()) {
+<div class="modal-overlay" (click)="showEditModal.set(false); showEditCatDropdown.set(false)">
+  <div class="doc-modal" (click)="$event.stopPropagation(); showEditCatDropdown.set(false)">
+
+    <div class="doc-modal__header">
+      <div>
+        <h2 class="doc-modal__title">Document Details</h2>
+        <p class="doc-modal__subtitle">View and edit document metadata.</p>
+      </div>
+      <div class="doc-modal__header-actions">
+        <button class="doc-modal__action-btn doc-modal__action-btn--download"
+          (click)="downloadDoc(selectedDocument()!, $event)" title="Download">
+          <span class="material-symbols-outlined">download</span>
+        </button>
+        <button class="doc-modal__action-btn doc-modal__action-btn--delete"
+          (click)="openDeleteConfirm(selectedDocument()!)" title="Delete">
+          <span class="material-symbols-outlined">delete</span>
+        </button>
+        <button class="doc-modal__close" (click)="showEditModal.set(false)">
+          <span class="material-symbols-outlined">close</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="doc-modal__file-info">
+      <div class="doc-modal__file-icon" [style.color]="getFileColor(selectedDocument()!.fileType)">
+        <span class="material-symbols-outlined">{{ getFileIcon(selectedDocument()!.fileType) }}</span>
+      </div>
+      <div>
+        <p class="doc-modal__file-type">{{ getFileTypeName(selectedDocument()!.fileType) }}</p>
+        <p class="doc-modal__file-meta">
+          {{ formatSize(selectedDocument()!.fileSizeBytes) }} · Uploaded {{ selectedDocument()!.uploadedAt }}
+        </p>
+      </div>
+    </div>
+
+    @if (canPreview(selectedDocument()!.fileType) && selectedDocument()!.previewUrl) {
+    <div class="doc-preview">
+      @if (isImage(selectedDocument()!.fileType)) {
+      <img [src]="selectedDocument()!.previewUrl!" alt="Preview" class="doc-preview__img" />
+      } @else if (selectedDocument()!.fileType === 'pdf') {
+      <iframe [src]="selectedDocument()!.previewUrl!" class="doc-preview__pdf" title="PDF Preview"></iframe>
+      } @else if (isVideo(selectedDocument()!.fileType)) {
+      <video class="doc-preview__video" controls>
+        <source [src]="selectedDocument()!.previewUrl!" />
+      </video>
+      } @else if (isAudio(selectedDocument()!.fileType)) {
+      <audio class="doc-preview__audio" controls>
+        <source [src]="selectedDocument()!.previewUrl!" />
+      </audio>
+      }
+    </div>
+    } @else if (canPreview(selectedDocument()!.fileType) && !selectedDocument()!.previewUrl) {
+    <div class="doc-preview-placeholder">
+      <span class="material-symbols-outlined" [style.color]="getFileColor(selectedDocument()!.fileType)">
+        {{ getFileIcon(selectedDocument()!.fileType) }}
+      </span>
+      <p>Preview available after download</p>
+      <button class="btn-secondary btn-sm" (click)="downloadDoc(selectedDocument()!, $event)">
+        <span class="material-symbols-outlined">download</span>Download to preview
+      </button>
+    </div>
+    } @else {
+    <div class="doc-preview-placeholder">
+      <span class="material-symbols-outlined" [style.color]="getFileColor(selectedDocument()!.fileType)">
+        {{ getFileIcon(selectedDocument()!.fileType) }}
+      </span>
+      <p>Preview not available for {{ selectedDocument()!.fileType.toUpperCase() }} files</p>
+    </div>
+    }
+
+    <div class="form-group">
+      <label>Title</label>
+      <input type="text" placeholder="Document title..." [(ngModel)]="editForm().title" />
+    </div>
+
+    <div class="form-group">
+      <label>Description <span class="form-group__optional">optional</span></label>
+      <textarea rows="2" placeholder="Brief description..." [(ngModel)]="editForm().description"></textarea>
+    </div>
+
+    <!-- Categories Dropdown -->
+    <div class="form-group" (click)="$event.stopPropagation()">
+      <label>Categories</label>
+      <div class="modal-cat-dropdown">
+        <button class="modal-cat-dropdown__trigger"
+          [class.modal-cat-dropdown__trigger--active]="editForm().categoryIds.length > 0"
+          [class.modal-cat-dropdown__trigger--open]="showEditCatDropdown()" (click)="toggleEditCatDropdown($event)">
+          <div class="modal-cat-dropdown__trigger-left">
+            @if (editForm().categoryIds.length > 0) {
+            <div class="modal-cat-dropdown__dots">
+              @for (color of getSelectedCatColors(editForm().categoryIds); track color) {
+              <span class="modal-cat-dropdown__dot" [style.background]="color"></span>
+              }
+            </div>
+            }
+            <span class="modal-cat-dropdown__label">
+              {{ getCatDropdownLabel(editForm().categoryIds) }}
+            </span>
+          </div>
+          <span class="material-symbols-outlined modal-cat-dropdown__arrow">
+            {{ showEditCatDropdown() ? 'expand_less' : 'expand_more' }}
+          </span>
+        </button>
+        @if (showEditCatDropdown()) {
+        <div class="modal-cat-dropdown__menu">
+          @for (cat of availableCategories(); track cat.id) {
+          <button class="modal-cat-dropdown__item"
+            [class.modal-cat-dropdown__item--selected]="editForm().categoryIds.includes(cat.id)"
+            (click)="toggleEditCategory(cat.id)">
+            <div class="modal-cat-dropdown__item-check">
+              @if (editForm().categoryIds.includes(cat.id)) {
+              <span class="material-symbols-outlined">check</span>
+              }
+            </div>
+            <span class="material-symbols-outlined modal-cat-dropdown__item-icon" [style.color]="cat.color">{{ cat.icon
+              }}</span>
+            <span class="modal-cat-dropdown__item-label">{{ cat.name }}</span>
+          </button>
+          }
+          @if (editForm().categoryIds.length > 0) {
+          <div class="modal-cat-dropdown__footer">
+            <button class="modal-cat-dropdown__clear"
+              (click)="editForm.update(f => ({ ...f, categoryIds: [] })); $event.stopPropagation()">
+              <span class="material-symbols-outlined">close</span>Clear
+            </button>
+          </div>
+          }
+        </div>
+        }
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>Access</label>
+      <div class="modal-access-toggle">
+        <button [class]="'modal-access-btn ' + (editForm().accessType === 'PRIVATE' ? 'active' : '')"
+          (click)="editForm.update(f => ({ ...f, accessType: 'PRIVATE' }))">
+          <span class="material-symbols-outlined">lock</span>Private
+        </button>
+        <button [class]="'modal-access-btn ' + (editForm().accessType === 'PUBLIC' ? 'active' : '')"
+          (click)="editForm.update(f => ({ ...f, accessType: 'PUBLIC' }))">
+          <span class="material-symbols-outlined">travel_explore</span>Public
+        </button>
+      </div>
+    </div>
+
+    <div class="doc-modal__footer">
+      <button class="btn-secondary" (click)="showEditModal.set(false)">Cancel</button>
+      <button class="btn-primary" (click)="submitEdit()">Save Changes</button>
+    </div>
+  </div>
+</div>
+}
+
+<!-- ══ DELETE CONFIRM ════════════════════════════════════ -->
+@if (showDeleteConfirm() && selectedDocument()) {
+<div class="modal-overlay" (click)="showDeleteConfirm.set(false)">
+  <div class="confirm-dialog" (click)="$event.stopPropagation()">
+    <div class="confirm-dialog__icon confirm-dialog__icon--danger">
+      <span class="material-symbols-outlined">delete</span>
+    </div>
+    <h3 class="confirm-dialog__title">Delete Document</h3>
+    <p class="confirm-dialog__text">
+      Are you sure you want to delete <strong>"{{ selectedDocument()!.title }}"</strong>?
+      The file will be permanently removed from storage.
+    </p>
+    <div class="confirm-dialog__actions">
+      <button class="btn-secondary" (click)="showDeleteConfirm.set(false)">Cancel</button>
+      <button class="btn-danger" (click)="confirmDelete()">Delete Document</button>
+    </div>
+  </div>
+</div>
+}

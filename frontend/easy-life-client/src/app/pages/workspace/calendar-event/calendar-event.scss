@@ -1,0 +1,1159 @@
+@use '../../../../styles/variables' as *;
+@use '../../../../styles/mixins' as *;
+
+// ── Header ─────────────────────────────────────────────────
+.cal-header {
+  @include flex-between;
+  margin-bottom: $space-5;
+  gap: $space-4;
+  flex-wrap: wrap;
+  align-items: flex-end;
+
+  &__text {
+    @include flex-col;
+    gap: $space-1;
+  }
+
+  &__label {
+    @include section-label;
+    color: var(--color-primary);
+  }
+
+  &__title {
+    font-size: $font-size-3xl;
+    font-weight: $font-weight-bold;
+    color: var(--color-text-primary);
+    line-height: 1.1;
+  }
+
+  &__subtitle {
+    font-size: $font-size-sm;
+    color: var(--color-text-secondary);
+  }
+
+  &__actions {
+    @include flex-start;
+    gap: $space-3;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+}
+
+// ── Nav ────────────────────────────────────────────────────
+.cal-nav {
+  @include flex-start;
+  gap: $space-1;
+
+  &__btn {
+    @include btn-ghost;
+    border-radius: $radius-md;
+    border: 1px solid var(--color-border);
+    width: 34px;
+    height: 34px;
+    padding: 0;
+    @include flex-center;
+
+    .material-symbols-outlined {
+      font-size: 20px;
+    }
+  }
+
+  &__today {
+    @include btn-base;
+    border: 1px solid var(--color-border);
+    background: var(--color-bg-card);
+    color: var(--color-text-secondary);
+    font-size: $font-size-sm;
+    padding: $space-1 $space-3;
+    border-radius: $radius-md;
+
+    &:hover {
+      border-color: var(--color-primary);
+      color: var(--color-primary);
+    }
+  }
+}
+
+// ── View Toggle ────────────────────────────────────────────
+.cal-view-toggle {
+  @include flex-start;
+  border: 1px solid var(--color-border);
+  border-radius: $radius-md;
+  overflow: hidden;
+  background: var(--color-bg-card);
+
+  button {
+    padding: $space-2 $space-4;
+    font-family: $font-family;
+    font-size: $font-size-sm;
+    font-weight: $font-weight-medium;
+    color: var(--color-text-secondary);
+    background: none;
+    border: none;
+    border-right: 1px solid var(--color-border);
+    cursor: pointer;
+    transition: all $transition-fast;
+
+    &:last-child {
+      border-right: none;
+    }
+
+    &:hover {
+      background: var(--color-bg-hover);
+      color: var(--color-text-primary);
+    }
+
+    &.active {
+      background: var(--color-primary);
+      color: white;
+    }
+  }
+}
+
+// ── Filters ────────────────────────────────────────────────
+.cal-filters {
+  @include flex-start;
+  gap: $space-3;
+  margin-bottom: $space-5;
+  flex-wrap: wrap;
+}
+
+.cal-filter-btn {
+  @include flex-start;
+  gap: $space-2;
+  padding: $space-2 $space-4;
+  border-radius: $radius-pill;
+  border: 1px solid var(--color-border);
+  background: var(--color-bg-card);
+  font-family: $font-family;
+  font-size: $font-size-sm;
+  font-weight: $font-weight-medium;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  transition: all $transition-fast;
+
+  .material-symbols-outlined {
+    font-size: 16px;
+    font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 20;
+  }
+
+  &:hover {
+    border-color: var(--color-primary);
+    color: var(--color-primary);
+    background: var(--color-primary-light);
+  }
+
+  &--active {
+    background: var(--color-primary);
+    border-color: var(--color-primary);
+    color: white;
+
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 20;
+    }
+
+    &:hover {
+      background: var(--color-primary-hover);
+      color: white;
+    }
+  }
+}
+
+// ── Month Body ─────────────────────────────────────────────
+.cal-body {
+  display: grid;
+  grid-template-columns: 1fr 260px;
+  gap: $space-5;
+  align-items: start;
+
+  @include below-lg {
+    grid-template-columns: 1fr;
+  }
+}
+
+.cal-grid {
+  @include card(0);
+  overflow: hidden;
+
+  &__header {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    background: var(--color-bg-input);
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  &__day-label {
+    padding: $space-3;
+    text-align: center;
+    font-size: $font-size-xs;
+    font-weight: $font-weight-semibold;
+    color: var(--color-text-muted);
+    letter-spacing: 0.06em;
+  }
+
+  &__cells {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+  }
+}
+
+.cal-cell {
+  min-height: 90px;
+  padding: $space-2;
+  border-right: 1px solid var(--color-border-light);
+  border-bottom: 1px solid var(--color-border-light);
+  @include flex-col;
+  gap: $space-1;
+  cursor: pointer;
+  transition: background $transition-fast;
+
+  &:nth-child(7n) {
+    border-right: none;
+  }
+
+  &:nth-last-child(-n + 7) {
+    border-bottom: none;
+  }
+
+  &:hover {
+    background: var(--color-bg-hover);
+  }
+
+  &--other-month .cal-cell__date {
+    color: var(--color-text-muted);
+    opacity: 0.4;
+  }
+
+  &--weekend {
+    background: var(--color-bg-input);
+  }
+
+  &--today {
+    background: var(--color-primary-light);
+
+    .cal-cell__date {
+      background: var(--color-primary);
+      color: white;
+      border-radius: $radius-full;
+    }
+  }
+
+  &__date {
+    font-size: $font-size-sm;
+    font-weight: $font-weight-medium;
+    color: var(--color-text-primary);
+    width: 24px;
+    height: 24px;
+    @include flex-center;
+    border-radius: $radius-full;
+  }
+
+  &__events {
+    @include flex-col;
+    gap: 2px;
+    flex: 1;
+  }
+}
+
+.cal-event-chip {
+  font-size: 10px;
+  font-weight: $font-weight-medium;
+  padding: 2px $space-2;
+  border-radius: 3px;
+  @include truncate;
+  cursor: pointer;
+  transition: opacity $transition-fast;
+
+  &:hover {
+    opacity: 0.8;
+  }
+}
+
+// ── Today Panel ────────────────────────────────────────────
+.cal-today-panel {
+  @include card($space-5);
+  @include flex-col;
+  gap: $space-4;
+
+  &__header {
+    @include flex-between;
+    align-items: flex-start;
+  }
+
+  &__date {
+    @include flex-col;
+    gap: 2px;
+  }
+
+  &__day-name {
+    font-size: $font-size-sm;
+    color: var(--color-text-secondary);
+  }
+
+  &__day-num {
+    font-size: $font-size-3xl;
+    font-weight: $font-weight-bold;
+    color: var(--color-text-primary);
+    line-height: 1;
+  }
+
+  &__badge {
+    background: var(--color-primary);
+    color: white;
+    font-size: $font-size-xs;
+    font-weight: $font-weight-bold;
+    padding: 2px $space-2;
+    border-radius: $radius-pill;
+    letter-spacing: 0.06em;
+  }
+
+  &__events {
+    @include flex-col;
+    gap: $space-3;
+  }
+
+  &__empty {
+    @include flex-col;
+    @include flex-center;
+    gap: $space-2;
+    padding: $space-6;
+    color: var(--color-text-muted);
+    font-size: $font-size-sm;
+    text-align: center;
+
+    .material-symbols-outlined {
+      font-size: 32px;
+      opacity: 0.3;
+    }
+  }
+
+  &__add {
+    @include flex-center;
+    gap: $space-2;
+    width: 100%;
+    padding: $space-3;
+    border-radius: $radius-md;
+    border: 1px dashed var(--color-border);
+    background: none;
+    font-family: $font-family;
+    font-size: $font-size-sm;
+    font-weight: $font-weight-medium;
+    color: var(--color-text-muted);
+    cursor: pointer;
+    transition: all $transition-fast;
+
+    .material-symbols-outlined {
+      font-size: 18px;
+    }
+
+    &:hover {
+      border-color: var(--color-primary);
+      color: var(--color-primary);
+      background: var(--color-primary-light);
+    }
+  }
+}
+
+.cal-today-event {
+  @include flex-col;
+  gap: $space-2;
+  padding: $space-3 $space-4;
+  background: var(--color-bg-input);
+  border-radius: $radius-md;
+  border-left: 3px solid transparent;
+  cursor: pointer;
+  transition: box-shadow $transition-fast;
+
+  &:hover {
+    box-shadow: var(--shadow-sm);
+  }
+
+  &__top {
+    @include flex-between;
+    gap: $space-2;
+  }
+
+  &__title {
+    font-size: $font-size-sm;
+    font-weight: $font-weight-semibold;
+    color: var(--color-text-primary);
+    line-height: 1.3;
+  }
+
+  &__access {
+    font-size: $font-size-xs;
+    font-weight: $font-weight-semibold;
+    color: var(--color-text-muted);
+    background: var(--color-bg-hover);
+    padding: 2px $space-2;
+    border-radius: $radius-pill;
+    flex-shrink: 0;
+  }
+
+  &__meta {
+    @include flex-start;
+    gap: $space-2;
+    font-size: $font-size-xs;
+    color: var(--color-text-secondary);
+
+    .material-symbols-outlined {
+      font-size: 13px;
+      color: var(--color-text-muted);
+    }
+  }
+
+  &__type-row {
+    @include flex-start;
+    gap: $space-1;
+    margin-top: $space-1;
+  }
+
+  &__type-icon {
+    font-size: 13px;
+  }
+
+  &__type-label {
+    font-size: $font-size-xs;
+    color: var(--color-text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+}
+
+// ── Week View ──────────────────────────────────────────────
+.cal-week {
+  @include card(0);
+  overflow: hidden;
+
+  &__header {
+    display: grid;
+    grid-template-columns: 60px repeat(7, 1fr);
+    border-bottom: 1px solid var(--color-border);
+    background: var(--color-bg-input);
+  }
+
+  &__time-col {
+    border-right: 1px solid var(--color-border);
+  }
+
+  &__day-col {
+    @include flex-col;
+    align-items: center;
+    padding: $space-3 $space-2;
+    border-right: 1px solid var(--color-border-light);
+    gap: $space-1;
+
+    &--today {
+      background: var(--color-primary-light);
+    }
+
+    &:last-child {
+      border-right: none;
+    }
+  }
+
+  &__day-name {
+    font-size: $font-size-xs;
+    font-weight: $font-weight-semibold;
+    color: var(--color-text-muted);
+    letter-spacing: 0.06em;
+  }
+
+  &__day-num {
+    font-size: $font-size-lg;
+    font-weight: $font-weight-bold;
+    color: var(--color-text-primary);
+    width: 32px;
+    height: 32px;
+    @include flex-center;
+    border-radius: $radius-full;
+
+    &.today-circle {
+      background: var(--color-primary);
+      color: white;
+    }
+  }
+
+  &__grid {
+    display: grid;
+    grid-template-columns: 60px repeat(7, 1fr);
+    height: 600px;
+    overflow-y: auto;
+    position: relative;
+    @include scrollbar-thin;
+  }
+
+  &__hours {
+    border-right: 1px solid var(--color-border);
+  }
+
+  &__hour-label {
+    height: 60px;
+    padding: $space-1 $space-2;
+    font-size: 10px;
+    color: var(--color-text-muted);
+    text-align: right;
+    border-bottom: 1px solid var(--color-border-light);
+  }
+
+  &__day {
+    position: relative;
+    border-right: 1px solid var(--color-border-light);
+
+    &:last-child {
+      border-right: none;
+    }
+
+    &--today {
+      background: var(--color-primary-subtle);
+    }
+  }
+
+  &__slot {
+    height: 60px;
+    border-bottom: 1px solid var(--color-border-light);
+  }
+
+  &__event {
+    position: absolute;
+    left: 2px;
+    right: 2px;
+    padding: 2px $space-2;
+    border-radius: 4px;
+    font-size: 10px;
+    overflow: hidden;
+    cursor: pointer;
+    z-index: 1;
+    min-height: 20px;
+  }
+
+  &__event-title {
+    font-weight: $font-weight-semibold;
+    @include truncate;
+  }
+
+  &__event-time {
+    opacity: 0.8;
+  }
+}
+
+// ── Day View ───────────────────────────────────────────────
+.cal-day {
+  @include card(0);
+  overflow: hidden;
+
+  &__grid {
+    position: relative;
+    height: 1440px;
+    overflow-y: auto;
+    @include scrollbar-thin;
+  }
+
+  &__row {
+    display: grid;
+    grid-template-columns: 60px 1fr;
+    height: 60px;
+    border-bottom: 1px solid var(--color-border-light);
+  }
+
+  &__hour-label {
+    padding: $space-1 $space-3;
+    font-size: 10px;
+    color: var(--color-text-muted);
+    text-align: right;
+    border-right: 1px solid var(--color-border);
+    line-height: 1;
+  }
+
+  &__slot {
+    border-bottom: 1px solid var(--color-border-light);
+  }
+
+  &__event {
+    position: absolute;
+    left: 70px;
+    right: $space-4;
+    padding: $space-2 $space-3;
+    border-radius: $radius-md;
+    cursor: pointer;
+    z-index: 1;
+    min-height: 40px;
+    box-shadow: var(--shadow-sm);
+  }
+
+  &__event-title {
+    font-size: $font-size-sm;
+    font-weight: $font-weight-semibold;
+    @include truncate;
+  }
+
+  &__event-meta {
+    font-size: $font-size-xs;
+    color: var(--color-text-secondary);
+    margin-top: 2px;
+  }
+}
+
+// ── Selected Day ───────────────────────────────────────────
+.cal-cell--selected:not(.cal-cell--today) {
+  background: var(--color-bg-hover);
+
+  .cal-cell__date {
+    background: var(--color-text-secondary);
+    color: white;
+    border-radius: $radius-full;
+  }
+}
+
+.cal-cell__more {
+  font-size: 10px;
+  color: var(--color-text-muted);
+  padding: 1px $space-1;
+  cursor: pointer;
+}
+
+// ══ MODAL OVERLAY ════════════════════════════════════════
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: var(--color-overlay);
+  backdrop-filter: blur(4px);
+  z-index: 200;
+  @include flex-center;
+  padding: $space-4;
+}
+
+// ══ EVENT MODAL ═══════════════════════════════════════════
+.event-modal {
+  background: var(--color-bg-card);
+  border-radius: $radius-xl;
+  box-shadow: var(--shadow-lg);
+  width: 100%;
+  max-width: 560px;
+  max-height: 90vh;
+  overflow-y: auto;
+  @include scrollbar-thin;
+  @include flex-col;
+  gap: $space-4;
+  padding: $space-8;
+
+  &__header {
+    @include flex-between;
+    align-items: flex-start;
+    gap: $space-4;
+  }
+
+  &__header-actions {
+    @include flex-start;
+    gap: $space-2;
+  }
+
+  &__title {
+    font-size: $font-size-xl;
+    font-weight: $font-weight-bold;
+    color: var(--color-text-primary);
+  }
+
+  &__subtitle {
+    font-size: $font-size-sm;
+    color: var(--color-text-muted);
+    margin-top: 2px;
+  }
+
+  &__close {
+    @include btn-ghost;
+    border-radius: $radius-md;
+    padding: $space-1;
+    flex-shrink: 0;
+
+    .material-symbols-outlined {
+      font-size: 22px;
+    }
+  }
+
+  &__action-btn {
+    width: 36px;
+    height: 36px;
+    border-radius: $radius-md;
+    border: none;
+    @include flex-center;
+    cursor: pointer;
+    transition: all $transition-fast;
+
+    .material-symbols-outlined {
+      font-size: 18px;
+    }
+
+    &--delete {
+      background: var(--color-danger-subtle);
+      color: var(--color-danger);
+
+      &:hover {
+        background: var(--color-danger-subtle);
+        filter: brightness(0.9);
+      }
+    }
+  }
+
+  &__color-bar {
+    height: 4px;
+    border-radius: $radius-pill;
+    margin: -$space-2 0 0;
+    transition: background $transition-base;
+  }
+
+  &__title-input {
+    width: 100%;
+    border: none;
+    border-bottom: 2px solid var(--color-border);
+    padding: $space-2 0;
+    font-family: $font-family;
+    font-size: $font-size-xl;
+    font-weight: $font-weight-semibold;
+    color: var(--color-text-primary);
+    background: transparent;
+    outline: none;
+    transition: border-color $transition-fast;
+
+    &::placeholder {
+      color: var(--color-text-muted);
+    }
+
+    &:focus {
+      border-color: var(--color-primary);
+    }
+  }
+
+  &__allday-row {
+    @include flex-start;
+    gap: $space-3;
+  }
+
+  &__allday-label {
+    font-size: $font-size-sm;
+    font-weight: $font-weight-medium;
+    color: var(--color-text-secondary);
+  }
+
+  &__row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: $space-4;
+
+    @include below-md {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  &__footer {
+    @include flex-between;
+    padding-top: $space-4;
+    border-top: 1px solid var(--color-border-light);
+  }
+}
+
+// ── Event Type Picker ──────────────────────────────────────
+.event-type-picker {
+  @include flex-start;
+  gap: $space-2;
+  flex-wrap: wrap;
+}
+
+.event-type-btn {
+  @include flex-start;
+  gap: $space-2;
+  padding: $space-1 $space-3;
+  border-radius: $radius-pill;
+  border: 1px solid var(--color-border);
+  background: var(--color-bg-card);
+  font-family: $font-family;
+  font-size: $font-size-xs;
+  font-weight: $font-weight-medium;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  transition: all $transition-fast;
+
+  .material-symbols-outlined {
+    font-size: 14px;
+    font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 20;
+  }
+
+  &:hover {
+    border-color: var(--color-primary);
+    color: var(--color-primary);
+  }
+
+  &--active {
+    background: var(--color-primary);
+    border-color: var(--color-primary);
+    color: white;
+
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 20;
+    }
+  }
+}
+
+// ── Color Picker ───────────────────────────────────────────
+.event-color-picker {
+  @include flex-start;
+  gap: $space-2;
+  flex-wrap: wrap;
+}
+
+.color-dot {
+  width: 26px;
+  height: 26px;
+  border-radius: $radius-full;
+  border: 2px solid transparent;
+  @include flex-center;
+  cursor: pointer;
+  transition: transform $transition-fast;
+  flex-shrink: 0;
+
+  .material-symbols-outlined {
+    font-size: 13px;
+    color: white;
+  }
+
+  &:hover {
+    transform: scale(1.2);
+  }
+
+  &--active {
+    box-shadow: 0 0 0 3px var(--color-bg-card), 0 0 0 5px currentColor;
+  }
+}
+
+// ── Input with Icon ────────────────────────────────────────
+.input-with-icon {
+  position: relative;
+  @include flex-start;
+
+  .material-symbols-outlined {
+    position: absolute;
+    left: $space-3;
+    font-size: 18px;
+    color: var(--color-text-muted);
+    pointer-events: none;
+    z-index: 1;
+  }
+
+  input {
+    @include input-base;
+    padding-left: $space-10;
+  }
+}
+
+// ── Toggle Switch ──────────────────────────────────────────
+.toggle-switch {
+  position: relative;
+  display: inline-block;
+  width: 44px;
+  height: 24px;
+  flex-shrink: 0;
+  cursor: pointer;
+
+  input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+
+    &:checked+.toggle-switch__slider {
+      background: var(--color-primary);
+
+      &::before {
+        transform: translateX(20px);
+      }
+    }
+  }
+
+  &__slider {
+    position: absolute;
+    inset: 0;
+    background: var(--color-border);
+    border-radius: $radius-pill;
+    transition: background $transition-base;
+
+    &::before {
+      content: '';
+      position: absolute;
+      width: 18px;
+      height: 18px;
+      left: 3px;
+      top: 3px;
+      background: white;
+      border-radius: $radius-full;
+      transition: transform $transition-base;
+      box-shadow: var(--shadow-sm);
+    }
+  }
+}
+
+// ── Confirm Dialog ─────────────────────────────────────────
+.confirm-dialog {
+  background: var(--color-bg-card);
+  border-radius: $radius-xl;
+  box-shadow: var(--shadow-lg);
+  width: 100%;
+  max-width: 420px;
+  padding: $space-8;
+  @include flex-col;
+  align-items: center;
+  text-align: center;
+  gap: $space-4;
+
+  &__icon {
+    width: 56px;
+    height: 56px;
+    border-radius: $radius-full;
+    @include flex-center;
+
+    .material-symbols-outlined {
+      font-size: 28px;
+      font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    }
+
+    &--danger {
+      background: var(--color-danger-subtle);
+      color: var(--color-danger);
+    }
+  }
+
+  &__title {
+    font-size: $font-size-xl;
+    font-weight: $font-weight-bold;
+    color: var(--color-text-primary);
+  }
+
+  &__text {
+    font-size: $font-size-sm;
+    color: var(--color-text-secondary);
+    line-height: 1.6;
+  }
+
+  &__actions {
+    @include flex-center;
+    gap: $space-3;
+    margin-top: $space-2;
+  }
+}
+
+.btn-danger {
+  @include btn-base;
+  background: var(--color-danger);
+  color: white;
+
+  &:hover:not(:disabled) {
+    background: var(--color-danger-hover);
+  }
+}
+
+// ── Category Dropdown ──────────────────────────────────────
+.modal-cat-dropdown {
+  position: relative;
+
+  &__trigger {
+    width: 100%;
+    @include flex-between;
+    padding: $space-2 $space-3;
+    border: 1px solid var(--color-border);
+    border-radius: $radius-md;
+    background: var(--color-bg-input);
+    font-family: $font-family;
+    font-size: $font-size-sm;
+    color: var(--color-text-secondary);
+    cursor: pointer;
+    transition: all $transition-fast;
+
+    &:hover,
+    &--open {
+      border-color: var(--color-primary);
+    }
+
+    &--active {
+      color: var(--color-text-primary);
+    }
+  }
+
+  &__trigger-left {
+    @include flex-start;
+    gap: $space-2;
+    min-width: 0;
+  }
+
+  &__dots {
+    @include flex-start;
+    gap: 4px;
+    flex-shrink: 0;
+  }
+
+  &__dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  &__label {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  &__arrow {
+    font-size: 18px;
+    color: var(--color-text-muted);
+    flex-shrink: 0;
+  }
+
+  &__menu {
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 0;
+    right: 0;
+    background: var(--color-bg-card);
+    border: 1px solid var(--color-border);
+    border-radius: $radius-md;
+    box-shadow: var(--shadow-md);
+    z-index: 50;
+    max-height: 220px;
+    overflow-y: auto;
+    @include scrollbar-thin;
+  }
+
+  &__item {
+    width: 100%;
+    @include flex-start;
+    gap: $space-3;
+    padding: $space-2 $space-4;
+    border: none;
+    background: none;
+    font-family: $font-family;
+    font-size: $font-size-sm;
+    color: var(--color-text-primary);
+    cursor: pointer;
+    transition: background $transition-fast;
+    text-align: left;
+
+    &:hover {
+      background: var(--color-bg-hover);
+    }
+
+    &--selected {
+      background: var(--color-primary-light);
+      color: var(--color-primary);
+      font-weight: $font-weight-medium;
+    }
+  }
+
+  &__item-check {
+    width: 18px;
+    height: 18px;
+    border-radius: $radius-sm;
+    border: 1.5px solid var(--color-border);
+    @include flex-center;
+    flex-shrink: 0;
+    transition: all $transition-fast;
+
+    .material-symbols-outlined {
+      font-size: 13px;
+      color: white;
+    }
+
+    .modal-cat-dropdown__item--selected & {
+      background: var(--color-primary);
+      border-color: var(--color-primary);
+    }
+  }
+
+  &__item-icon {
+    font-size: 17px;
+    flex-shrink: 0;
+    font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 20;
+  }
+
+  &__item-label {
+    flex: 1;
+    text-align: left;
+  }
+
+  &__footer {
+    padding: $space-2 $space-4;
+    border-top: 1px solid var(--color-border-light);
+    position: sticky;
+    bottom: 0;
+    background: var(--color-bg-card);
+  }
+
+  &__clear {
+    @include flex-start;
+    gap: $space-2;
+    background: none;
+    border: none;
+    font-family: $font-family;
+    font-size: $font-size-xs;
+    font-weight: $font-weight-medium;
+    color: var(--color-text-muted);
+    cursor: pointer;
+    padding: $space-1 0;
+    transition: color $transition-fast;
+
+    .material-symbols-outlined {
+      font-size: 14px;
+    }
+
+    &:hover {
+      color: var(--color-danger);
+    }
+  }
+}
+
+// ── Access Toggle ──────────────────────────────────────────
+.modal-access-toggle {
+  @include flex-start;
+  border: 1px solid var(--color-border);
+  border-radius: $radius-md;
+  overflow: hidden;
+}
+
+.modal-access-btn {
+  @include flex-start;
+  gap: $space-2;
+  flex: 1;
+  padding: $space-2 $space-3;
+  border: none;
+  background: none;
+  font-family: $font-family;
+  font-size: $font-size-sm;
+  font-weight: $font-weight-medium;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  transition: all $transition-fast;
+  border-right: 1px solid var(--color-border);
+  justify-content: center;
+
+  &:last-child {
+    border-right: none;
+  }
+
+  .material-symbols-outlined {
+    font-size: 16px;
+  }
+
+  &:hover {
+    background: var(--color-bg-hover);
+    color: var(--color-text-primary);
+  }
+
+  &.active {
+    background: var(--color-primary);
+    color: white;
+  }
+}
+
+.event-color-hint {
+  font-size: $font-size-xs;
+  color: var(--color-text-muted);
+  margin-top: $space-1;
+}

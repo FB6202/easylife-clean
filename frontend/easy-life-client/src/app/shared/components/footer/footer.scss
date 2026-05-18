@@ -1,0 +1,36 @@
+@use '../../../../styles/variables' as *;
+@use '../../../../styles/mixins' as *;
+
+.footer {
+  background: #ffffff;
+  border-top: 1px solid var(--color-border-light);
+  padding: $space-6 0;
+
+  &__inner {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 $space-6;
+    @include flex-between;
+    flex-wrap: wrap;
+    gap: $space-4;
+  }
+
+  &__copy {
+    font-size: $font-size-xs;
+    color: var(--color-text-muted);
+  }
+
+  &__links {
+    @include flex-start;
+    gap: $space-5;
+  }
+
+  &__link {
+    font-size: $font-size-xs;
+    color: var(--color-text-muted);
+    transition: color $transition-fast;
+    &:hover {
+      color: var(--color-primary);
+    }
+  }
+}

@@ -1,0 +1,574 @@
+@use '../../../../styles/variables' as *;
+@use '../../../../styles/mixins' as *;
+
+// ── Header ─────────────────────────────────────────────────
+.network-header {
+  @include flex-between;
+  margin-bottom: $space-5;
+  gap: $space-4;
+  flex-wrap: wrap;
+  align-items: flex-end;
+
+  &__text {
+    @include flex-col;
+    gap: $space-1;
+  }
+
+  &__title {
+    font-size: $font-size-3xl;
+    font-weight: $font-weight-bold;
+    color: var(--color-text-primary);
+  }
+
+  &__subtitle {
+    font-size: $font-size-sm;
+    color: var(--color-text-secondary);
+  }
+
+  &__actions {
+    @include flex-start;
+    gap: $space-3;
+  }
+}
+
+// ── Tag Filter ─────────────────────────────────────────────
+.network-tags {
+  @include flex-start;
+  gap: $space-2;
+  margin-bottom: $space-5;
+  flex-wrap: wrap;
+
+  &__sort {
+    @include flex-start;
+    gap: $space-1;
+    margin-left: auto;
+    font-size: $font-size-xs;
+    color: var(--color-text-muted);
+    cursor: pointer;
+    transition: color $transition-fast;
+
+    .material-symbols-outlined {
+      font-size: 15px;
+    }
+
+    &:hover {
+      color: var(--color-text-primary);
+    }
+  }
+}
+
+.network-tag {
+  padding: $space-2 $space-4;
+  border-radius: $radius-pill;
+  border: 1px solid var(--color-border);
+  background: var(--color-bg-card);
+  font-family: $font-family;
+  font-size: $font-size-sm;
+  font-weight: $font-weight-medium;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  transition: all $transition-fast;
+
+  &:hover {
+    border-color: var(--color-primary);
+    color: var(--color-primary);
+    background: var(--color-primary-light);
+  }
+
+  &--active {
+    background: var(--color-primary);
+    border-color: var(--color-primary);
+    color: white;
+
+    &:hover {
+      background: var(--color-primary-hover);
+      color: white;
+    }
+  }
+}
+
+// ── Container ──────────────────────────────────────────────
+.network-container {
+  @include card(0);
+  overflow: hidden;
+}
+
+// ── Table ──────────────────────────────────────────────────
+.network-table__header {
+  display: grid;
+  grid-template-columns: 2fr 2fr 120px 100px 120px;
+  padding: $space-3 $space-6;
+  background: var(--color-bg-input);
+  border-bottom: 1px solid var(--color-border);
+  gap: $space-4;
+}
+
+.network-table__row {
+  display: grid;
+  grid-template-columns: 2fr 2fr 120px 100px 120px;
+  padding: $space-4 $space-6;
+  border-bottom: 1px solid var(--color-border-light);
+  gap: $space-4;
+  align-items: center;
+  transition: background $transition-fast;
+  cursor: pointer;
+
+  &:last-of-type {
+    border-bottom: none;
+  }
+
+  &:hover {
+    background: var(--color-bg-hover);
+  }
+}
+
+.network-col {
+  @include flex-start;
+  font-size: $font-size-xs;
+  font-weight: $font-weight-semibold;
+  color: var(--color-text-muted);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  gap: $space-3;
+}
+
+// ── Contact Info ───────────────────────────────────────────
+.contact-avatar {
+  width: 38px;
+  height: 38px;
+  border-radius: $radius-full;
+  @include flex-center;
+  font-size: $font-size-xs;
+  font-weight: $font-weight-bold;
+  color: white;
+  flex-shrink: 0;
+}
+
+.contact-info {
+  @include flex-col;
+  gap: 2px;
+  min-width: 0;
+
+  &__name {
+    font-size: $font-size-sm;
+    font-weight: $font-weight-semibold;
+    color: var(--color-text-primary);
+    @include truncate;
+  }
+
+  &__role {
+    font-size: $font-size-xs;
+    color: var(--color-text-muted);
+    @include truncate;
+  }
+}
+
+// ── Skills ─────────────────────────────────────────────────
+.contact-skills {
+  @include flex-start;
+  gap: $space-2;
+  flex-wrap: wrap;
+}
+
+.contact-skill-tag {
+  font-size: $font-size-xs;
+  font-weight: $font-weight-medium;
+  padding: 2px $space-2;
+  border-radius: $radius-pill;
+  background: var(--color-bg-input);
+  border: 1px solid var(--color-border);
+  color: var(--color-text-secondary);
+  white-space: nowrap;
+}
+
+.contact-skill-more {
+  font-size: $font-size-xs;
+  font-weight: $font-weight-semibold;
+  color: var(--color-text-muted);
+  padding: 2px $space-2;
+}
+
+// ── Categories ─────────────────────────────────────────────
+.contact-cats {
+  @include flex-start;
+  gap: $space-2;
+}
+
+.contact-cat-icon {
+  font-size: 18px;
+  font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 20;
+}
+
+// ── Type Badge ─────────────────────────────────────────────
+.contact-type {
+  font-size: $font-size-xs;
+  font-weight: $font-weight-bold;
+  padding: 3px $space-3;
+  border-radius: $radius-pill;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  white-space: nowrap;
+
+  &.type--business {
+    background: var(--color-info-subtle);
+    color: var(--color-info-text);
+    border: 1px solid var(--color-info-border);
+  }
+
+  &.type--colleague {
+    background: var(--color-success-subtle);
+    color: var(--color-success-text);
+    border: 1px solid var(--color-success-border);
+  }
+
+  &.type--mentor {
+    background: var(--color-purple-subtle);
+    color: var(--color-purple-text);
+    border: 1px solid var(--color-purple-border);
+  }
+
+  &.type--friend {
+    background: var(--color-warning-subtle);
+    color: var(--color-warning-text);
+    border: 1px solid var(--color-warning-border);
+  }
+
+  &.type--other {
+    background: var(--color-neutral-subtle);
+    color: var(--color-neutral-text);
+    border: 1px solid var(--color-neutral-border);
+  }
+}
+
+// ── Last Contact ───────────────────────────────────────────
+.contact-last__icon {
+  font-size: 16px;
+  color: var(--color-text-muted);
+}
+
+.contact-last__text {
+  font-size: $font-size-sm;
+  color: var(--color-text-secondary);
+}
+
+// ══ MODAL OVERLAY ════════════════════════════════════════
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: var(--color-overlay);
+  backdrop-filter: blur(4px);
+  z-index: 200;
+  @include flex-center;
+  padding: $space-4;
+}
+
+// ══ CONTACT MODAL ════════════════════════════════════════
+.contact-modal {
+  background: var(--color-bg-card);
+  border-radius: $radius-xl;
+  box-shadow: var(--shadow-lg);
+  width: 100%;
+  max-width: 620px;
+  max-height: 90vh;
+  overflow-y: auto;
+  @include scrollbar-thin;
+  @include flex-col;
+  gap: $space-4;
+  padding: $space-8;
+
+  &__header {
+    @include flex-between;
+    align-items: flex-start;
+    gap: $space-4;
+  }
+
+  &__header-info {
+    @include flex-start;
+    gap: $space-4;
+    flex: 1;
+    min-width: 0;
+  }
+
+  &__avatar {
+    width: 52px;
+    height: 52px;
+    border-radius: $radius-full;
+    @include flex-center;
+    font-size: $font-size-lg;
+    font-weight: $font-weight-bold;
+    color: white;
+    flex-shrink: 0;
+  }
+
+  &__header-actions {
+    @include flex-start;
+    gap: $space-2;
+  }
+
+  &__title {
+    font-size: $font-size-xl;
+    font-weight: $font-weight-bold;
+    color: var(--color-text-primary);
+  }
+
+  &__subtitle {
+    font-size: $font-size-sm;
+    color: var(--color-text-muted);
+    margin-top: 2px;
+  }
+
+  &__close {
+    @include btn-ghost;
+    border-radius: $radius-md;
+    padding: $space-1;
+    flex-shrink: 0;
+
+    .material-symbols-outlined {
+      font-size: 22px;
+    }
+  }
+
+  &__action-btn {
+    width: 36px;
+    height: 36px;
+    border-radius: $radius-md;
+    border: none;
+    @include flex-center;
+    cursor: pointer;
+    transition: all $transition-fast;
+
+    .material-symbols-outlined {
+      font-size: 18px;
+    }
+
+    &--delete {
+      background: var(--color-danger-subtle);
+      color: var(--color-danger);
+
+      &:hover {
+        background: var(--color-danger-subtle);
+        filter: brightness(0.9);
+      }
+    }
+  }
+
+  &__row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: $space-4;
+
+    @include below-md {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  &__footer {
+    @include flex-between;
+    padding-top: $space-4;
+    border-top: 1px solid var(--color-border-light);
+  }
+}
+
+// ── Relationship Type Picker ───────────────────────────────
+.modal-type-picker {
+  @include flex-start;
+  gap: $space-2;
+  flex-wrap: wrap;
+}
+
+.modal-type-btn {
+  padding: $space-1 $space-3;
+  border-radius: $radius-pill;
+  border: 1px solid var(--color-border);
+  background: var(--color-bg-card);
+  font-family: $font-family;
+  font-size: $font-size-xs;
+  font-weight: $font-weight-medium;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  transition: all $transition-fast;
+
+  &:hover {
+    border-color: var(--color-primary);
+    color: var(--color-primary);
+  }
+
+  &--business.active {
+    background: var(--color-info-subtle);
+    color: var(--color-info-text);
+    border-color: var(--color-info-border);
+  }
+
+  &--colleague.active {
+    background: var(--color-success-subtle);
+    color: var(--color-success-text);
+    border-color: var(--color-success-border);
+  }
+
+  &--mentor.active {
+    background: var(--color-purple-subtle);
+    color: var(--color-purple-text);
+    border-color: var(--color-purple-border);
+  }
+
+  &--friend.active {
+    background: var(--color-warning-subtle);
+    color: var(--color-warning-text);
+    border-color: var(--color-warning-border);
+  }
+
+  &--other.active {
+    background: var(--color-neutral-subtle);
+    color: var(--color-neutral-text);
+    border-color: var(--color-neutral-border);
+  }
+}
+
+// ── Skills Input ───────────────────────────────────────────
+.skill-input-row {
+  @include flex-start;
+  gap: $space-2;
+
+  input {
+    @include input-base;
+    flex: 1;
+  }
+}
+
+.skill-add-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: $radius-md;
+  border: 1px solid var(--color-border);
+  background: var(--color-bg-card);
+  @include flex-center;
+  cursor: pointer;
+  flex-shrink: 0;
+  color: var(--color-text-secondary);
+  transition: all $transition-fast;
+
+  .material-symbols-outlined {
+    font-size: 20px;
+  }
+
+  &:hover {
+    border-color: var(--color-primary);
+    color: var(--color-primary);
+    background: var(--color-primary-light);
+  }
+}
+
+.skill-tags {
+  @include flex-start;
+  gap: $space-2;
+  flex-wrap: wrap;
+  margin-top: $space-3;
+}
+
+.skill-tag {
+  @include flex-start;
+  gap: $space-1;
+  font-size: $font-size-xs;
+  font-weight: $font-weight-medium;
+  padding: 3px $space-2 3px $space-3;
+  border-radius: $radius-pill;
+  background: var(--color-primary-light);
+  color: var(--color-primary);
+  border: 1px solid var(--color-primary-border);
+
+  button {
+    @include flex-center;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    color: var(--color-primary);
+    opacity: 0.6;
+    transition: opacity $transition-fast;
+
+    .material-symbols-outlined {
+      font-size: 13px;
+    }
+
+    &:hover {
+      opacity: 1;
+    }
+  }
+}
+
+// ══ CONFIRM DIALOG ════════════════════════════════════════
+.confirm-dialog {
+  background: var(--color-bg-card);
+  border-radius: $radius-xl;
+  box-shadow: var(--shadow-lg);
+  width: 100%;
+  max-width: 420px;
+  padding: $space-8;
+  @include flex-col;
+  align-items: center;
+  text-align: center;
+  gap: $space-4;
+
+  &__icon {
+    width: 56px;
+    height: 56px;
+    border-radius: $radius-full;
+    @include flex-center;
+
+    .material-symbols-outlined {
+      font-size: 28px;
+      font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    }
+
+    &--danger {
+      background: var(--color-danger-subtle);
+      color: var(--color-danger);
+    }
+  }
+
+  &__title {
+    font-size: $font-size-xl;
+    font-weight: $font-weight-bold;
+    color: var(--color-text-primary);
+  }
+
+  &__text {
+    font-size: $font-size-sm;
+    color: var(--color-text-secondary);
+    line-height: 1.6;
+  }
+
+  &__actions {
+    @include flex-center;
+    gap: $space-3;
+    margin-top: $space-2;
+  }
+}
+
+.btn-danger {
+  @include btn-base;
+  background: var(--color-danger);
+  color: white;
+
+  &:hover:not(:disabled) {
+    background: var(--color-danger-hover);
+  }
+}
+
+.btn-secondary--active {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+  background: var(--color-primary-light);
+}
+
+.filter-active-badge {
+  background: var(--color-primary);
+  color: white;
+  font-size: 11px;
+  font-weight: $font-weight-bold;
+  padding: 1px 6px;
+  border-radius: $radius-pill;
+  margin-left: $space-1;
+  min-width: 18px;
+  text-align: center;
+}

@@ -1,0 +1,118 @@
+<app-navbar />
+
+<main class="support-page">
+  <!-- Hero -->
+  <section class="support-hero">
+    <div class="support-hero__inner">
+      <span class="support-hero__label">Support Center</span>
+      <h1 class="support-hero__title">How can we help?</h1>
+      <p class="support-hero__subtitle">Search our documentation or browse by category below.</p>
+      <div class="support-hero__search">
+        <span class="material-symbols-outlined">search</span>
+        <input type="text" placeholder="Search for answers..." />
+      </div>
+      <div class="support-hero__tags">
+        <span class="support-tag">Getting started</span>
+        <span class="support-tag">AI Agent</span>
+        <span class="support-tag">Billing</span>
+        <span class="support-tag">Import data</span>
+        <span class="support-tag">Mobile app</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- Categories -->
+  <section class="support-categories">
+    <div class="support-categories__inner">
+      <h2 class="support-categories__title">Browse by topic</h2>
+      <div class="support-categories__grid">
+        @for (cat of categories; track cat.title) {
+          <div class="support-category-card">
+            <div class="support-category-card__icon">
+              <span class="material-symbols-outlined">{{ cat.icon }}</span>
+            </div>
+            <div class="support-category-card__content">
+              <h3 class="support-category-card__title">{{ cat.title }}</h3>
+              <p class="support-category-card__desc">{{ cat.description }}</p>
+              <span class="support-category-card__count"> {{ cat.articles }} articles </span>
+            </div>
+            <span class="material-symbols-outlined support-category-card__arrow">
+              chevron_right
+            </span>
+          </div>
+        }
+      </div>
+    </div>
+  </section>
+
+  <!-- FAQ -->
+  <section class="support-faq">
+    <div class="support-faq__inner">
+      <div class="support-faq__header">
+        <h2 class="support-faq__title">Frequently asked questions</h2>
+        <p class="support-faq__subtitle">Quick answers to the most common questions.</p>
+      </div>
+      <div class="support-faq__list">
+        @for (faq of faqs(); track faq.question; let i = $index) {
+          <div class="faq-item" [class.faq-item--open]="faq.open">
+            <button class="faq-item__header" (click)="toggleFaq(i)">
+              <span class="faq-item__question">{{ faq.question }}</span>
+              <span class="material-symbols-outlined faq-item__icon">
+                {{ faq.open ? 'remove' : 'add' }}
+              </span>
+            </button>
+            @if (faq.open) {
+              <div class="faq-item__answer">
+                <p>{{ faq.answer }}</p>
+              </div>
+            }
+          </div>
+        }
+      </div>
+    </div>
+  </section>
+
+  <!-- Contact -->
+  <section class="support-contact">
+    <div class="support-contact__inner">
+      <h2 class="support-contact__title">Still need help?</h2>
+      <p class="support-contact__subtitle">
+        Can't find what you're looking for? Our team is happy to help.
+      </p>
+      <div class="support-contact__cards">
+        <div class="contact-card">
+          <div class="contact-card__icon">
+            <span class="material-symbols-outlined">mail</span>
+          </div>
+          <h3 class="contact-card__title">Email us</h3>
+          <p class="contact-card__desc">
+            Send us a message and we'll get back to you within 24 hours.
+          </p>
+          <a href="mailto:support@easylife.app" class="btn-primary btn-sm"> Send email </a>
+        </div>
+        <div class="contact-card contact-card--featured">
+          <div class="contact-card__icon">
+            <span class="material-symbols-outlined">auto_awesome</span>
+          </div>
+          <h3 class="contact-card__title">Ask the AI</h3>
+          <p class="contact-card__desc">
+            Already a user? Your AI Agent can answer most questions instantly.
+          </p>
+          <a routerLink="/workspace/dashboard" class="btn-primary btn-sm"> Open Easy Life </a>
+        </div>
+        <div class="contact-card">
+          <div class="contact-card__icon">
+            <span class="material-symbols-outlined">forum</span>
+          </div>
+          <h3 class="contact-card__title">Community</h3>
+          <p class="contact-card__desc">
+            Join our community forum and connect with other Easy Life users.
+          </p>
+          <a href="#" class="btn-outlined btn-sm"> Join community </a>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<app-footer />
