@@ -9,4 +9,6 @@ interface WeekPlanRepository extends JpaRepository<WeekPlan, Long>, JpaSpecifica
 
     Optional<WeekPlan> findByIdAndUserId(Long id, Long userId);
 
+    boolean existsByIdAndUserId(Long id, Long userId);
+
 }

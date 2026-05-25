@@ -55,7 +55,7 @@
           <div class="category-card__footer">
             <span class="category-card__date">
               <span class="material-symbols-outlined">calendar_today</span>
-              Created {{ category.createdAt }}
+              Created {{ formatCreatedAt(category.createdAt) }}
             </span>
             <button class="category-card__arrow" (click)="openEdit(category, $event)">
               <span class="material-symbols-outlined">arrow_forward</span>

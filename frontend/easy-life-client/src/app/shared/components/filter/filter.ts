@@ -33,10 +33,9 @@ export type FilterValues = Record<string, string | string[] | boolean | null>;
   selector: 'app-filter-panel',
   imports: [CommonModule, FormsModule],
   templateUrl: './filter.html',
-  styleUrl: './filter.scss'
+  styleUrl: './filter.scss',
 })
 export class FilterPanelComponent implements OnInit {
-
   readonly fields = input.required<FilterField[]>();
   readonly initialValues = input<FilterValues>({});
   readonly title = input<string>('Filters');
@@ -50,7 +49,7 @@ export class FilterPanelComponent implements OnInit {
 
   readonly activeCount = computed(() => {
     const v = this.values();
-    return Object.values(v).filter(val => {
+    return Object.values(v).filter((val) => {
       if (val === null || val === '' || val === false) return false;
       if (Array.isArray(val)) return val.length > 0;
       return true;
@@ -59,11 +58,14 @@ export class FilterPanelComponent implements OnInit {
 
   ngOnInit() {
     const init: FilterValues = {};
-    this.fields().forEach(f => {
-      init[f.key] = this.initialValues()[f.key] ?? (
-        f.type === 'multiselect' || f.type === 'multiselect-dropdown' ? [] :
-          f.type === 'toggle' ? false : ''
-      );
+    this.fields().forEach((f) => {
+      init[f.key] =
+        this.initialValues()[f.key] ??
+        (f.type === 'multiselect' || f.type === 'multiselect-dropdown'
+          ? []
+          : f.type === 'toggle'
+            ? false
+            : '');
     });
     this.values.set({ ...init, ...this.initialValues() });
   }
@@ -81,15 +83,15 @@ export class FilterPanelComponent implements OnInit {
   }
 
   setValue(key: string, value: string | boolean | null) {
-    this.values.update(v => ({ ...v, [key]: value }));
+    this.values.update((v) => ({ ...v, [key]: value }));
   }
 
   toggleMultiOption(key: string, value: string) {
     const current = this.getArrayValue(key);
     const updated = current.includes(value)
-      ? current.filter(v => v !== value)
+      ? current.filter((v) => v !== value)
       : [...current, value];
-    this.values.update(v => ({ ...v, [key]: updated }));
+    this.values.update((v) => ({ ...v, [key]: updated }));
   }
 
   isSelected(key: string, value: string): boolean {
@@ -97,7 +99,7 @@ export class FilterPanelComponent implements OnInit {
   }
 
   clearArray(key: string) {
-    this.values.update(v => ({ ...v, [key]: [] }));
+    this.values.update((v) => ({ ...v, [key]: [] }));
   }
 
   // ── Dropdown ───────────────────────────────────────────
@@ -107,7 +109,7 @@ export class FilterPanelComponent implements OnInit {
 
   toggleDropdown(key: string, event: Event) {
     event.stopPropagation();
-    this.openDropdowns.update(set => {
+    this.openDropdowns.update((set) => {
       const next = new Set(set);
       if (next.has(key)) {
         next.delete(key);
@@ -127,7 +129,7 @@ export class FilterPanelComponent implements OnInit {
     const selected = this.getArrayValue(key);
     if (selected.length === 0) return 'All';
     if (selected.length === 1) {
-      const opt = options.find(o => o.value.toString() === selected[0]);
+      const opt = options.find((o) => o.value.toString() === selected[0]);
       return opt?.label ?? '1 selected';
     }
     return `${selected.length} selected`;
@@ -135,7 +137,7 @@ export class FilterPanelComponent implements OnInit {
 
   getSelectedOptions(key: string, options: FilterOption[] = []): FilterOption[] {
     const selected = this.getArrayValue(key);
-    return options.filter(o => selected.includes(o.value.toString()));
+    return options.filter((o) => selected.includes(o.value.toString()));
   }
 
   onApply() {
@@ -145,9 +147,13 @@ export class FilterPanelComponent implements OnInit {
 
   onReset() {
     const empty: FilterValues = {};
-    this.fields().forEach(f => {
-      empty[f.key] = f.type === 'multiselect' || f.type === 'multiselect-dropdown'
-        ? [] : f.type === 'toggle' ? false : '';
+    this.fields().forEach((f) => {
+      empty[f.key] =
+        f.type === 'multiselect' || f.type === 'multiselect-dropdown'
+          ? []
+          : f.type === 'toggle'
+            ? false
+            : '';
     });
     this.values.set(empty);
     this.closeAllDropdowns();
@@ -159,5 +165,7 @@ export class FilterPanelComponent implements OnInit {
     this.close.emit();
   }
 
-  onOverlayClick() { this.onClose(); }
+  onOverlayClick() {
+    this.onClose();
+  }
 }

@@ -61,11 +61,19 @@
     <div class="profile-form-grid">
       <div class="form-group">
         <label>First Name</label>
-        <input type="text" [value]="firstname()" (input)="firstname.set($any($event.target).value); markChanged()" />
+        <input
+          type="text"
+          [value]="firstname()"
+          (input)="firstname.set($any($event.target).value); markChanged()"
+        />
       </div>
       <div class="form-group">
         <label>Last Name</label>
-        <input type="text" [value]="lastname()" (input)="lastname.set($any($event.target).value); markChanged()" />
+        <input
+          type="text"
+          [value]="lastname()"
+          (input)="lastname.set($any($event.target).value); markChanged()"
+        />
       </div>
     </div>
 
@@ -82,10 +90,14 @@
     <div class="form-group">
       <label>
         Mobile Number
-        <span class="form-group__optional">optional – for AI agent</span>
+        <span class="form-group__optional">optional - for AI agent</span>
       </label>
-      <input type="tel" placeholder="+49 151 00000000" [value]="mobileNumber()"
-        (input)="mobileNumber.set($any($event.target).value); markChanged()" />
+      <input
+        type="tel"
+        placeholder="+49 151 00000000"
+        [value]="mobileNumber()"
+        (input)="mobileNumber.set($any($event.target).value); markChanged()"
+      />
     </div>
 
     <!-- Bio -->
@@ -94,9 +106,13 @@
         Bio
         <span class="form-group__optional">optional</span>
       </label>
-      <textarea rows="4" [attr.maxlength]="bioMaxLength" [value]="bio()"
+      <textarea
+        rows="4"
+        [attr.maxlength]="bioMaxLength"
+        [value]="bio()"
         (input)="bio.set($any($event.target).value); markChanged()"
-        placeholder="Tell others a bit about yourself..."></textarea>
+        placeholder="Tell others a bit about yourself..."
+      ></textarea>
       <span class="form-group__counter">{{ bio().length }}/{{ bioMaxLength }}</span>
     </div>
   </div>
@@ -114,30 +130,52 @@
     </div>
 
     <div class="profile-form-grid">
-      <div class="form-group">
-        <label>Country</label>
-        <input type="text" [value]="country()" (input)="country.set($any($event.target).value); markChanged()" />
-      </div>
-      <div class="form-group">
-        <label>City</label>
-        <input type="text" [value]="city()" (input)="city.set($any($event.target).value); markChanged()" />
-      </div>
+      <!-- ALT: street + number + additionalInfo + zip + city -->
+
+      <!-- NEU: street + zip + city + state + country -->
       <div class="form-group">
         <label>Street</label>
-        <input type="text" [value]="street()" (input)="street.set($any($event.target).value); markChanged()" />
+        <input
+          type="text"
+          [value]="street()"
+          (input)="street.set($any($event.target).value); markChanged()"
+        />
       </div>
-      <div class="form-group">
-        <label>Number</label>
-        <input type="text" [value]="number()" (input)="number.set($any($event.target).value); markChanged()" />
+      <div class="profile-form-grid">
+        <div class="form-group">
+          <label>ZIP Code</label>
+          <input
+            type="text"
+            [value]="zip()"
+            (input)="zip.set($any($event.target).value); markChanged()"
+          />
+        </div>
+        <div class="form-group">
+          <label>City</label>
+          <input
+            type="text"
+            [value]="city()"
+            (input)="city.set($any($event.target).value); markChanged()"
+          />
+        </div>
       </div>
-      <div class="form-group">
-        <label>ZIP Code</label>
-        <input type="text" [value]="zipCode()" (input)="zipCode.set($any($event.target).value); markChanged()" />
-      </div>
-      <div class="form-group">
-        <label>Additional Info <span class="form-group__optional">optional</span></label>
-        <input type="text" placeholder="Apartment, suite, etc." [value]="additionalInfo()"
-          (input)="additionalInfo.set($any($event.target).value); markChanged()" />
+      <div class="profile-form-grid">
+        <div class="form-group">
+          <label>State / Region</label>
+          <input
+            type="text"
+            [value]="state()"
+            (input)="state.set($any($event.target).value); markChanged()"
+          />
+        </div>
+        <div class="form-group">
+          <label>Country</label>
+          <input
+            type="text"
+            [value]="country()"
+            (input)="country.set($any($event.target).value); markChanged()"
+          />
+        </div>
       </div>
     </div>
   </div>
@@ -165,12 +203,15 @@
       </div>
       <div class="pref-theme-toggle">
         @for (theme of themes; track theme.value) {
-        <button [class]="
+          <button
+            [class]="
               'pref-theme-btn ' + (webColorTheme() === theme.value ? 'pref-theme-btn--active' : '')
-            " (click)="webColorTheme.set(theme.value); markChanged()">
-          <span class="material-symbols-outlined">{{ theme.icon }}</span>
-          {{ theme.label }}
-        </button>
+            "
+            (click)="webColorTheme.set(theme.value); markChanged()"
+          >
+            <span class="material-symbols-outlined">{{ theme.icon }}</span>
+            {{ theme.label }}
+          </button>
         }
       </div>
     </div>
@@ -185,13 +226,16 @@
       </div>
       <div class="pref-theme-toggle">
         @for (theme of themes; track theme.value) {
-        <button [class]="
+          <button
+            [class]="
               'pref-theme-btn ' +
               (mobileColorTheme() === theme.value ? 'pref-theme-btn--active' : '')
-            " (click)="mobileColorTheme.set(theme.value); markChanged()">
-          <span class="material-symbols-outlined">{{ theme.icon }}</span>
-          {{ theme.label }}
-        </button>
+            "
+            (click)="mobileColorTheme.set(theme.value); markChanged()"
+          >
+            <span class="material-symbols-outlined">{{ theme.icon }}</span>
+            {{ theme.label }}
+          </button>
         }
       </div>
     </div>
@@ -207,11 +251,13 @@
       </div>
       <div class="pref-lang-toggle">
         @for (lang of languages; track lang.value) {
-        <button [class]="'pref-lang-btn ' + (language() === lang.value ? 'pref-lang-btn--active' : '')"
-          (click)="language.set(lang.value); markChanged()">
-          <span>{{ lang.flag }}</span>
-          {{ lang.label }}
-        </button>
+          <button
+            [class]="'pref-lang-btn ' + (language() === lang.value ? 'pref-lang-btn--active' : '')"
+            (click)="language.set(lang.value); markChanged()"
+          >
+            <span>{{ lang.flag }}</span>
+            {{ lang.label }}
+          </button>
         }
       </div>
     </div>
@@ -226,8 +272,11 @@
         </div>
       </div>
       <label class="pref-toggle">
-        <input type="checkbox" [checked]="emailNotifications()"
-          (change)="emailNotifications.update((v) => !v); markChanged()" />
+        <input
+          type="checkbox"
+          [checked]="emailNotifications()"
+          (change)="emailNotifications.update((v) => !v); markChanged()"
+        />
         <span class="pref-toggle__slider"></span>
       </label>
     </div>
@@ -241,8 +290,11 @@
         </div>
       </div>
       <label class="pref-toggle">
-        <input type="checkbox" [checked]="pushNotifications()"
-          (change)="pushNotifications.update((v) => !v); markChanged()" />
+        <input
+          type="checkbox"
+          [checked]="pushNotifications()"
+          (change)="pushNotifications.update((v) => !v); markChanged()"
+        />
         <span class="pref-toggle__slider"></span>
       </label>
     </div>
@@ -266,18 +318,30 @@
       <div class="profile-form-grid">
         <div class="form-group">
           <label>Current Password</label>
-          <input type="password" placeholder="Enter current password" [value]="currentPassword()"
-            (input)="currentPassword.set($any($event.target).value)" />
+          <input
+            type="password"
+            placeholder="Enter current password"
+            [value]="currentPassword()"
+            (input)="currentPassword.set($any($event.target).value)"
+          />
         </div>
         <div class="form-group">
           <label>New Password</label>
-          <input type="password" placeholder="Enter new password" [value]="newPassword()"
-            (input)="newPassword.set($any($event.target).value)" />
+          <input
+            type="password"
+            placeholder="Enter new password"
+            [value]="newPassword()"
+            (input)="newPassword.set($any($event.target).value)"
+          />
         </div>
         <div class="form-group">
           <label>Confirm New Password</label>
-          <input type="password" placeholder="Repeat new password" [value]="confirmPassword()"
-            (input)="confirmPassword.set($any($event.target).value)" />
+          <input
+            type="password"
+            placeholder="Repeat new password"
+            [value]="confirmPassword()"
+            (input)="confirmPassword.set($any($event.target).value)"
+          />
         </div>
       </div>
       <div class="profile-subsection__action">
@@ -293,8 +357,10 @@
       <h3 class="profile-subsection__title">Two-Factor Authentication</h3>
       <div class="security-row">
         <div class="security-row__info">
-          <span class="material-symbols-outlined security-row__icon"
-            [style.color]="twoFactorEnabled() ? '#43a047' : '#9e9e9e'">
+          <span
+            class="material-symbols-outlined security-row__icon"
+            [style.color]="twoFactorEnabled() ? '#43a047' : '#9e9e9e'"
+          >
             {{ twoFactorEnabled() ? 'verified_user' : 'shield' }}
           </span>
           <div>
@@ -307,8 +373,10 @@
             <p class="security-row__desc">Add an extra layer of security via authenticator app.</p>
           </div>
         </div>
-        <button [class]="twoFactorEnabled() ? 'btn-secondary' : 'btn-primary'"
-          (click)="twoFactorEnabled.update((v) => !v)">
+        <button
+          [class]="twoFactorEnabled() ? 'btn-secondary' : 'btn-primary'"
+          (click)="twoFactorEnabled.update((v) => !v)"
+        >
           <span class="material-symbols-outlined">
             {{ twoFactorEnabled() ? 'toggle_off' : 'toggle_on' }}
           </span>
@@ -323,9 +391,12 @@
       <div class="profile-form-grid profile-form-grid--single">
         <div class="form-group">
           <label>Auto Logout After</label>
-          <select [value]="sessionTimeout()" (change)="sessionTimeout.set($any($event.target).value)">
+          <select
+            [value]="sessionTimeout()"
+            (change)="sessionTimeout.set($any($event.target).value)"
+          >
             @for (opt of sessionTimeoutOptions; track opt.value) {
-            <option [value]="opt.value">{{ opt.label }}</option>
+              <option [value]="opt.value">{{ opt.label }}</option>
             }
           </select>
         </div>
@@ -386,36 +457,40 @@
       <h3 class="profile-subsection__title">Available Plans</h3>
       <div class="billing-plans">
         @for (plan of plans; track plan.id) {
-        <div class="billing-card" [class.billing-card--active]="currentPlan() === plan.id"
-          [class.billing-card--popular]="plan.popular" [style.--plan-color]="plan.color">
-          @if (plan.popular) {
-          <div class="billing-card__badge">Most Popular</div>
-          }
-          <div class="billing-card__header">
-            <h4 class="billing-card__name" [style.color]="plan.color">{{ plan.label }}</h4>
-            <div class="billing-card__price">
-              <span class="billing-card__amount">{{ plan.price }}</span>
-              <span class="billing-card__period">{{ plan.period }}</span>
-            </div>
-          </div>
-          <ul class="billing-card__features">
-            @for (feature of plan.features; track feature) {
-            <li>
-              <span class="material-symbols-outlined">check</span>
-              {{ feature }}
-            </li>
+          <div
+            class="billing-card"
+            [class.billing-card--active]="currentPlan() === plan.id"
+            [class.billing-card--popular]="plan.popular"
+            [style.--plan-color]="plan.color"
+          >
+            @if (plan.popular) {
+              <div class="billing-card__badge">Most Popular</div>
             }
-          </ul>
-          @if (currentPlan() === plan.id) {
-          <button class="billing-card__btn billing-card__btn--current" disabled>
-            Current Plan
-          </button>
-          } @else {
-          <button class="billing-card__btn" [style.background]="plan.color">
-            {{ plan.id === 'FREE' ? 'Downgrade' : 'Upgrade to ' + plan.label }}
-          </button>
-          }
-        </div>
+            <div class="billing-card__header">
+              <h4 class="billing-card__name" [style.color]="plan.color">{{ plan.label }}</h4>
+              <div class="billing-card__price">
+                <span class="billing-card__amount">{{ plan.price }}</span>
+                <span class="billing-card__period">{{ plan.period }}</span>
+              </div>
+            </div>
+            <ul class="billing-card__features">
+              @for (feature of plan.features; track feature) {
+                <li>
+                  <span class="material-symbols-outlined">check</span>
+                  {{ feature }}
+                </li>
+              }
+            </ul>
+            @if (currentPlan() === plan.id) {
+              <button class="billing-card__btn billing-card__btn--current" disabled>
+                Current Plan
+              </button>
+            } @else {
+              <button class="billing-card__btn" [style.background]="plan.color">
+                {{ plan.id === 'FREE' ? 'Downgrade' : 'Upgrade to ' + plan.label }}
+              </button>
+            }
+          </div>
         }
       </div>
     </div>
@@ -437,38 +512,38 @@
 
   <!-- ══ STICKY SAVE BAR ═══════════════════════════════════ -->
   @if (hasChanges()) {
-  <div class="profile-save-bar">
-    <p class="profile-save-bar__text">
-      <span class="material-symbols-outlined">info</span>
-      You have unsaved changes
-    </p>
-    <div class="profile-save-bar__actions">
-      <button class="btn-secondary" (click)="onDiscard()">Discard</button>
-      <button class="btn-primary" (click)="onSave()">
-        <span class="material-symbols-outlined">save</span>
-        Save Changes
-      </button>
+    <div class="profile-save-bar">
+      <p class="profile-save-bar__text">
+        <span class="material-symbols-outlined">info</span>
+        You have unsaved changes
+      </p>
+      <div class="profile-save-bar__actions">
+        <button class="btn-secondary" (click)="onDiscard()">Discard</button>
+        <button class="btn-primary" (click)="onSave()">
+          <span class="material-symbols-outlined">save</span>
+          Save Changes
+        </button>
+      </div>
     </div>
-  </div>
   }
 </div>
 
 <!-- ══ DELETE CONFIRM ════════════════════════════════════ -->
 @if (showDeleteConfirm()) {
-<div class="modal-overlay" (click)="showDeleteConfirm.set(false)">
-  <div class="confirm-dialog" (click)="$event.stopPropagation()">
-    <div class="confirm-dialog__icon confirm-dialog__icon--danger">
-      <span class="material-symbols-outlined">delete_forever</span>
-    </div>
-    <h3 class="confirm-dialog__title">Delete Account</h3>
-    <p class="confirm-dialog__text">
-      This will permanently delete your account, all tasks, goals, documents and settings.
-      <strong>This cannot be undone.</strong>
-    </p>
-    <div class="confirm-dialog__actions">
-      <button class="btn-secondary" (click)="showDeleteConfirm.set(false)">Cancel</button>
-      <button class="btn-danger">Yes, Delete My Account</button>
+  <div class="modal-overlay" (click)="showDeleteConfirm.set(false)">
+    <div class="confirm-dialog" (click)="$event.stopPropagation()">
+      <div class="confirm-dialog__icon confirm-dialog__icon--danger">
+        <span class="material-symbols-outlined">delete_forever</span>
+      </div>
+      <h3 class="confirm-dialog__title">Delete Account</h3>
+      <p class="confirm-dialog__text">
+        This will permanently delete your account, all tasks, goals, documents and settings.
+        <strong>This cannot be undone.</strong>
+      </p>
+      <div class="confirm-dialog__actions">
+        <button class="btn-secondary" (click)="showDeleteConfirm.set(false)">Cancel</button>
+        <button class="btn-danger">Yes, Delete My Account</button>
+      </div>
     </div>
   </div>
-</div>
 }

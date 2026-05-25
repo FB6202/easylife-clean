@@ -19,6 +19,41 @@
   --color-text-inverse: #ffffff;
   --color-text-accent: #43a047;
 
+  // Mentor (Purple)
+  --color-purple-subtle: rgba(156, 39, 176, 0.08);
+  --color-purple-text: #7b1fa2;
+  --color-purple-border: rgba(156, 39, 176, 0.35);
+
+  // Friend (Warning/Orange)
+  --color-warning-subtle: rgba(245, 124, 0, 0.08);
+  --color-warning-text: #e65100;
+  --color-warning-border: rgba(245, 124, 0, 0.35);
+
+  /* Status */
+  --color-info-subtle: #e3f2fd;
+  --color-info-text: #1976d2;
+  --color-success-subtle: #e8f5e9;
+  --color-success-text: #2e7d32;
+  --color-reminder-subtle: #fff8e1;
+  --color-reminder-text: #f57c00;
+
+  /* Priority */
+  --color-priority-critical-subtle: #ffebee;
+  --color-priority-critical-text: #c62828;
+  --color-priority-critical-border: #ef9a9a;
+  --color-priority-high-subtle: #fff3e0;
+  --color-priority-high-text: #e65100;
+  --color-priority-high-border: #ffcc80;
+  --color-priority-medium-subtle: #fffde7;
+  --color-priority-medium-text: #f57f17;
+  --color-priority-medium-border: #fff176;
+  --color-priority-low-subtle: #e8eaf6;
+  --color-priority-low-text: #283593;
+  --color-priority-low-border: #9fa8da;
+  --color-priority-optional-subtle: #f5f5f5;
+  --color-priority-optional-text: #616161;
+  --color-priority-optional-border: #e0e0e0;
+
   --color-border: #e0e0e0;
   --color-border-light: #f0f0f0;
   --color-border-focus: #43a047;
@@ -74,6 +109,41 @@
   --color-text-muted: #5f6368;
   --color-text-inverse: #1a1a1a;
   --color-text-accent: #66bb6a;
+
+  // Mentor (Purple)
+  --color-purple-subtle: rgba(206, 147, 216, 0.12);
+  --color-purple-text: #ce93d8;
+  --color-purple-border: rgba(206, 147, 216, 0.35);
+
+  // Friend (Warning/Orange)
+  --color-warning-subtle: rgba(255, 167, 38, 0.12);
+  --color-warning-text: #ffa726;
+  --color-warning-border: rgba(255, 167, 38, 0.35);
+
+  /* Status */
+  --color-info-subtle: #0d2137;
+  --color-info-text: #42a5f5;
+  --color-success-subtle: #0d1f0e;
+  --color-success-text: #66bb6a;
+  --color-reminder-subtle: #1f1a08;
+  --color-reminder-text: #ffca28;
+
+  /* Priority */
+  --color-priority-critical-subtle: #2a0f0f;
+  --color-priority-critical-text: #ef5350;
+  --color-priority-critical-border: #7f1f1f;
+  --color-priority-high-subtle: #2a1800;
+  --color-priority-high-text: #ffa726;
+  --color-priority-high-border: #7f4400;
+  --color-priority-medium-subtle: #2a2100;
+  --color-priority-medium-text: #ffca28;
+  --color-priority-medium-border: #7f6400;
+  --color-priority-low-subtle: #0d1433;
+  --color-priority-low-text: #42a5f5;
+  --color-priority-low-border: #1a3a7f;
+  --color-priority-optional-subtle: #1a1a1a;
+  --color-priority-optional-text: #9e9e9e;
+  --color-priority-optional-border: #333333;
 
   --color-border: #2d3139;
   --color-border-light: #1e2329;

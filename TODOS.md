@@ -6,17 +6,44 @@
 - tests for all edge cases (document)
 - clean backend code (especially entities)
 - clean frontend code (especially ts-files)
+- create vision board functionality
+- exception handling - s3 service
+- forgot password
 
 ## Frontend:
+- filter functionalities
+- modals:
+  - hover colors
+  - category chronology
+  - part chronology
+  - filter chronology
+  - redesign optional field headline
+- persistent widgets (as settings)
+- input validations everywhere
+- error component (page or just field):
+  - page
+  - component
+  - depending on exceptions
 - dark mode (logo)
 - toaster + loading circles
 - screenshot for main page
+- menu only icons (not vanished)
+- ai-agent
+  - larger panel
+- todos:
+- categories:
+- goals:
 - calendar
   - event create notification directly
+  - ai-agent
+- documents:
+  - test download
+  - test preview
 - profile
   - contract change
   - size for profile image
-  - register with number mobile number (for messaging ai-agent)
+  - dropdowns for address (country etc.)
+  - 2fa design + general design
 
 ## Backend:
 - pagination for all types
@@ -24,15 +51,9 @@
 - keycloak
 - login/logout (refresh)
 - payment
-  - financial data (user)
 - persist widget on user
+- dashboard endpoint
 - ai-agent (tools + session security)
   - tools
   - session security
-
-## postman testing:
-- get errors:
-- post errors:
-- put errors:
-- delete errors:
-- fetch errors:
+  - endpoints

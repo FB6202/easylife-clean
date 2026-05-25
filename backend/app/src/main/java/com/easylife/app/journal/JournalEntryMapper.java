@@ -1,18 +1,24 @@
 package com.easylife.app.journal;
 
+import com.easylife.app.categories.api.CategoryApi;
+import com.easylife.app.categories.payload.CategoryPreview;
 import com.easylife.app.journal.api.JournalEntryRequest;
 import com.easylife.app.journal.api.JournalEntryResponse;
 import com.easylife.app.weekplan.api.WeekPlanApi;
 import com.easylife.app.weekplan.api.WeekPlanSummary;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
+
 @Component
 class JournalEntryMapper {
 
-    private final WeekPlanApi weekPlanApi;
+    private final WeekPlanApi  weekPlanApi;
+    private final CategoryApi  categoryApi;
 
-    JournalEntryMapper(WeekPlanApi weekPlanApi) {
+    JournalEntryMapper(WeekPlanApi weekPlanApi, CategoryApi categoryApi) {
         this.weekPlanApi = weekPlanApi;
+        this.categoryApi = categoryApi;
     }
 
     JournalEntryResponse toResponse(JournalEntry entry) {
@@ -20,10 +26,11 @@ class JournalEntryMapper {
         if (entry.getWeekPlanId() != null) {
             try {
                 weekPlanSummary = weekPlanApi.findById(entry.getWeekPlanId());
-            } catch (Exception e) {
-                // WeekPlan not found – gracefully return null
-            }
+            } catch (Exception ignored) {}
         }
+
+        List<CategoryPreview> categories =
+                categoryApi.findPreviewsByIds(entry.getCategoryIds());
 
         return new JournalEntryResponse(
                 entry.getId(),
@@ -36,7 +43,7 @@ class JournalEntryMapper {
                 entry.getEntryDate(),
                 entry.getCreatedAt(),
                 entry.getUpdatedAt(),
-                entry.getCategoryIds(),
+                categories,
                 entry.getWeekPlanId(),
                 weekPlanSummary
         );
@@ -45,7 +52,7 @@ class JournalEntryMapper {
     JournalEntry toEntity(JournalEntryRequest request, Long userId) {
         JournalEntry entry = new JournalEntry();
         entry.setUserId(userId);
-        update(entry, request); // ← war applyRequest
+        update(entry, request);
         return entry;
     }
 
@@ -58,8 +65,7 @@ class JournalEntryMapper {
         entry.setGratitude(request.gratitude());
         entry.setEntryDate(request.entryDate());
         entry.setCategoryIds(
-                request.categoryIds() != null ? request.categoryIds() : java.util.List.of()
-        );
+                request.categoryIds() != null ? request.categoryIds() : java.util.List.of());
         entry.setWeekPlanId(request.weekPlanId());
     }
 }

@@ -1,32 +1,16 @@
-import { Component, signal, computed } from '@angular/core';
+import { Component, signal, computed, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Router, ActivatedRoute } from '@angular/router';
 import { PaginationComponent } from '../../../shared/components/pagination/pagination';
-import { ActivatedRoute, Router } from '@angular/router';
 import {
   FilterPanelComponent,
   FilterField,
   FilterValues,
 } from '../../../shared/components/filter/filter';
+import { FollowService } from '../../../core/services/follow-service';
 import { AiAgentService } from '../../../core/services/ai-agent';
-
-type FollowStatus = 'ACCEPTED' | 'PENDING';
-
-interface FollowUser {
-  id: number;
-  username: string;
-  displayName: string;
-  initials: string;
-  avatarColor: string;
-  status: FollowStatus;
-}
-
-interface PendingRequest {
-  id: number;
-  username: string;
-  displayName: string;
-  initials: string;
-  avatarColor: string;
-}
+import { FollowUser } from '../../../core/models/follow.model';
+import { environment } from '../../../../environments/environment';
 
 type ActiveTab = 'following' | 'followers';
 
@@ -36,327 +20,189 @@ type ActiveTab = 'following' | 'followers';
   templateUrl: './following.html',
   styleUrl: './following.scss',
 })
-export class FollowingComponent {
+export class FollowingComponent implements OnInit {
+  private readonly userId = environment.userId;
+  private readonly followService = inject(FollowService);
+  private readonly aiAgent = inject(AiAgentService);
+  private readonly router = inject(Router);
+  private readonly route = inject(ActivatedRoute);
+
+  private readonly username = this.route.snapshot.paramMap.get('username') ?? 'user';
+
   readonly activeTab = signal<ActiveTab>('following');
 
-  // Bestehende pendingRequests bleiben + ergänzen:
-  readonly pendingRequests = signal([
-    {
-      id: 1,
-      username: 'max_builder',
-      firstname: 'Max',
-      lastname: 'Builder',
-      avatarColor: '#1976d2',
-      initials: 'MB',
-      requestedAt: '2 days ago',
-    },
-    {
-      id: 2,
-      username: 'nina_creates',
-      firstname: 'Nina',
-      lastname: 'Creates',
-      avatarColor: '#e91e63',
-      initials: 'NC',
-      requestedAt: '5 days ago',
-    },
-    {
-      id: 3,
-      username: 'tom_dev',
-      firstname: 'Tom',
-      lastname: 'Dev',
-      avatarColor: '#43a047',
-      initials: 'TD',
-      requestedAt: '1 week ago',
-    },
-  ]);
+  // ── Mapped lists ───────────────────────────────────────────────────────────
+  readonly following = computed(() =>
+    this.followService
+      .following()
+      .map((f) => this.toFollowUser(f.id, f.followingId, f.followingUsername, f.status)),
+  );
 
-  // Bestehende following + followers ergänzen:
-  readonly following = signal([
-    {
-      id: 1,
-      username: 'sarah_creates',
-      firstname: 'Sarah',
-      lastname: 'Creates',
-      avatarColor: '#e91e63',
-      initials: 'SC',
-      followStatus: 'FOLLOWING',
-      publicGoals: 3,
-      publicCategories: 7,
-    },
-    {
-      id: 2,
-      username: 'felix_dev',
-      firstname: 'Felix',
-      lastname: 'Dev',
-      avatarColor: '#43a047',
-      initials: 'FD',
-      followStatus: 'FOLLOWING',
-      publicGoals: 8,
-      publicCategories: 5,
-    },
-    {
-      id: 3,
-      username: 'moritz_pm',
-      firstname: 'Moritz',
-      lastname: 'PM',
-      avatarColor: '#f57c00',
-      initials: 'MP',
-      followStatus: 'REQUESTED',
-      publicGoals: 4,
-      publicCategories: 3,
-    },
-    {
-      id: 4,
-      username: 'lena_builds',
-      firstname: 'Lena',
-      lastname: 'Builds',
-      avatarColor: '#9c27b0',
-      initials: 'LB',
-      followStatus: 'FOLLOWING',
-      publicGoals: 6,
-      publicCategories: 4,
-    },
-    {
-      id: 5,
-      username: 'jan_strategy',
-      firstname: 'Jan',
-      lastname: 'Strategy',
-      avatarColor: '#00bcd4',
-      initials: 'JS',
-      followStatus: 'FOLLOWING',
-      publicGoals: 2,
-      publicCategories: 6,
-    },
-    {
-      id: 6,
-      username: 'anna_design',
-      firstname: 'Anna',
-      lastname: 'Design',
-      avatarColor: '#ff5722',
-      initials: 'AD',
-      followStatus: 'FOLLOWING',
-      publicGoals: 5,
-      publicCategories: 3,
-    },
-    {
-      id: 7,
-      username: 'peter_vc',
-      firstname: 'Peter',
-      lastname: 'VC',
-      avatarColor: '#3f51b5',
-      initials: 'PV',
-      followStatus: 'REQUESTED',
-      publicGoals: 9,
-      publicCategories: 2,
-    },
-    {
-      id: 8,
-      username: 'mia_founder',
-      firstname: 'Mia',
-      lastname: 'Founder',
-      avatarColor: '#795548',
-      initials: 'MF',
-      followStatus: 'FOLLOWING',
-      publicGoals: 7,
-      publicCategories: 5,
-    },
-  ]);
+  readonly followers = computed(() =>
+    this.followService
+      .followers()
+      .map((f) => this.toFollowUser(f.id, f.followerId, f.followerUsername, f.status)),
+  );
 
-  readonly followers = signal([
-    {
-      id: 1,
-      username: 'max_builder',
-      firstname: 'Max',
-      lastname: 'Builder',
-      avatarColor: '#1976d2',
-      initials: 'MB',
-      followStatus: 'FOLLOWING',
-      publicGoals: 6,
-      publicCategories: 4,
-    },
-    {
-      id: 2,
-      username: 'julia_ops',
-      firstname: 'Julia',
-      lastname: 'Ops',
-      avatarColor: '#43a047',
-      initials: 'JO',
-      followStatus: 'FOLLOWING',
-      publicGoals: 3,
-      publicCategories: 2,
-    },
-    {
-      id: 3,
-      username: 'ben_product',
-      firstname: 'Ben',
-      lastname: 'Product',
-      avatarColor: '#f57c00',
-      initials: 'BP',
-      followStatus: 'NONE',
-      publicGoals: 5,
-      publicCategories: 3,
-    },
-    {
-      id: 4,
-      username: 'clara_ux',
-      firstname: 'Clara',
-      lastname: 'UX',
-      avatarColor: '#e91e63',
-      initials: 'CU',
-      followStatus: 'NONE',
-      publicGoals: 4,
-      publicCategories: 6,
-    },
-    {
-      id: 5,
-      username: 'david_finance',
-      firstname: 'David',
-      lastname: 'Finance',
-      avatarColor: '#9c27b0',
-      initials: 'DF',
-      followStatus: 'FOLLOWING',
-      publicGoals: 2,
-      publicCategories: 1,
-    },
-    {
-      id: 6,
-      username: 'sophie_growth',
-      firstname: 'Sophie',
-      lastname: 'Growth',
-      avatarColor: '#00bcd4',
-      initials: 'SG',
-      followStatus: 'NONE',
-      publicGoals: 8,
-      publicCategories: 4,
-    },
-  ]);
+  readonly pendingRequests = computed(() =>
+    this.followService
+      .pending()
+      .map((f) => this.toFollowUser(f.id, f.followerId, f.followerUsername, f.status)),
+  );
 
-  readonly username: string;
-  readonly currentPage = signal(0);
-  readonly pageSize = signal(10);
+  readonly pendingCount = computed(() => this.pendingRequests().length);
 
-
+  // ── Active list ────────────────────────────────────────────────────────────
   readonly activeList = computed(() =>
     this.activeTab() === 'following' ? this.following() : this.followers(),
   );
 
-  readonly totalElements = computed(() => this.activeList().length);
-  readonly totalPages = computed(() => Math.ceil(this.totalElements() / this.pageSize()));
-
-  readonly paginatedList = computed(() => {
-    const start = this.currentPage() * this.pageSize();
-    return this.activeList().slice(start, start + this.pageSize());
-  });
-
-  onPageChange(page: number) {
-    this.currentPage.set(page);
-  }
-  onPageSizeChange(size: number) {
-    this.pageSize.set(size);
-    this.currentPage.set(0);
-  }
-
-  constructor(private router: Router, private route: ActivatedRoute, private aiAgent: AiAgentService) {
-    this.username = this.route.snapshot.paramMap.get('username') ?? 'user';
-  }
-
+  // ── Filter ─────────────────────────────────────────────────────────────────
   showFilter = signal(false);
   activeFilters = signal<FilterValues>({});
 
-  readonly followingFilterFields: FilterField[] = [
+  readonly followingFilterFields = computed((): FilterField[] => [
     {
-      key: 'search',
-      label: 'Search',
-      type: 'text',
-      icon: 'search',
-      placeholder: 'Search by name or username...',
-    },
-    {
-      key: 'tab',
-      label: 'View',
+      key: 'status',
+      label: 'Status',
       type: 'select',
-      icon: 'people',
+      icon: 'person',
       options: [
-        { value: 'following', label: 'Following' },
-        { value: 'followers', label: 'Followers' },
+        { value: 'ACCEPTED', label: 'Following', icon: 'check_circle', color: '#43a047' },
+        { value: 'PENDING', label: 'Requested', icon: 'hourglass_empty', color: '#f9a825' },
       ],
     },
-    {
-      key: 'followStatus',
-      label: 'Follow Status',
-      type: 'multiselect',
-      icon: 'person_add',
-      options: [
-        { value: 'FOLLOWING', label: 'Following', icon: 'how_to_reg', color: '#43a047' },
-        { value: 'REQUESTED', label: 'Requested', icon: 'schedule', color: '#f9a825' },
-      ],
-    },
-    {
-      key: 'hasPublicGoals',
-      label: 'Has Public Goals',
-      type: 'toggle',
-      icon: 'flag',
-    },
-    {
-      key: 'hasPublicContacts',
-      label: 'Has Public Contacts',
-      type: 'toggle',
-      icon: 'people',
-    },
-  ];
-
-  readonly pendingCount = computed(() => this.pendingRequests().length);
+  ]);
 
   readonly activeFilterCount = computed(
-    () =>
-      Object.values(this.activeFilters()).filter((v) => {
-        if (!v || v === '') return false;
-        if (Array.isArray(v)) return v.length > 0;
-        return true;
-      }).length,
+    () => Object.values(this.activeFilters()).filter((v) => v && v !== '').length,
   );
 
-  onFilterApply(values: FilterValues) {
+  readonly filteredList = computed(() => {
+    const list = this.activeList();
+    const status = this.activeFilters()['status'] as string | undefined;
+    if (!status) return list;
+    return list.filter((u) => u.status === status);
+  });
+
+  onFilterApply(values: FilterValues): void {
     this.activeFilters.set(values);
     this.showFilter.set(false);
-    console.log('Following filter applied:', values);
   }
 
-  onFilterReset() {
+  onFilterReset(): void {
     this.activeFilters.set({});
+    this.showFilter.set(false);
   }
 
-  acceptRequest(id: number) {
-    this.pendingRequests.update((r) => r.filter((p) => p.id !== id));
-  }
+  // ── Client-side Pagination ─────────────────────────────────────────────────
+  readonly pageSize = signal(10);
+  readonly currentPage = signal(0);
 
-  declineRequest(id: number) {
-    this.pendingRequests.update((r) => r.filter((p) => p.id !== id));
-  }
+  readonly totalElements = computed(() => this.filteredList().length);
+  readonly totalPages = computed(() =>
+    Math.max(1, Math.ceil(this.totalElements() / this.pageSize())),
+  );
 
-  unfollow(id: number) {
-    this.following.update((f) => f.filter((u) => u.id !== id));
-  }
+  readonly paginatedList = computed(() => {
+    const start = this.currentPage() * this.pageSize();
+    return this.filteredList().slice(start, start + this.pageSize());
+  });
 
-  cancelRequest(id: number) {
-    this.following.update((f) => f.filter((u) => u.id !== id));
+  onPageChange(page: number): void {
+    this.currentPage.set(page);
   }
-
-  setTab(tab: ActiveTab) {
-    this.activeTab.set(tab);
+  onPageSizeChange(size: number): void {
+    this.pageSize.set(size);
     this.currentPage.set(0);
   }
-
-  onAiClick() {
+  onAiClick(): void {
     this.aiAgent.open();
   }
 
-  goToSearch() {
-    const username = this.route.snapshot.paramMap.get('username');
-    this.router.navigate([`/workspace/${username}/following/search`]);
+  // ── Tabs ───────────────────────────────────────────────────────────────────
+  setTab(tab: ActiveTab): void {
+    this.activeTab.set(tab);
+    this.currentPage.set(0);
+    this.activeFilters.set({});
   }
 
-  goToProfile(userId: number) {
+  // ── Actions ────────────────────────────────────────────────────────────────
+  acceptRequest(followId: number): void {
+    console.log('TODO accept:', followId);
+  }
+
+  declineRequest(followId: number): void {
+    console.log('TODO decline:', followId);
+  }
+
+  cancelRequest(followId: number): void {
+    console.log('TODO cancel:', followId);
+  }
+
+  unfollow(followId: number): void {
+    console.log('TODO unfollow:', followId);
+  }
+
+  goToProfile(userId: number): void {
     this.router.navigate([`/workspace/${this.username}/following/user/${userId}`]);
+  }
+
+  goToSearch(): void {
+    this.router.navigate([`/workspace/${this.username}/following/search`]);
+  }
+
+  // ── Lifecycle ──────────────────────────────────────────────────────────────
+  ngOnInit(): void {
+    this.followService.loadAll(this.userId);
+  }
+
+  // ── Helpers ────────────────────────────────────────────────────────────────
+  private toFollowUser(
+    followId: number,
+    userId: number,
+    username: string,
+    status: any,
+  ): FollowUser {
+    return {
+      followId,
+      userId,
+      username,
+      displayName: this.formatUsername(username),
+      initials: this.getInitials(username),
+      avatarColor: this.getAvatarColor(username),
+      status,
+    };
+  }
+
+  private formatUsername(username: string): string {
+    return username
+      .replace(/[_.-]/g, ' ')
+      .replace(/([A-Z])/g, ' $1')
+      .trim()
+      .split(' ')
+      .map((w) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
+      .join(' ');
+  }
+
+  private getInitials(username: string): string {
+    const parts = username.replace(/[_.-]/g, ' ').trim().split(' ');
+    if (parts.length >= 2) return (parts[0][0] + parts[1][0]).toUpperCase();
+    return username.slice(0, 2).toUpperCase();
+  }
+
+  private getAvatarColor(username: string): string {
+    const colors = [
+      '#1976d2',
+      '#43a047',
+      '#f57c00',
+      '#9c27b0',
+      '#e91e63',
+      '#00bcd4',
+      '#ff5722',
+      '#3f51b5',
+    ];
+    const hash = username.split('').reduce((acc, c) => acc + c.charCodeAt(0), 0);
+    return colors[hash % colors.length];
   }
 }

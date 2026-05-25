@@ -1,5 +1,6 @@
 package com.easylife.app.goals.payload;
 
+import com.easylife.app.categories.payload.CategoryPreview;
 import com.easylife.app.shared.enums.AccessType;
 import com.easylife.app.shared.enums.GoalStatus;
 
@@ -19,7 +20,7 @@ public record GoalResponse(
         GoalStatus status,
         AccessType accessType,
         LocalDateTime createdAt,
-        List<Long> categoryIds,
+        List<CategoryPreview> categories,
         List<GoalTaskResponse> tasks,
-        String presignedImageUrl        // neu
+        String presignedImageUrl
 ) {}

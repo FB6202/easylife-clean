@@ -1,4 +1,5 @@
-import { Component, signal, computed } from '@angular/core';
+import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
+import { Component, signal, computed, inject, OnInit, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { PaginationComponent } from '../../../shared/components/pagination/pagination';
@@ -7,37 +8,13 @@ import {
   FilterField,
   FilterValues,
 } from '../../../shared/components/filter/filter';
+import { DocumentService } from '../../../core/services/document-service';
+import { CategoryService } from '../../../core/services/category-service';
 import { AiAgentService } from '../../../core/services/ai-agent';
+import { DocumentResponse, DocumentFilter, AccessType } from '../../../core/models/document.model';
+import { environment } from '../../../../environments/environment';
 
 type ViewMode = 'grid' | 'list';
-type AccessType = 'PRIVATE' | 'PUBLIC';
-type FileType =
-  | 'pdf' | 'docx' | 'doc' | 'xlsx' | 'xls' | 'pptx' | 'ppt' | 'txt' | 'csv'
-  | 'png' | 'jpg' | 'jpeg' | 'webp' | 'gif' | 'svg' | 'heic'
-  | 'mp4' | 'mov' | 'avi' | 'mkv' | 'webm'
-  | 'mp3' | 'wav' | 'aac' | 'flac' | 'm4a'
-  | 'zip' | 'rar' | '7z' | 'tar'
-  | 'json' | 'xml' | 'html' | 'css' | 'ts' | 'js';
-
-interface CategoryPreview {
-  id: number;
-  name: string;
-  icon: string;
-  color: string;
-}
-
-interface Document {
-  id: number;
-  title: string;
-  description: string;
-  filePath: string;
-  fileType: FileType;
-  fileSizeBytes: number;
-  accessType: AccessType;
-  uploadedAt: string;
-  categories: CategoryPreview[];
-  previewUrl: string | null;
-}
 
 interface DocumentForm {
   title: string;
@@ -52,196 +29,259 @@ interface DocumentForm {
   templateUrl: './documents.html',
   styleUrl: './documents.scss',
 })
-export class DocumentsComponent {
+export class DocumentsComponent implements OnInit {
+  private readonly userId = environment.userId;
+  private readonly documentService = inject(DocumentService);
+  private readonly categoryService = inject(CategoryService);
+  private readonly aiAgent = inject(AiAgentService);
+  private readonly sanitizer = inject(DomSanitizer);
 
   readonly viewMode = signal<ViewMode>('grid');
 
-  readonly availableCategories = signal<CategoryPreview[]>([
-    { id: 1, name: 'Work', icon: 'work', color: '#1976d2' },
-    { id: 2, name: 'Finance', icon: 'payments', color: '#f57c00' },
-    { id: 3, name: 'Personal', icon: 'person', color: '#9c27b0' },
-    { id: 4, name: 'Health', icon: 'self_improvement', color: '#43a047' },
-  ]);
+  // ── Service State ──────────────────────────────────────────────────────────
+  readonly paginatedDocuments = this.documentService.documents;
+  readonly currentPage = this.documentService.currentPage;
+  readonly pageSize = this.documentService.pageSize;
+  readonly totalPages = this.documentService.totalPages;
+  readonly totalElements = this.documentService.totalElements;
 
-  readonly documents = signal<Document[]>([
-    { id: 1, title: 'Quarterly Financial Statement 2024', description: 'Q4 financial report with full P&L breakdown.', filePath: '/docs/q4-financial.pdf', fileType: 'pdf', fileSizeBytes: 2400000, accessType: 'PRIVATE', uploadedAt: 'Aug 15, 2024', categories: [{ id: 2, name: 'Finance', icon: 'payments', color: '#f57c00' }], previewUrl: null },
-    { id: 2, title: 'Product Design Manifesto v2', description: 'Design principles and component guidelines.', filePath: '/docs/design-manifesto.docx', fileType: 'docx', fileSizeBytes: 850000, accessType: 'PUBLIC', uploadedAt: 'Oct 12, 2023', categories: [{ id: 1, name: 'Work', icon: 'work', color: '#1976d2' }], previewUrl: null },
-    { id: 3, title: 'Brand Assets Package 2024', description: 'Logos, colors and brand guidelines.', filePath: '/docs/brand-assets.png', fileType: 'png', fileSizeBytes: 18500000, accessType: 'PRIVATE', uploadedAt: 'Sep 01, 2024', categories: [{ id: 1, name: 'Work', icon: 'work', color: '#1976d2' }], previewUrl: null },
-    { id: 4, title: 'User Feedback Analysis', description: 'Compiled survey results from Q3 2024.', filePath: '/docs/feedback.xlsx', fileType: 'xlsx', fileSizeBytes: 1200000, accessType: 'PUBLIC', uploadedAt: 'Aug 28, 2024', categories: [{ id: 1, name: 'Work', icon: 'work', color: '#1976d2' }, { id: 2, name: 'Finance', icon: 'payments', color: '#f57c00' }], previewUrl: null },
-    { id: 5, title: 'Product Demo Recording', description: 'Full demo walkthrough for Acme Corp.', filePath: '/docs/demo.mp4', fileType: 'mp4', fileSizeBytes: 245000000, accessType: 'PRIVATE', uploadedAt: 'Jul 12, 2024', categories: [{ id: 1, name: 'Work', icon: 'work', color: '#1976d2' }], previewUrl: null },
-    { id: 6, title: 'Podcast Interview Raw', description: 'Unedited recording from the ProductPeople podcast.', filePath: '/docs/podcast.mp3', fileType: 'mp3', fileSizeBytes: 87000000, accessType: 'PRIVATE', uploadedAt: 'Jun 30, 2024', categories: [{ id: 4, name: 'Health', icon: 'self_improvement', color: '#43a047' }], previewUrl: null },
-    { id: 7, title: 'Office Renovation Photos', description: 'Before and after renovation pictures.', filePath: '/docs/renovation.jpg', fileType: 'jpg', fileSizeBytes: 42000000, accessType: 'PRIVATE', uploadedAt: 'May 15, 2024', categories: [{ id: 3, name: 'Personal', icon: 'person', color: '#9c27b0' }], previewUrl: null },
-    { id: 8, title: 'Technical Architecture Overview', description: 'System design and infrastructure documentation for Easy Life.', filePath: '/docs/architecture.pdf', fileType: 'pdf', fileSizeBytes: 1800000, accessType: 'PRIVATE', uploadedAt: 'Apr 10, 2024', categories: [{ id: 1, name: 'Work', icon: 'work', color: '#1976d2' }], previewUrl: null },
-    { id: 9, title: 'Marketing Campaign Q1 2024', description: 'Full campaign brief and creative assets for Q1.', filePath: '/docs/marketing-q1.pptx', fileType: 'pptx', fileSizeBytes: 34000000, accessType: 'PRIVATE', uploadedAt: 'Mar 01, 2024', categories: [{ id: 1, name: 'Work', icon: 'work', color: '#1976d2' }, { id: 2, name: 'Finance', icon: 'payments', color: '#f57c00' }], previewUrl: null },
-    { id: 10, title: 'Personal Budget 2024', description: 'Monthly budget tracking and savings overview.', filePath: '/docs/budget-2024.xlsx', fileType: 'xlsx', fileSizeBytes: 450000, accessType: 'PRIVATE', uploadedAt: 'Jan 01, 2024', categories: [{ id: 2, name: 'Finance', icon: 'payments', color: '#f57c00' }, { id: 3, name: 'Personal', icon: 'person', color: '#9c27b0' }], previewUrl: null },
-    { id: 11, title: 'Easy Life Brand Guidelines', description: 'Color palette, typography and usage rules for the Easy Life brand.', filePath: '/docs/brand-guidelines.pdf', fileType: 'pdf', fileSizeBytes: 6700000, accessType: 'PUBLIC', uploadedAt: 'Feb 14, 2024', categories: [{ id: 1, name: 'Work', icon: 'work', color: '#1976d2' }], previewUrl: null },
-    { id: 12, title: 'Weekly Workout Tracker', description: 'Spreadsheet to track weekly gym sessions and progress.', filePath: '/docs/workout-tracker.xlsx', fileType: 'xlsx', fileSizeBytes: 230000, accessType: 'PRIVATE', uploadedAt: 'Jan 15, 2024', categories: [{ id: 4, name: 'Health', icon: 'self_improvement', color: '#43a047' }], previewUrl: null },
-    { id: 13, title: 'API Documentation v2', description: 'Full REST API reference for Easy Life backend endpoints.', filePath: '/docs/api-docs.html', fileType: 'html', fileSizeBytes: 890000, accessType: 'PUBLIC', uploadedAt: 'Mar 22, 2024', categories: [{ id: 1, name: 'Work', icon: 'work', color: '#1976d2' }], previewUrl: null },
-    { id: 14, title: 'Interview Recording – UX Research', description: 'Raw audio recording of 5 user interviews for product research.', filePath: '/docs/ux-interviews.m4a', fileType: 'm4a', fileSizeBytes: 145000000, accessType: 'PRIVATE', uploadedAt: 'Apr 05, 2024', categories: [{ id: 1, name: 'Work', icon: 'work', color: '#1976d2' }], previewUrl: null },
-    { id: 15, title: 'Team Offsite Photos', description: 'Photo collection from the Berlin offsite in March.', filePath: '/docs/offsite-march.jpg', fileType: 'jpg', fileSizeBytes: 78000000, accessType: 'PRIVATE', uploadedAt: 'Mar 18, 2024', categories: [{ id: 1, name: 'Work', icon: 'work', color: '#1976d2' }, { id: 3, name: 'Personal', icon: 'person', color: '#9c27b0' }], previewUrl: null },
-    { id: 16, title: 'Investor Pitch Deck', description: 'Seed round pitch deck for Easy Life Series A.', filePath: '/docs/pitch-deck.pptx', fileType: 'pptx', fileSizeBytes: 22000000, accessType: 'PRIVATE', uploadedAt: 'May 01, 2024', categories: [{ id: 2, name: 'Finance', icon: 'payments', color: '#f57c00' }, { id: 1, name: 'Work', icon: 'work', color: '#1976d2' }], previewUrl: null },
-    { id: 17, title: 'App Store Screenshots', description: 'Final screenshots and preview images for iOS App Store submission.', filePath: '/docs/app-store.png', fileType: 'png', fileSizeBytes: 9400000, accessType: 'PUBLIC', uploadedAt: 'May 10, 2024', categories: [{ id: 1, name: 'Work', icon: 'work', color: '#1976d2' }], previewUrl: null },
-    { id: 18, title: 'Legal Entity Documents', description: 'GmbH founding documents and shareholder agreements.', filePath: '/docs/legal.zip', fileType: 'zip', fileSizeBytes: 3200000, accessType: 'PRIVATE', uploadedAt: 'Dec 01, 2023', categories: [{ id: 2, name: 'Finance', icon: 'payments', color: '#f57c00' }], previewUrl: null },
-    { id: 19, title: 'Product Walkthrough Video', description: 'Full feature walkthrough for the Easy Life onboarding flow.', filePath: '/docs/walkthrough.mp4', fileType: 'mp4', fileSizeBytes: 310000000, accessType: 'PUBLIC', uploadedAt: 'May 15, 2024', categories: [{ id: 1, name: 'Work', icon: 'work', color: '#1976d2' }], previewUrl: null },
-    { id: 20, title: 'Health Check Report 2023', description: 'Annual health checkup results and doctor notes.', filePath: '/docs/health-report.pdf', fileType: 'pdf', fileSizeBytes: 1100000, accessType: 'PRIVATE', uploadedAt: 'Nov 30, 2023', categories: [{ id: 4, name: 'Health', icon: 'self_improvement', color: '#43a047' }, { id: 3, name: 'Personal', icon: 'person', color: '#9c27b0' }], previewUrl: null },
-  ]);
+  readonly availableCategories = this.categoryService.allCategories;
 
-  readonly currentPage = signal(0);
-  readonly pageSize = signal(10);
-  readonly totalElements = computed(() => this.documents().length);
-  readonly totalPages = computed(() => Math.ceil(this.totalElements() / this.pageSize()));
-  readonly paginatedDocuments = computed(() => {
-    const start = this.currentPage() * this.pageSize();
-    return this.documents().slice(start, start + this.pageSize());
-  });
-  onPageChange(page: number) { this.currentPage.set(page); }
-  onPageSizeChange(size: number) { this.pageSize.set(size); this.currentPage.set(0); }
+  // ── Stats ──────────────────────────────────────────────────────────────────
+  readonly totalFiles = this.documentService.totalElements;
 
-  // ── Row Menu ───────────────────────────────────────────────
-  openMenuId = signal<number | null>(null);
-
-  toggleMenu(id: number, event: Event) {
-    event.stopPropagation();
-    this.openMenuId.update(v => (v === id ? null : id));
-  }
-
-  closeMenu() {
-    this.openMenuId.set(null);
-  }
-
-  quickToggleAccess(doc: Document, event: Event) {
-    event.stopPropagation();
-    this.documents.update(list =>
-      list.map(d =>
-        d.id === doc.id
-          ? { ...d, accessType: d.accessType === 'PRIVATE' ? 'PUBLIC' : 'PRIVATE' }
-          : d,
-      ),
-    );
-    this.openMenuId.set(null);
-  }
-
-  quickDelete(doc: Document, event: Event) {
-    event.stopPropagation();
-    this.selectedDocument.set(doc);
-    this.openMenuId.set(null);
-    this.showDeleteConfirm.set(true);
-  }
-
-  readonly totalStorageBytes = computed(() =>
-    this.documents().reduce((acc, d) => acc + d.fileSizeBytes, 0)
-  );
   readonly totalStorageFormatted = computed(() => {
-    const gb = this.totalStorageBytes() / 1e9;
-    return gb >= 1 ? gb.toFixed(1) + ' GB' : (this.totalStorageBytes() / 1e6).toFixed(0) + ' MB';
+    const total = this.paginatedDocuments().reduce((sum, d) => sum + (d.fileSizeBytes ?? 0), 0);
+    return this.formatSize(total);
   });
-  readonly totalFiles = computed(() => this.totalElements());
 
-  constructor(private aiAgent: AiAgentService) { }
-
-  // ── Filter ─────────────────────────────────────────────
+  // ── Filter ─────────────────────────────────────────────────────────────────
   showFilter = signal(false);
   activeFilters = signal<FilterValues>({});
 
-  readonly documentFilterFields: FilterField[] = [
-    { key: 'search', label: 'Search', type: 'text', icon: 'search', placeholder: 'Search documents...' },
+  readonly documentFilterFields = computed((): FilterField[] => [
     {
-      key: 'fileType', label: 'File Type', type: 'multiselect-dropdown', icon: 'description',
+      key: 'fileType',
+      label: 'File Type',
+      type: 'select',
+      icon: 'description',
       options: [
-        { value: 'pdf', label: 'PDF', icon: 'picture_as_pdf', color: '#f44336' },
+        // Documents
+        { value: 'pdf', label: 'PDF', icon: 'picture_as_pdf', color: '#d32f2f' },
+        { value: 'docx', label: 'Word', icon: 'description', color: '#1976d2' },
+        { value: 'doc', label: 'Word (Legacy)', icon: 'description', color: '#1976d2' },
+        { value: 'xlsx', label: 'Excel', icon: 'table_chart', color: '#43a047' },
+        { value: 'xls', label: 'Excel (Legacy)', icon: 'table_chart', color: '#43a047' },
+        { value: 'csv', label: 'CSV', icon: 'table_chart', color: '#43a047' },
+        { value: 'pptx', label: 'PowerPoint', icon: 'slideshow', color: '#f57c00' },
+        { value: 'ppt', label: 'PPT (Legacy)', icon: 'slideshow', color: '#f57c00' },
+        { value: 'txt', label: 'Text', icon: 'article', color: '#757575' },
+        // Images
+        { value: 'png', label: 'PNG', icon: 'image', color: '#9c27b0' },
+        { value: 'jpg', label: 'JPEG', icon: 'image', color: '#9c27b0' },
+        { value: 'jpeg', label: 'JPEG', icon: 'image', color: '#9c27b0' },
+        { value: 'webp', label: 'WebP', icon: 'image', color: '#9c27b0' },
+        { value: 'gif', label: 'GIF', icon: 'image', color: '#9c27b0' },
+        { value: 'svg', label: 'SVG', icon: 'image', color: '#9c27b0' },
+        { value: 'heic', label: 'HEIC', icon: 'image', color: '#9c27b0' },
+        // Video
+        { value: 'mp4', label: 'MP4', icon: 'videocam', color: '#e91e63' },
+        { value: 'mov', label: 'MOV', icon: 'videocam', color: '#e91e63' },
+        { value: 'avi', label: 'AVI', icon: 'videocam', color: '#e91e63' },
+        { value: 'mkv', label: 'MKV', icon: 'videocam', color: '#e91e63' },
+        { value: 'webm', label: 'WebM', icon: 'videocam', color: '#e91e63' },
+        // Audio
+        { value: 'mp3', label: 'MP3', icon: 'music_note', color: '#00bcd4' },
+        { value: 'wav', label: 'WAV', icon: 'music_note', color: '#00bcd4' },
+        { value: 'aac', label: 'AAC', icon: 'music_note', color: '#00bcd4' },
+        { value: 'flac', label: 'FLAC', icon: 'music_note', color: '#00bcd4' },
+        { value: 'm4a', label: 'M4A', icon: 'music_note', color: '#00bcd4' },
+        // Archives
+        { value: 'zip', label: 'ZIP', icon: 'folder_zip', color: '#5d4037' },
+        { value: 'rar', label: 'RAR', icon: 'folder_zip', color: '#5d4037' },
+        { value: '7z', label: '7Z', icon: 'folder_zip', color: '#5d4037' },
+        { value: 'tar', label: 'TAR', icon: 'folder_zip', color: '#5d4037' },
+        // Code
+        { value: 'json', label: 'JSON', icon: 'code', color: '#43a047' },
+        { value: 'xml', label: 'XML', icon: 'code', color: '#f57c00' },
+        { value: 'html', label: 'HTML', icon: 'code', color: '#e91e63' },
+        { value: 'ts', label: 'TypeScript', icon: 'code', color: '#1976d2' },
+        { value: 'js', label: 'JavaScript', icon: 'code', color: '#f9a825' },
+      ],
+    },
+    {
+      key: 'fileType',
+      label: 'File Type',
+      type: 'select',
+      icon: 'description',
+      options: [
+        { value: 'pdf', label: 'PDF', icon: 'picture_as_pdf', color: '#d32f2f' },
         { value: 'docx', label: 'Word', icon: 'description', color: '#1976d2' },
         { value: 'xlsx', label: 'Excel', icon: 'table_chart', color: '#43a047' },
         { value: 'pptx', label: 'PowerPoint', icon: 'slideshow', color: '#f57c00' },
-        { value: 'txt', label: 'Text', icon: 'article', color: '#9e9e9e' },
-        { value: 'csv', label: 'CSV', icon: 'grid_on', color: '#00897b' },
-        { value: 'png', label: 'Image', icon: 'image', color: '#f57c00' },
-        { value: 'mp4', label: 'Video', icon: 'videocam', color: '#e53935' },
-        { value: 'mp3', label: 'Audio', icon: 'music_note', color: '#8e24aa' },
-        { value: 'zip', label: 'Archive', icon: 'folder_zip', color: '#5e35b1' },
-        { value: 'json', label: 'Code / Data', icon: 'data_object', color: '#f9a825' },
-      ]
+        { value: 'png', label: 'Image', icon: 'image', color: '#9c27b0' },
+        { value: 'txt', label: 'Text', icon: 'article', color: '#757575' },
+        { value: 'zip', label: 'Archive', icon: 'folder_zip', color: '#5d4037' },
+      ],
     },
     {
-      key: 'accessType', label: 'Access', type: 'multiselect', icon: 'lock',
+      key: 'access',
+      label: 'Access',
+      type: 'select',
+      icon: 'lock',
       options: [
-        { value: 'PUBLIC', label: 'Public', icon: 'travel_explore', color: '#43a047' },
         { value: 'PRIVATE', label: 'Private', icon: 'lock', color: '#757575' },
-      ]
+        { value: 'PUBLIC', label: 'Public', icon: 'travel_explore', color: '#43a047' },
+      ],
     },
     {
-      key: 'categories', label: 'Categories', type: 'multiselect-dropdown', icon: 'category',
-      options: [
-        { value: '1', label: 'Work', icon: 'work', color: '#1976d2' },
-        { value: '2', label: 'Finance', icon: 'payments', color: '#f57c00' },
-        { value: '3', label: 'Personal', icon: 'person', color: '#9c27b0' },
-        { value: '4', label: 'Health', icon: 'self_improvement', color: '#43a047' },
-      ]
+      key: 'categories',
+      label: 'Categories',
+      type: 'multiselect-dropdown',
+      icon: 'category',
+      options: this.availableCategories().map((c) => ({
+        value: String(c.id),
+        label: c.name,
+        icon: c.icon,
+        color: c.color,
+      })),
     },
-    { key: 'uploadedAt', label: 'Upload Date Range', type: 'date-range', icon: 'calendar_today' },
-    {
-      key: 'sizeRange', label: 'File Size', type: 'select', icon: 'storage',
-      options: [
-        { value: 'small', label: 'Small (< 1 MB)' },
-        { value: 'medium', label: 'Medium (1–10 MB)' },
-        { value: 'large', label: 'Large (10–100 MB)' },
-        { value: 'xlarge', label: 'Extra Large (> 100 MB)' },
-      ]
-    },
-  ];
+    { key: 'uploadedFrom', label: 'Uploaded From', type: 'date', icon: 'calendar_today' },
+    { key: 'uploadedTo', label: 'Uploaded To', type: 'date', icon: 'calendar_today' },
+  ]);
 
-  readonly activeFilterCount = computed(() =>
-    Object.values(this.activeFilters()).filter(v => {
-      if (!v || v === '') return false;
-      if (Array.isArray(v)) return v.length > 0;
-      return true;
-    }).length
+  readonly activeFilterCount = computed(
+    () =>
+      Object.values(this.activeFilters()).filter((v) => {
+        if (!v || v === '') return false;
+        if (Array.isArray(v)) return v.length > 0;
+        return true;
+      }).length,
   );
 
-  onFilterApply(values: FilterValues) { this.activeFilters.set(values); this.showFilter.set(false); }
-  onFilterReset() { this.activeFilters.set({}); }
+  onFilterApply(values: FilterValues): void {
+    this.activeFilters.set(values);
+    const categoryIds = (values['categories'] as string[] | undefined)
+      ?.map(Number)
+      .filter((n) => !isNaN(n));
+    this.documentService.loadAll(this.userId, 0, {
+      fileType: (values['fileType'] as string) || undefined,
+      accessType: (values['access'] as AccessType) || undefined,
+      uploadedFrom: (values['uploadedFrom'] as string) || undefined,
+      uploadedTo: (values['uploadedTo'] as string) || undefined,
+      categoryIds: categoryIds?.length ? categoryIds : undefined,
+    });
+    this.showFilter.set(false);
+  }
 
-  // ── Category Dropdown ──────────────────────────────────
+  onFilterReset(): void {
+    this.activeFilters.set({});
+    this.documentService.loadAll(this.userId, 0);
+    this.showFilter.set(false);
+  }
+
+  // ── Pagination ─────────────────────────────────────────────────────────────
+  onPageChange(page: number): void {
+    this.documentService.loadAll(this.userId, page, this.buildFilterFromActive());
+  }
+
+  onPageSizeChange(size: number): void {
+    this.documentService.pageSize.set(size);
+    this.documentService.loadAll(this.userId, 0, this.buildFilterFromActive());
+  }
+
+  onAiClick(): void {
+    this.aiAgent.open();
+  }
+
+  getSafeUrl(url: string | null): SafeResourceUrl | null {
+    if (!url) return null;
+    return this.sanitizer.bypassSecurityTrustResourceUrl(url);
+  }
+
+  // ── Category Dropdowns ─────────────────────────────────────────────────────
   showCatDropdown = signal(false);
   showEditCatDropdown = signal(false);
 
-  toggleCatDropdown(event: Event) {
+  readonly sortedUploadCategories = computed(() => {
+    const cats = this.availableCategories();
+    if (!Array.isArray(cats)) return [];
+    const selected = this.uploadForm().categoryIds;
+    return [...cats].sort(
+      (a, b) => (selected.includes(a.id) ? 0 : 1) - (selected.includes(b.id) ? 0 : 1),
+    );
+  });
+
+  readonly sortedEditCategories = computed(() => {
+    const cats = this.availableCategories();
+    if (!Array.isArray(cats)) return [];
+    const selected = this.editForm().categoryIds;
+    return [...cats].sort(
+      (a, b) => (selected.includes(a.id) ? 0 : 1) - (selected.includes(b.id) ? 0 : 1),
+    );
+  });
+
+  toggleCatDropdown(event: Event): void {
     event.stopPropagation();
-    this.showCatDropdown.update(v => !v);
+    this.showCatDropdown.update((v) => !v);
     this.showEditCatDropdown.set(false);
   }
 
-  toggleEditCatDropdown(event: Event) {
+  toggleEditCatDropdown(event: Event): void {
     event.stopPropagation();
-    this.showEditCatDropdown.update(v => !v);
+    this.showEditCatDropdown.update((v) => !v);
     this.showCatDropdown.set(false);
   }
 
   getCatDropdownLabel(categoryIds: number[]): string {
-    if (categoryIds.length === 0) return 'Select categories...';
+    if (!categoryIds.length) return 'Select categories...';
+    const cats = this.availableCategories();
+    if (!Array.isArray(cats)) return `${categoryIds.length} selected`;
     if (categoryIds.length === 1)
-      return this.availableCategories().find(c => c.id === categoryIds[0])?.name ?? '1 selected';
+      return cats.find((c) => c.id === categoryIds[0])?.name ?? '1 selected';
     return `${categoryIds.length} selected`;
   }
 
   getSelectedCatColors(categoryIds: number[]): string[] {
-    return this.availableCategories()
-      .filter(c => categoryIds.includes(c.id))
-      .map(c => c.color)
+    const cats = this.availableCategories();
+    if (!Array.isArray(cats)) return [];
+    return cats
+      .filter((c) => categoryIds.includes(c.id))
+      .map((c) => c.color)
       .slice(0, 3);
   }
 
-  // ── Modals ─────────────────────────────────────────────
+  toggleUploadCategory(id: number): void {
+    this.uploadForm.update((f) => ({
+      ...f,
+      categoryIds: f.categoryIds.includes(id)
+        ? f.categoryIds.filter((i) => i !== id)
+        : [...f.categoryIds, id],
+    }));
+  }
+
+  toggleEditCategory(id: number): void {
+    this.editForm.update((f) => ({
+      ...f,
+      categoryIds: f.categoryIds.includes(id)
+        ? f.categoryIds.filter((i) => i !== id)
+        : [...f.categoryIds, id],
+    }));
+  }
+
+  // ── Upload Modal ───────────────────────────────────────────────────────────
   showUploadModal = signal(false);
-  showEditModal = signal(false);
-  showDeleteConfirm = signal(false);
-  selectedDocument = signal<Document | null>(null);
   uploadedFile = signal<File | null>(null);
   uploadPreviewUrl = signal<string | null>(null);
 
-  editForm = signal<DocumentForm>({ title: '', description: '', accessType: 'PRIVATE', categoryIds: [] });
-  uploadForm = signal<DocumentForm>({ title: '', description: '', accessType: 'PRIVATE', categoryIds: [] });
+  uploadForm = signal<DocumentForm>({
+    title: '',
+    description: '',
+    accessType: 'PRIVATE',
+    categoryIds: [],
+  });
 
-  openUpload() {
+  openUpload(): void {
     this.uploadedFile.set(null);
     this.uploadPreviewUrl.set(null);
     this.uploadForm.set({ title: '', description: '', accessType: 'PRIVATE', categoryIds: [] });
@@ -249,135 +289,246 @@ export class DocumentsComponent {
     this.showUploadModal.set(true);
   }
 
-  onFileSelect(event: Event) {
-    const file = (event.target as HTMLInputElement).files?.[0];
-    if (!file) return;
+  onFileSelect(event: Event): void {
+    const file = (event.target as HTMLInputElement).files?.[0] ?? null;
     this.uploadedFile.set(file);
-    if (!this.uploadForm().title)
-      this.uploadForm.update(f => ({ ...f, title: file.name.replace(/\.[^/.]+$/, '') }));
-    const isPreviewable = ['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'image/svg+xml', 'application/pdf', 'video/mp4', 'video/quicktime', 'video/webm', 'audio/mpeg', 'audio/wav', 'audio/aac', 'audio/mp4'].includes(file.type);
-    this.uploadPreviewUrl.set(isPreviewable ? URL.createObjectURL(file) : null);
+    if (!file) return;
+
+    // Titel aus Dateiname ableiten wenn leer
+    if (!this.uploadForm().title) {
+      this.uploadForm.update((f) => ({
+        ...f,
+        title: file.name.replace(/\.[^/.]+$/, ''),
+      }));
+    }
+
+    // Preview URL generieren
+    if (
+      file.type.startsWith('image/') ||
+      file.type === 'application/pdf' ||
+      file.type.startsWith('video/') ||
+      file.type.startsWith('audio/')
+    ) {
+      this.uploadPreviewUrl.set(URL.createObjectURL(file));
+    }
   }
 
-  submitUpload() {
+  submitUpload(): void {
     if (!this.uploadedFile() || !this.uploadForm().title.trim()) return;
-    console.log('Upload:', this.uploadedFile(), this.uploadForm());
+    console.log('TODO upload:', this.uploadedFile(), this.uploadForm());
     this.showUploadModal.set(false);
   }
 
-  toggleUploadCategory(id: number) {
-    this.uploadForm.update(f => {
-      const ids = f.categoryIds.includes(id)
-        ? f.categoryIds.filter(i => i !== id)
-        : f.categoryIds.length < 5 ? [...f.categoryIds, id] : f.categoryIds;
-      return { ...f, categoryIds: ids };
-    });
-  }
+  // ── Edit Modal ─────────────────────────────────────────────────────────────
+  showEditModal = signal(false);
+  showDeleteConfirm = signal(false);
+  selectedDocument = signal<DocumentResponse | null>(null);
 
-  openEdit(doc: Document) {
+  editForm = signal<DocumentForm>({
+    title: '',
+    description: '',
+    accessType: 'PRIVATE',
+    categoryIds: [],
+  });
+
+  openEdit(doc: DocumentResponse): void {
+    this.documentService.loadById(this.userId, doc.id);
     this.selectedDocument.set(doc);
-    this.editForm.set({ title: doc.title, description: doc.description, accessType: doc.accessType, categoryIds: doc.categories.map(c => c.id) });
+    this.editForm.set({
+      title: doc.title,
+      description: doc.description ?? '',
+      accessType: doc.accessType,
+      categoryIds: doc.categories?.map((c) => c.id) ?? [],
+    });
     this.showEditCatDropdown.set(false);
     this.showEditModal.set(true);
   }
 
-  submitEdit() {
+  submitEdit(): void {
     if (!this.editForm().title.trim()) return;
-    console.log('Update doc:', this.selectedDocument()?.id, this.editForm());
+    console.log('TODO update doc:', this.selectedDocument()?.id, this.editForm());
     this.showEditModal.set(false);
   }
 
-  toggleEditCategory(id: number) {
-    this.editForm.update(f => {
-      const ids = f.categoryIds.includes(id)
-        ? f.categoryIds.filter(i => i !== id)
-        : f.categoryIds.length < 5 ? [...f.categoryIds, id] : f.categoryIds;
-      return { ...f, categoryIds: ids };
-    });
-  }
-
-  openDeleteConfirm(doc: Document) {
+  openDeleteConfirm(doc: DocumentResponse, event?: Event): void {
+    event?.stopPropagation();
     this.selectedDocument.set(doc);
     this.showEditModal.set(false);
     this.showDeleteConfirm.set(true);
   }
 
-  confirmDelete() {
-    const id = this.selectedDocument()?.id;
-    if (id) this.documents.update(d => d.filter(doc => doc.id !== id));
+  confirmDelete(): void {
+    console.log('TODO delete doc:', this.selectedDocument()?.id);
     this.showDeleteConfirm.set(false);
     this.selectedDocument.set(null);
   }
 
-  downloadDoc(doc: Document, event: Event) {
-    event.stopPropagation();
-    console.log('Download:', doc.filePath);
+  downloadDoc(doc: DocumentResponse, event?: Event): void {
+    event?.stopPropagation();
+    if (doc.presignedUrl) window.open(doc.presignedUrl, '_blank');
   }
 
-  canPreview(fileType: FileType): boolean {
-    return ['pdf', 'png', 'jpg', 'jpeg', 'webp', 'gif', 'svg', 'mp4', 'mov', 'webm', 'mp3', 'wav', 'aac', 'm4a'].includes(fileType);
-  }
-
-  isImage(fileType: FileType): boolean {
-    return ['png', 'jpg', 'jpeg', 'webp', 'gif', 'svg', 'heic'].includes(fileType);
-  }
-
-  isVideo(fileType: FileType): boolean {
-    return ['mp4', 'mov', 'avi', 'mkv', 'webm'].includes(fileType);
-  }
-
-  isAudio(fileType: FileType): boolean {
-    return ['mp3', 'wav', 'aac', 'flac', 'm4a'].includes(fileType);
-  }
-
-  getFileIcon(type: FileType): string {
-    const map: Partial<Record<FileType, string>> = {
-      pdf: 'picture_as_pdf', docx: 'description', doc: 'description',
-      xlsx: 'table_chart', xls: 'table_chart', pptx: 'slideshow', ppt: 'slideshow',
-      txt: 'article', csv: 'grid_on', png: 'image', jpg: 'image', jpeg: 'image',
-      webp: 'image', gif: 'gif_box', svg: 'polyline', heic: 'image',
-      mp4: 'videocam', mov: 'videocam', avi: 'videocam', mkv: 'videocam', webm: 'videocam',
-      mp3: 'music_note', wav: 'music_note', aac: 'music_note', flac: 'music_note', m4a: 'music_note',
-      zip: 'folder_zip', rar: 'folder_zip', '7z': 'folder_zip', tar: 'folder_zip',
-      json: 'data_object', xml: 'code', html: 'html', css: 'css', ts: 'code', js: 'javascript',
+  // ── File Helpers ───────────────────────────────────────────────────────────
+  getFileIcon(fileType: string): string {
+    const map: Record<string, string> = {
+      pdf: 'picture_as_pdf',
+      docx: 'description',
+      doc: 'description',
+      xlsx: 'table_chart',
+      xls: 'table_chart',
+      csv: 'table_chart',
+      pptx: 'slideshow',
+      ppt: 'slideshow',
+      png: 'image',
+      jpg: 'image',
+      jpeg: 'image',
+      webp: 'image',
+      gif: 'image',
+      svg: 'image',
+      heic: 'image',
+      mp4: 'videocam',
+      mov: 'videocam',
+      avi: 'videocam',
+      mp3: 'music_note',
+      wav: 'music_note',
+      aac: 'music_note',
+      zip: 'folder_zip',
+      rar: 'folder_zip',
+      json: 'code',
+      xml: 'code',
+      html: 'code',
+      ts: 'code',
+      js: 'code',
+      txt: 'article',
     };
-    return map[type] ?? 'insert_drive_file';
+    return map[fileType?.toLowerCase()] ?? 'insert_drive_file';
   }
 
-  getFileColor(type: FileType): string {
-    const map: Partial<Record<FileType, string>> = {
-      pdf: '#f44336', docx: '#1976d2', doc: '#1976d2', xlsx: '#43a047', xls: '#43a047',
-      pptx: '#f57c00', ppt: '#f57c00', txt: '#9e9e9e', csv: '#00897b',
-      png: '#f57c00', jpg: '#f57c00', jpeg: '#f57c00', webp: '#ff7043', gif: '#ab47bc',
-      svg: '#26c6da', heic: '#f57c00', mp4: '#e53935', mov: '#e53935', avi: '#e53935',
-      mkv: '#b71c1c', webm: '#c62828', mp3: '#8e24aa', wav: '#7b1fa2', aac: '#6a1b9a',
-      flac: '#4a148c', m4a: '#9c27b0', zip: '#5e35b1', rar: '#512da8', '7z': '#4527a0',
-      tar: '#673ab7', json: '#f9a825', xml: '#0288d1', html: '#e64a19', css: '#1565c0',
-      ts: '#1976d2', js: '#f9a825',
+  getFileColor(fileType: string): string {
+    const map: Record<string, string> = {
+      pdf: '#d32f2f',
+      docx: '#1976d2',
+      doc: '#1976d2',
+      xlsx: '#43a047',
+      xls: '#43a047',
+      csv: '#43a047',
+      pptx: '#f57c00',
+      ppt: '#f57c00',
+      png: '#9c27b0',
+      jpg: '#9c27b0',
+      jpeg: '#9c27b0',
+      webp: '#9c27b0',
+      gif: '#9c27b0',
+      svg: '#9c27b0',
+      heic: '#9c27b0',
+      mp4: '#e91e63',
+      mov: '#e91e63',
+      mp3: '#00bcd4',
+      wav: '#00bcd4',
+      zip: '#5d4037',
+      rar: '#5d4037',
+      json: '#43a047',
+      ts: '#1976d2',
+      js: '#f9a825',
+      txt: '#757575',
     };
-    return map[type] ?? '#757575';
+    return map[fileType?.toLowerCase()] ?? '#757575';
   }
 
-  getFileTypeName(type: FileType): string {
-    const map: Partial<Record<FileType, string>> = {
-      pdf: 'PDF Document', docx: 'Word Document', doc: 'Word Document',
-      xlsx: 'Excel Spreadsheet', xls: 'Excel Spreadsheet', pptx: 'PowerPoint', ppt: 'PowerPoint',
-      txt: 'Text File', csv: 'CSV Spreadsheet', png: 'PNG Image', jpg: 'JPEG Image',
-      jpeg: 'JPEG Image', webp: 'WebP Image', gif: 'GIF Image', svg: 'SVG Vector', heic: 'HEIC Image',
-      mp4: 'MP4 Video', mov: 'MOV Video', avi: 'AVI Video', mkv: 'MKV Video', webm: 'WebM Video',
-      mp3: 'MP3 Audio', wav: 'WAV Audio', aac: 'AAC Audio', flac: 'FLAC Audio', m4a: 'M4A Audio',
-      zip: 'ZIP Archive', rar: 'RAR Archive', '7z': '7-Zip Archive', tar: 'TAR Archive',
-      json: 'JSON File', xml: 'XML File', html: 'HTML File', css: 'CSS File',
-      ts: 'TypeScript File', js: 'JavaScript File',
+  getFileTypeName(fileType: string): string {
+    const map: Record<string, string> = {
+      pdf: 'PDF Document',
+      docx: 'Word Document',
+      doc: 'Word Document',
+      xlsx: 'Excel Spreadsheet',
+      xls: 'Excel Spreadsheet',
+      csv: 'CSV File',
+      pptx: 'PowerPoint',
+      ppt: 'PowerPoint',
+      png: 'PNG Image',
+      jpg: 'JPEG Image',
+      jpeg: 'JPEG Image',
+      webp: 'WebP Image',
+      gif: 'GIF Image',
+      svg: 'SVG Vector',
+      heic: 'HEIC Image',
+      mp4: 'MP4 Video',
+      mov: 'MOV Video',
+      avi: 'AVI Video',
+      mp3: 'MP3 Audio',
+      wav: 'WAV Audio',
+      aac: 'AAC Audio',
+      zip: 'ZIP Archive',
+      rar: 'RAR Archive',
+      json: 'JSON File',
+      xml: 'XML File',
+      html: 'HTML File',
+      ts: 'TypeScript File',
+      js: 'JavaScript File',
+      txt: 'Text File',
     };
-    return map[type] ?? 'File';
+    return map[fileType?.toLowerCase()] ?? fileType?.toUpperCase() ?? 'File';
+  }
+
+  canPreview(fileType: string): boolean {
+    return (
+      this.isImage(fileType) ||
+      fileType === 'pdf' ||
+      this.isVideo(fileType) ||
+      this.isAudio(fileType)
+    );
+  }
+
+  isImage(fileType: string): boolean {
+    return ['png', 'jpg', 'jpeg', 'webp', 'gif', 'svg', 'heic'].includes(fileType?.toLowerCase());
+  }
+
+  isVideo(fileType: string): boolean {
+    return ['mp4', 'mov', 'avi', 'mkv', 'webm'].includes(fileType?.toLowerCase());
+  }
+
+  isAudio(fileType: string): boolean {
+    return ['mp3', 'wav', 'aac', 'flac', 'm4a'].includes(fileType?.toLowerCase());
   }
 
   formatSize(bytes: number): string {
-    if (bytes >= 1e9) return (bytes / 1e9).toFixed(1) + ' GB';
-    if (bytes >= 1e6) return (bytes / 1e6).toFixed(1) + ' MB';
-    return (bytes / 1e3).toFixed(0) + ' KB';
+    if (!bytes) return '—';
+    if (bytes < 1024) return `${bytes} B`;
+    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+    return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
   }
 
-  onAiClick() { this.aiAgent.open(); }
+  formatUploadedAt(dateStr: string): string {
+    if (!dateStr) return '';
+    return new Date(dateStr).toLocaleString('en', {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric',
+    });
+  }
+
+  @HostListener('document:click')
+  onDocumentClick(): void {
+    this.showCatDropdown.set(false);
+    this.showEditCatDropdown.set(false);
+  }
+
+  ngOnInit(): void {
+    this.documentService.loadAll(this.userId);
+    this.categoryService.loadAllFlat(this.userId);
+  }
+
+  private buildFilterFromActive(): DocumentFilter {
+    const v = this.activeFilters();
+    const categoryIds = (v['categories'] as string[] | undefined)
+      ?.map(Number)
+      .filter((n) => !isNaN(n));
+    return {
+      fileType: (v['fileType'] as string) || undefined,
+      accessType: (v['access'] as AccessType) || undefined,
+      uploadedFrom: (v['uploadedFrom'] as string) || undefined,
+      uploadedTo: (v['uploadedTo'] as string) || undefined,
+      categoryIds: categoryIds?.length ? categoryIds : undefined,
+    };
+  }
 }

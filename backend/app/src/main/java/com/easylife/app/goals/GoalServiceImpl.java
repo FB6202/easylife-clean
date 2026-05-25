@@ -34,7 +34,12 @@ class GoalServiceImpl implements GoalService, GoalApi {
         validateCategories(request.categoryIds(), userId);
         Goal goal = goalMapper.toEntity(request, userId);
         goal.setCreatedAt(LocalDateTime.now());
-        return goalMapper.toResponse(goalRepository.save(goal));
+        Goal saved = goalRepository.save(goal);
+        return goalMapper.toResponse(
+                saved,
+                categoryApi.findPreviewsByIds(saved.getCategoryIds()),
+                null
+        );
     }
 
     @Override
@@ -43,6 +48,7 @@ class GoalServiceImpl implements GoalService, GoalApi {
                 .orElseThrow(() -> new EntityNotFoundException("Goal not found"));
         return goalMapper.toResponse(
                 goal,
+                categoryApi.findPreviewsByIds(goal.getCategoryIds()),
                 storageApi.generateDownloadUrl(goal.getImagePath())
         );
     }
@@ -55,6 +61,7 @@ class GoalServiceImpl implements GoalService, GoalApi {
                 result.getContent().stream()
                         .map(goal -> goalMapper.toResponse(
                                 goal,
+                                categoryApi.findPreviewsByIds(goal.getCategoryIds()),
                                 storageApi.generateDownloadUrl(goal.getImagePath())))
                         .toList(),
                 result.getNumber(),
@@ -71,7 +78,12 @@ class GoalServiceImpl implements GoalService, GoalApi {
         validateCategories(request.categoryIds(), userId);
         goalMapper.update(goal, request);
         goal.setUpdatedAt(LocalDateTime.now());
-        return goalMapper.toResponse(goalRepository.save(goal));
+        Goal saved = goalRepository.save(goal);
+        return goalMapper.toResponse(
+                saved,
+                categoryApi.findPreviewsByIds(saved.getCategoryIds()),
+                storageApi.generateDownloadUrl(saved.getImagePath())
+        );
     }
 
     @Override
@@ -83,8 +95,10 @@ class GoalServiceImpl implements GoalService, GoalApi {
         }
         goal.setImagePath(imagePath);
         goal.setUpdatedAt(LocalDateTime.now());
+        Goal saved = goalRepository.save(goal);
         return goalMapper.toResponse(
-                goalRepository.save(goal),
+                saved,
+                categoryApi.findPreviewsByIds(saved.getCategoryIds()),
                 storageApi.generateDownloadUrl(imagePath)
         );
     }

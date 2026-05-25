@@ -1,5 +1,6 @@
 package com.easylife.app.documents.payload;
 
+import com.easylife.app.categories.payload.CategoryPreview;
 import com.easylife.app.shared.enums.AccessType;
 
 import java.time.LocalDateTime;
@@ -13,6 +14,6 @@ public record DocumentResponse(
         Long fileSizeBytes,
         AccessType accessType,
         LocalDateTime uploadedAt,
-        List<Long> categoryIds,
+        List<CategoryPreview> categories,
         String presignedUrl
 ) {}

@@ -1,22 +1,21 @@
 package com.easylife.app.weekplan;
 
+import com.easylife.app.categories.payload.CategoryPreview;
 import com.easylife.app.weekplan.api.*;
 import org.springframework.stereotype.Component;
+
 import java.util.List;
 
 @Component
 class WeekPlanMapper {
 
-    WeekPlanResponse toResponse(WeekPlan weekPlan) {
+    WeekPlanResponse toResponse(WeekPlan weekPlan, List<CategoryPreview> categories) {
         List<WeekPlanItemResponse> itemResponses = weekPlan.getItems()
                 .stream()
                 .map(this::toItemResponse)
                 .toList();
 
-        int itemsDone = (int) weekPlan.getItems().stream()
-                .filter(WeekPlanItem::getDone)
-                .count();
-
+        int itemsDone  = (int) weekPlan.getItems().stream().filter(WeekPlanItem::getDone).count();
         int itemsTotal = weekPlan.getItems().size();
 
         return new WeekPlanResponse(
@@ -29,7 +28,7 @@ class WeekPlanMapper {
                 weekPlan.getReflection(),
                 weekPlan.getCreatedAt(),
                 weekPlan.getUpdatedAt(),
-                weekPlan.getCategoryIds(),
+                categories,
                 itemResponses,
                 itemsDone,
                 itemsTotal
@@ -60,13 +59,9 @@ class WeekPlanMapper {
         weekPlan.setIntention(request.intention());
         weekPlan.setStartDate(request.startDate());
         weekPlan.setEndDate(request.endDate());
-        if (request.status() != null) {
-            weekPlan.setStatus(request.status());
-        }
+        if (request.status() != null) weekPlan.setStatus(request.status());
         weekPlan.setReflection(request.reflection());
-        weekPlan.setCategoryIds(
-                request.categoryIds() != null ? request.categoryIds() : List.of()
-        );
+        weekPlan.setCategoryIds(request.categoryIds() != null ? request.categoryIds() : List.of());
     }
 
     WeekPlanItem toItemEntity(WeekPlanItemRequest request, WeekPlan weekPlan) {

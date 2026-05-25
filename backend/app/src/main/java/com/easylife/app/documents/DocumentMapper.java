@@ -1,5 +1,6 @@
 package com.easylife.app.documents;
 
+import com.easylife.app.categories.payload.CategoryPreview;
 import com.easylife.app.documents.payload.DocumentRequest;
 import com.easylife.app.documents.payload.DocumentResponse;
 import com.easylife.app.shared.enums.AccessType;
@@ -7,11 +8,12 @@ import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.List;
 
 @Component
 class DocumentMapper {
 
-    public DocumentResponse toResponse(Document document, String presignedUrl) {
+    public DocumentResponse toResponse(Document document, List<CategoryPreview> categories, String presignedUrl) {
         return new DocumentResponse(
                 document.getId(),
                 document.getTitle(),
@@ -20,7 +22,7 @@ class DocumentMapper {
                 document.getFileSizeBytes(),
                 document.getAccessType(),
                 document.getUploadedAt(),
-                document.getCategoryIds(),
+                categories,
                 presignedUrl
         );
     }
@@ -47,5 +49,4 @@ class DocumentMapper {
         document.setAccessType(request.accessType());
         document.setCategoryIds(request.categoryIds() != null ? request.categoryIds() : new ArrayList<>());
     }
-
 }

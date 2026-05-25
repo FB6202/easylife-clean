@@ -3,7 +3,7 @@
   <div class="dash-greeting__text">
     <span class="dash-greeting__label">DASHBOARD</span>
     <h1 class="dash-greeting__title">
-      {{ greeting() }}, {{ username }}
+      {{ greeting }}, {{ greetingName() }}
       <span class="material-symbols-outlined dash-greeting__icon">waving_hand</span>
     </h1>
     <p class="dash-greeting__subtitle">
@@ -16,46 +16,59 @@
       {{ today }}
     </span>
     <div class="dash-actions">
-
       <!-- Widget Manager -->
       <div class="widget-manager" (click)="$event.stopPropagation()">
-        <button class="widget-manager__trigger" [class.widget-manager__trigger--active]="showWidgetManager()"
-          (click)="showWidgetManager.update(v => !v)">
+        <button
+          class="widget-manager__trigger"
+          [class.widget-manager__trigger--active]="showWidgetManager()"
+          (click)="showWidgetManager.update((v) => !v)"
+        >
           <span class="material-symbols-outlined">dashboard_customize</span>
           Widgets
-          <span class="widget-manager__count">{{ enabledCount() }}/{{ widgetConfigs().length }}</span>
+          <span class="widget-manager__count"
+            >{{ enabledCount() }}/{{ widgetConfigs().length }}</span
+          >
           <span class="material-symbols-outlined widget-manager__arrow">
             {{ showWidgetManager() ? 'expand_less' : 'expand_more' }}
           </span>
         </button>
 
         @if (showWidgetManager()) {
-        <div class="widget-manager__panel">
-          <div class="widget-manager__panel-header">
-            <span class="material-symbols-outlined">dashboard_customize</span>
-            Customize Dashboard
-          </div>
-          <div class="widget-manager__list">
-            @for (widget of widgetConfigs(); track widget.id) {
-            <div class="widget-manager__item" [class.widget-manager__item--enabled]="widget.enabled"
-              (click)="toggleWidget(widget.id)">
-              <div class="widget-manager__item-left">
-                <div class="widget-manager__item-icon" [class.widget-manager__item-icon--enabled]="widget.enabled">
-                  <span class="material-symbols-outlined">{{ widget.icon }}</span>
-                </div>
-                <span class="widget-manager__item-label">{{ widget.label }}</span>
-              </div>
-              <div class="widget-manager__toggle" [class.widget-manager__toggle--on]="widget.enabled">
-                <div class="widget-manager__toggle-knob"></div>
-              </div>
+          <div class="widget-manager__panel">
+            <div class="widget-manager__panel-header">
+              <span class="material-symbols-outlined">dashboard_customize</span>
+              Customize Dashboard
             </div>
-            }
+            <div class="widget-manager__list">
+              @for (widget of widgetConfigs(); track widget.id) {
+                <div
+                  class="widget-manager__item"
+                  [class.widget-manager__item--enabled]="widget.enabled"
+                  (click)="toggleWidget(widget.id)"
+                >
+                  <div class="widget-manager__item-left">
+                    <div
+                      class="widget-manager__item-icon"
+                      [class.widget-manager__item-icon--enabled]="widget.enabled"
+                    >
+                      <span class="material-symbols-outlined">{{ widget.icon }}</span>
+                    </div>
+                    <span class="widget-manager__item-label">{{ widget.label }}</span>
+                  </div>
+                  <div
+                    class="widget-manager__toggle"
+                    [class.widget-manager__toggle--on]="widget.enabled"
+                  >
+                    <div class="widget-manager__toggle-knob"></div>
+                  </div>
+                </div>
+              }
+            </div>
+            <div class="widget-manager__panel-footer">
+              <span class="material-symbols-outlined">info</span>
+              {{ enabledCount() }} of {{ widgetConfigs().length }} widgets visible
+            </div>
           </div>
-          <div class="widget-manager__panel-footer">
-            <span class="material-symbols-outlined">info</span>
-            {{ enabledCount() }} of {{ widgetConfigs().length }} widgets visible
-          </div>
-        </div>
         }
       </div>
 
@@ -70,340 +83,373 @@
 
 <!-- Overlay to close widget manager -->
 @if (showWidgetManager()) {
-<div class="widget-manager-overlay" (click)="showWidgetManager.set(false)"></div>
+  <div class="widget-manager-overlay" (click)="showWidgetManager.set(false)"></div>
 }
 
 <!-- Widgets Grid -->
 <div class="dash-grid">
-
   <!-- Tasks Widget -->
   @if (isWidgetEnabled('tasks')) {
-  <div class="dash-widget dash-widget--tasks" (click)="navigateTo('tasks')">
-    <div class="dash-widget__header">
-      <div class="dash-widget__header-left">
-        <div class="dash-widget__icon-wrap dash-widget__icon-wrap--tasks">
-          <span class="material-symbols-outlined">check_circle</span>
+    <div class="dash-widget dash-widget--tasks" (click)="navigateTo('tasks')">
+      <div class="dash-widget__header">
+        <div class="dash-widget__header-left">
+          <div class="dash-widget__icon-wrap dash-widget__icon-wrap--tasks">
+            <span class="material-symbols-outlined">check_circle</span>
+          </div>
+          <div>
+            <p class="dash-widget__title">Daily Actions</p>
+            <p class="dash-widget__subtitle">3 pending · 2 in progress</p>
+          </div>
         </div>
-        <div>
-          <p class="dash-widget__title">Daily Actions</p>
-          <p class="dash-widget__subtitle">3 pending · 2 in progress</p>
-        </div>
+        <span class="material-symbols-outlined dash-widget__arrow">arrow_forward</span>
       </div>
-      <span class="material-symbols-outlined dash-widget__arrow">arrow_forward</span>
-    </div>
-    <div class="dash-widget__list">
-      @for (task of tasks; track task.id) {
-      <div class="dash-task-item">
-        <span [class]="'material-symbols-outlined dash-task-item__status status--' + task.status">
-          {{ task.status === 'done' ? 'check_circle' : task.status === 'in-progress' ? 'pending' :
-          'radio_button_unchecked' }}
-        </span>
-        <div class="dash-task-item__info">
-          <span class="dash-task-item__title">{{ task.title }}</span>
-          <span [class]="'dash-task-item__due dash-task-item__due--' + task.dueClass">{{ task.due }}</span>
-        </div>
-        <span [class]="'dash-task-item__priority priority--' + task.priority">{{ task.priority.toUpperCase() }}</span>
+      <div class="dash-widget__list">
+        @for (task of tasks; track task.id) {
+          <div class="dash-task-item">
+            <span
+              [class]="'material-symbols-outlined dash-task-item__status status--' + task.status"
+            >
+              {{
+                task.status === 'done'
+                  ? 'check_circle'
+                  : task.status === 'in-progress'
+                    ? 'pending'
+                    : 'radio_button_unchecked'
+              }}
+            </span>
+            <div class="dash-task-item__info">
+              <span class="dash-task-item__title">{{ task.title }}</span>
+              <span [class]="'dash-task-item__due dash-task-item__due--' + task.dueClass">{{
+                task.due
+              }}</span>
+            </div>
+            <span [class]="'dash-task-item__priority priority--' + task.priority">{{
+              task.priority.toUpperCase()
+            }}</span>
+          </div>
+        }
       </div>
-      }
     </div>
-  </div>
   }
 
   <!-- Calendar Widget -->
   @if (isWidgetEnabled('calendar')) {
-  <div class="dash-widget dash-widget--calendar" (click)="navigateTo('calendar')">
-    <div class="dash-widget__header">
-      <div class="dash-widget__header-left">
-        <div class="dash-widget__icon-wrap dash-widget__icon-wrap--calendar">
-          <span class="material-symbols-outlined">calendar_month</span>
-        </div>
-        <div>
-          <p class="dash-widget__title">Today's Calendar</p>
-          <p class="dash-widget__subtitle">{{ events.length }} events scheduled</p>
-        </div>
-      </div>
-      <span class="material-symbols-outlined dash-widget__arrow">arrow_forward</span>
-    </div>
-    <div class="dash-widget__list">
-      @for (event of events; track event.id) {
-      <div class="dash-event-item">
-        <div class="dash-event-item__bar" [style.background]="event.color"></div>
-        <div class="dash-event-item__info">
-          <span class="dash-event-item__title">{{ event.title }}</span>
-          <div class="dash-event-item__meta">
-            <span class="dash-event-item__time">
-              <span class="material-symbols-outlined">schedule</span>{{ event.time }}
-            </span>
-            <span class="dash-event-item__location">
-              <span class="material-symbols-outlined">location_on</span>{{ event.location }}
-            </span>
+    <div class="dash-widget dash-widget--calendar" (click)="navigateTo('calendar')">
+      <div class="dash-widget__header">
+        <div class="dash-widget__header-left">
+          <div class="dash-widget__icon-wrap dash-widget__icon-wrap--calendar">
+            <span class="material-symbols-outlined">calendar_month</span>
+          </div>
+          <div>
+            <p class="dash-widget__title">Today's Calendar</p>
+            <p class="dash-widget__subtitle">{{ events.length }} events scheduled</p>
           </div>
         </div>
+        <span class="material-symbols-outlined dash-widget__arrow">arrow_forward</span>
       </div>
-      }
+      <div class="dash-widget__list">
+        @for (event of events; track event.id) {
+          <div class="dash-event-item">
+            <div class="dash-event-item__bar" [style.background]="event.color"></div>
+            <div class="dash-event-item__info">
+              <span class="dash-event-item__title">{{ event.title }}</span>
+              <div class="dash-event-item__meta">
+                <span class="dash-event-item__time">
+                  <span class="material-symbols-outlined">schedule</span>{{ event.time }}
+                </span>
+                <span class="dash-event-item__location">
+                  <span class="material-symbols-outlined">location_on</span>{{ event.location }}
+                </span>
+              </div>
+            </div>
+          </div>
+        }
+      </div>
     </div>
-  </div>
   }
 
   <!-- Goals Widget -->
   @if (isWidgetEnabled('goals')) {
-  <div class="dash-widget dash-widget--goals" (click)="navigateTo('goals')">
-    <div class="dash-widget__header">
-      <div class="dash-widget__header-left">
-        <div class="dash-widget__icon-wrap dash-widget__icon-wrap--goals">
-          <span class="material-symbols-outlined">flag</span>
-        </div>
-        <div>
-          <p class="dash-widget__title">Goals</p>
-          <p class="dash-widget__subtitle">{{ goals.length }} active goals</p>
-        </div>
-      </div>
-      <span class="material-symbols-outlined dash-widget__arrow">arrow_forward</span>
-    </div>
-    <div class="dash-widget__list">
-      @for (goal of goals; track goal.id) {
-      <div class="dash-goal-item">
-        <span class="material-symbols-outlined dash-goal-item__icon" style="color: #f57c00">{{ goal.icon }}</span>
-        <div class="dash-goal-item__info">
-          <div class="dash-goal-item__title-row">
-            <span class="dash-goal-item__title">{{ goal.title }}</span>
-            <span class="dash-goal-item__pct">{{ goal.pct }}%</span>
+    <div class="dash-widget dash-widget--goals" (click)="navigateTo('goals')">
+      <div class="dash-widget__header">
+        <div class="dash-widget__header-left">
+          <div class="dash-widget__icon-wrap dash-widget__icon-wrap--goals">
+            <span class="material-symbols-outlined">flag</span>
           </div>
-          <div class="progress-bar progress-bar-sm dash-goal-item__bar">
-            <div class="progress-fill" [style.width.%]="goal.pct"></div>
+          <div>
+            <p class="dash-widget__title">Goals</p>
+            <p class="dash-widget__subtitle">{{ goals.length }} active goals</p>
           </div>
-          <span class="dash-goal-item__deadline">
-            <span class="material-symbols-outlined">calendar_today</span>{{ goal.deadline }}
-          </span>
         </div>
+        <span class="material-symbols-outlined dash-widget__arrow">arrow_forward</span>
       </div>
-      }
+      <div class="dash-widget__list">
+        @for (goal of goals; track goal.id) {
+          <div class="dash-goal-item">
+            <span class="material-symbols-outlined dash-goal-item__icon" style="color: #f57c00">{{
+              goal.icon
+            }}</span>
+            <div class="dash-goal-item__info">
+              <div class="dash-goal-item__title-row">
+                <span class="dash-goal-item__title">{{ goal.title }}</span>
+                <span class="dash-goal-item__pct">{{ goal.pct }}%</span>
+              </div>
+              <div class="progress-bar progress-bar-sm dash-goal-item__bar">
+                <div class="progress-fill" [style.width.%]="goal.pct"></div>
+              </div>
+              <span class="dash-goal-item__deadline">
+                <span class="material-symbols-outlined">calendar_today</span>{{ goal.deadline }}
+              </span>
+            </div>
+          </div>
+        }
+      </div>
     </div>
-  </div>
   }
 
   <!-- Week Plan Widget -->
   @if (isWidgetEnabled('weekplan')) {
-  <div class="dash-widget dash-widget--weekplan" (click)="navigateTo('my-week')">
-    <div class="dash-widget__header">
-      <div class="dash-widget__header-left">
-        <div class="dash-widget__icon-wrap dash-widget__icon-wrap--weekplan">
-          <span class="material-symbols-outlined">view_week</span>
+    <div class="dash-widget dash-widget--weekplan" (click)="navigateTo('my-week')">
+      <div class="dash-widget__header">
+        <div class="dash-widget__header-left">
+          <div class="dash-widget__icon-wrap dash-widget__icon-wrap--weekplan">
+            <span class="material-symbols-outlined">view_week</span>
+          </div>
+          <div>
+            <p class="dash-widget__title">My Week</p>
+            <p class="dash-widget__subtitle">
+              {{ weekplan.itemsDone }}/{{ weekplan.itemsTotal }} items done
+            </p>
+          </div>
         </div>
-        <div>
-          <p class="dash-widget__title">My Week</p>
-          <p class="dash-widget__subtitle">{{ weekplan.itemsDone }}/{{ weekplan.itemsTotal }} items done</p>
+        <span class="material-symbols-outlined dash-widget__arrow">arrow_forward</span>
+      </div>
+      <div class="dash-weekplan-body">
+        <div class="dash-weekplan-body__status-row">
+          <span class="dash-weekplan-body__status">
+            <span class="material-symbols-outlined">rocket_launch</span>{{ weekplan.status }}
+          </span>
+          <span class="dash-weekplan-body__items"
+            >{{ weekplan.itemsDone }}/{{ weekplan.itemsTotal }} items</span
+          >
+        </div>
+        <p class="dash-weekplan-body__title">{{ weekplan.title }}</p>
+        <p class="dash-weekplan-body__intention">"{{ weekplan.intention }}"</p>
+        <div class="dash-weekplan-body__progress">
+          <div class="progress-bar">
+            <div class="progress-fill" [style.width.%]="weekplan.pct"></div>
+          </div>
+          <div class="dash-weekplan-body__progress-info">
+            <span>Progress</span>
+            <span class="dash-weekplan-body__pct">{{ weekplan.pct }}%</span>
+          </div>
         </div>
       </div>
-      <span class="material-symbols-outlined dash-widget__arrow">arrow_forward</span>
     </div>
-    <div class="dash-weekplan-body">
-      <div class="dash-weekplan-body__status-row">
-        <span class="dash-weekplan-body__status">
-          <span class="material-symbols-outlined">rocket_launch</span>{{ weekplan.status }}
-        </span>
-        <span class="dash-weekplan-body__items">{{ weekplan.itemsDone }}/{{ weekplan.itemsTotal }} items</span>
-      </div>
-      <p class="dash-weekplan-body__title">{{ weekplan.title }}</p>
-      <p class="dash-weekplan-body__intention">"{{ weekplan.intention }}"</p>
-      <div class="dash-weekplan-body__progress">
-        <div class="progress-bar">
-          <div class="progress-fill" [style.width.%]="weekplan.pct"></div>
-        </div>
-        <div class="dash-weekplan-body__progress-info">
-          <span>Progress</span>
-          <span class="dash-weekplan-body__pct">{{ weekplan.pct }}%</span>
-        </div>
-      </div>
-    </div>
-  </div>
   }
 
   <!-- Categories Widget -->
   @if (isWidgetEnabled('categories')) {
-  <div class="dash-widget dash-widget--categories" (click)="navigateTo('categories')">
-    <div class="dash-widget__header">
-      <div class="dash-widget__header-left">
-        <div class="dash-widget__icon-wrap dash-widget__icon-wrap--categories">
-          <span class="material-symbols-outlined">category</span>
+    <div class="dash-widget dash-widget--categories" (click)="navigateTo('categories')">
+      <div class="dash-widget__header">
+        <div class="dash-widget__header-left">
+          <div class="dash-widget__icon-wrap dash-widget__icon-wrap--categories">
+            <span class="material-symbols-outlined">category</span>
+          </div>
+          <div>
+            <p class="dash-widget__title">Categories</p>
+            <p class="dash-widget__subtitle">{{ categories.length }} active categories</p>
+          </div>
         </div>
-        <div>
-          <p class="dash-widget__title">Categories</p>
-          <p class="dash-widget__subtitle">{{ categories.length }} active categories</p>
-        </div>
+        <span class="material-symbols-outlined dash-widget__arrow">arrow_forward</span>
       </div>
-      <span class="material-symbols-outlined dash-widget__arrow">arrow_forward</span>
-    </div>
-    <div class="dash-widget__list">
-      @for (cat of categories; track cat.id) {
-      <div class="dash-cat-item">
-        <div class="dash-cat-item__icon" [style.background]="cat.color + '18'">
-          <span class="material-symbols-outlined" [style.color]="cat.color">{{ cat.icon }}</span>
-        </div>
-        <div class="dash-cat-item__info">
-          <span class="dash-cat-item__name">{{ cat.name }}</span>
-          <span class="dash-cat-item__count">{{ cat.count }}</span>
-        </div>
-        <div class="dash-cat-item__bar-wrap">
-          <div class="dash-cat-item__bar" [style.background]="cat.color"></div>
-        </div>
+      <div class="dash-widget__list">
+        @for (cat of categories; track cat.id) {
+          <div class="dash-cat-item">
+            <div class="dash-cat-item__icon" [style.background]="cat.color + '18'">
+              <span class="material-symbols-outlined" [style.color]="cat.color">{{
+                cat.icon
+              }}</span>
+            </div>
+            <div class="dash-cat-item__info">
+              <span class="dash-cat-item__name">{{ cat.name }}</span>
+              <span class="dash-cat-item__count">{{ cat.count }}</span>
+            </div>
+            <div class="dash-cat-item__bar-wrap">
+              <div class="dash-cat-item__bar" [style.background]="cat.color"></div>
+            </div>
+          </div>
+        }
       </div>
-      }
     </div>
-  </div>
   }
 
   <!-- Notifications Widget -->
   @if (isWidgetEnabled('notifications')) {
-  <div class="dash-widget dash-widget--notifications" (click)="navigateTo('notifications')">
-    <div class="dash-widget__header">
-      <div class="dash-widget__header-left">
-        <div class="dash-widget__icon-wrap dash-widget__icon-wrap--notifications">
-          <span class="material-symbols-outlined">notifications</span>
+    <div class="dash-widget dash-widget--notifications" (click)="navigateTo('notifications')">
+      <div class="dash-widget__header">
+        <div class="dash-widget__header-left">
+          <div class="dash-widget__icon-wrap dash-widget__icon-wrap--notifications">
+            <span class="material-symbols-outlined">notifications</span>
+          </div>
+          <div>
+            <p class="dash-widget__title">Notifications</p>
+            <p class="dash-widget__subtitle">2 unread alerts</p>
+          </div>
         </div>
-        <div>
-          <p class="dash-widget__title">Notifications</p>
-          <p class="dash-widget__subtitle">2 unread alerts</p>
+        <div style="display: flex; align-items: center; gap: 8px">
+          <span class="dash-notif-badge">2</span>
+          <span class="material-symbols-outlined dash-widget__arrow">arrow_forward</span>
         </div>
       </div>
-      <div style="display:flex; align-items:center; gap: 8px;">
-        <span class="dash-notif-badge">2</span>
-        <span class="material-symbols-outlined dash-widget__arrow">arrow_forward</span>
-      </div>
-    </div>
-    <div class="dash-widget__list">
-      @for (notif of notifications; track notif.id) {
-      <div [class]="'dash-notif-item ' + (notif.unread ? 'dash-notif-item--unread' : '')">
-        <div [class]="'dash-notif-item__icon type--' + notif.type">
-          <span class="material-symbols-outlined">
-            {{ notif.type === 'reminder' ? 'alarm' : notif.type === 'success' ? 'check_circle' : notif.type ===
-            'warning' ? 'warning' : 'info' }}
-          </span>
-        </div>
-        <div class="dash-notif-item__info">
-          <span class="dash-notif-item__title">{{ notif.title }}</span>
-          <span class="dash-notif-item__msg">{{ notif.message }}</span>
-          <span class="dash-notif-item__time">{{ notif.time }}</span>
-        </div>
-        @if (notif.unread) {
-        <div class="dash-notif-item__dot"></div>
+      <div class="dash-widget__list">
+        @for (notif of notifications; track notif.id) {
+          <div [class]="'dash-notif-item ' + (notif.unread ? 'dash-notif-item--unread' : '')">
+            <div [class]="'dash-notif-item__icon type--' + notif.type">
+              <span class="material-symbols-outlined">
+                {{
+                  notif.type === 'reminder'
+                    ? 'alarm'
+                    : notif.type === 'success'
+                      ? 'check_circle'
+                      : notif.type === 'warning'
+                        ? 'warning'
+                        : 'info'
+                }}
+              </span>
+            </div>
+            <div class="dash-notif-item__info">
+              <span class="dash-notif-item__title">{{ notif.title }}</span>
+              <span class="dash-notif-item__msg">{{ notif.message }}</span>
+              <span class="dash-notif-item__time">{{ notif.time }}</span>
+            </div>
+            @if (notif.unread) {
+              <div class="dash-notif-item__dot"></div>
+            }
+          </div>
         }
       </div>
-      }
     </div>
-  </div>
   }
 
   <!-- Journal Widget -->
   @if (isWidgetEnabled('journal')) {
-  <div class="dash-widget dash-widget--journal" (click)="navigateTo('journal')">
-    <div class="dash-widget__header">
-      <div class="dash-widget__header-left">
-        <div class="dash-widget__icon-wrap dash-widget__icon-wrap--journal">
-          <span class="material-symbols-outlined">menu_book</span>
+    <div class="dash-widget dash-widget--journal" (click)="navigateTo('journal')">
+      <div class="dash-widget__header">
+        <div class="dash-widget__header-left">
+          <div class="dash-widget__icon-wrap dash-widget__icon-wrap--journal">
+            <span class="material-symbols-outlined">menu_book</span>
+          </div>
+          <div>
+            <p class="dash-widget__title">Journal</p>
+            <p class="dash-widget__subtitle">{{ journalEntries.length }} recent entries</p>
+          </div>
         </div>
-        <div>
-          <p class="dash-widget__title">Journal</p>
-          <p class="dash-widget__subtitle">{{ journalEntries.length }} recent entries</p>
-        </div>
+        <span class="material-symbols-outlined dash-widget__arrow">arrow_forward</span>
       </div>
-      <span class="material-symbols-outlined dash-widget__arrow">arrow_forward</span>
-    </div>
-    <div class="dash-widget__list">
-      @for (entry of journalEntries; track entry.id) {
-      <div class="dash-journal-item">
-        <span class="material-symbols-outlined dash-journal-item__mood" [style.color]="getMoodColor(entry.mood)">
-          {{ getMoodIcon(entry.mood) }}
-        </span>
-        <div class="dash-journal-item__info">
-          <span class="dash-journal-item__title">{{ entry.title }}</span>
-          <span class="dash-journal-item__meta">
-            {{ entry.date }} · {{ entry.wordCount }} words
-          </span>
-        </div>
+      <div class="dash-widget__list">
+        @for (entry of journalEntries; track entry.id) {
+          <div class="dash-journal-item">
+            <span
+              class="material-symbols-outlined dash-journal-item__mood"
+              [style.color]="getMoodColor(entry.mood)"
+            >
+              {{ getMoodIcon(entry.mood) }}
+            </span>
+            <div class="dash-journal-item__info">
+              <span class="dash-journal-item__title">{{ entry.title }}</span>
+              <span class="dash-journal-item__meta">
+                {{ entry.date }} · {{ entry.wordCount }} words
+              </span>
+            </div>
+          </div>
+        }
       </div>
-      }
     </div>
-  </div>
   }
 
   <!-- People Widget -->
   @if (isWidgetEnabled('network')) {
-  <div class="dash-widget dash-widget--network" (click)="navigateTo('network')">
-    <div class="dash-widget__header">
-      <div class="dash-widget__header-left">
-        <div class="dash-widget__icon-wrap dash-widget__icon-wrap--network">
-          <span class="material-symbols-outlined">people</span>
+    <div class="dash-widget dash-widget--network" (click)="navigateTo('network')">
+      <div class="dash-widget__header">
+        <div class="dash-widget__header-left">
+          <div class="dash-widget__icon-wrap dash-widget__icon-wrap--network">
+            <span class="material-symbols-outlined">people</span>
+          </div>
+          <div>
+            <p class="dash-widget__title">People</p>
+            <p class="dash-widget__subtitle">{{ contacts.length }} recent contacts</p>
+          </div>
         </div>
-        <div>
-          <p class="dash-widget__title">People</p>
-          <p class="dash-widget__subtitle">{{ contacts.length }} recent contacts</p>
-        </div>
+        <span class="material-symbols-outlined dash-widget__arrow">arrow_forward</span>
       </div>
-      <span class="material-symbols-outlined dash-widget__arrow">arrow_forward</span>
-    </div>
-    <div class="dash-widget__list">
-      @for (contact of contacts; track contact.id) {
-      <div class="dash-contact-item">
-        <div class="dash-contact-item__avatar" [style.background]="contact.avatarColor">
-          {{ contact.initials }}
-        </div>
-        <div class="dash-contact-item__info">
-          <span class="dash-contact-item__name">{{ contact.firstname }} {{ contact.lastname }}</span>
-          <span class="dash-contact-item__position">{{ contact.position }}</span>
-        </div>
+      <div class="dash-widget__list">
+        @for (contact of contacts; track contact.id) {
+          <div class="dash-contact-item">
+            <div class="dash-contact-item__avatar" [style.background]="contact.avatarColor">
+              {{ contact.initials }}
+            </div>
+            <div class="dash-contact-item__info">
+              <span class="dash-contact-item__name"
+                >{{ contact.firstname }} {{ contact.lastname }}</span
+              >
+              <span class="dash-contact-item__position">{{ contact.position }}</span>
+            </div>
+          </div>
+        }
       </div>
-      }
     </div>
-  </div>
   }
 
   <!-- Following Widget -->
   @if (isWidgetEnabled('following')) {
-  <div class="dash-widget dash-widget--following" (click)="navigateTo('following')">
-    <div class="dash-widget__header">
-      <div class="dash-widget__header-left">
-        <div class="dash-widget__icon-wrap dash-widget__icon-wrap--following">
-          <span class="material-symbols-outlined">person_add</span>
+    <div class="dash-widget dash-widget--following" (click)="navigateTo('following')">
+      <div class="dash-widget__header">
+        <div class="dash-widget__header-left">
+          <div class="dash-widget__icon-wrap dash-widget__icon-wrap--following">
+            <span class="material-symbols-outlined">person_add</span>
+          </div>
+          <div>
+            <p class="dash-widget__title">Network</p>
+            <p class="dash-widget__subtitle">
+              {{ followingStats.following }} following · {{ followingStats.followers }} followers
+            </p>
+          </div>
         </div>
-        <div>
-          <p class="dash-widget__title">Network</p>
-          <p class="dash-widget__subtitle">{{ followingStats.following }} following · {{ followingStats.followers }}
-            followers</p>
-        </div>
+        <span class="material-symbols-outlined dash-widget__arrow">arrow_forward</span>
       </div>
-      <span class="material-symbols-outlined dash-widget__arrow">arrow_forward</span>
-    </div>
-    <div class="dash-widget__list">
-      <div class="dash-following-stats">
-        <div class="dash-following-stat">
-          <span class="dash-following-stat__num">{{ followingStats.following }}</span>
-          <span class="dash-following-stat__label">Following</span>
+      <div class="dash-widget__list">
+        <div class="dash-following-stats">
+          <div class="dash-following-stat">
+            <span class="dash-following-stat__num">{{ followingStats.following }}</span>
+            <span class="dash-following-stat__label">Following</span>
+          </div>
+          <div class="dash-following-stat">
+            <span class="dash-following-stat__num">{{ followingStats.followers }}</span>
+            <span class="dash-following-stat__label">Followers</span>
+          </div>
+          <div class="dash-following-stat dash-following-stat--pending">
+            <span class="dash-following-stat__num">{{ followingStats.pendingRequests }}</span>
+            <span class="dash-following-stat__label">Pending</span>
+          </div>
         </div>
-        <div class="dash-following-stat">
-          <span class="dash-following-stat__num">{{ followingStats.followers }}</span>
-          <span class="dash-following-stat__label">Followers</span>
-        </div>
-        <div class="dash-following-stat dash-following-stat--pending">
-          <span class="dash-following-stat__num">{{ followingStats.pendingRequests }}</span>
-          <span class="dash-following-stat__label">Pending</span>
-        </div>
+        <button
+          class="dash-following-search"
+          (click)="$event.stopPropagation(); navigateTo('network/search')"
+        >
+          <span class="material-symbols-outlined">person_search</span>
+          Find People
+        </button>
       </div>
-      <button class="dash-following-search" (click)="$event.stopPropagation(); navigateTo('network/search')">
-        <span class="material-symbols-outlined">person_search</span>
-        Find People
-      </button>
     </div>
-  </div>
   }
 
   <!-- Empty State wenn alle deaktiviert -->
   @if (enabledCount() === 0) {
-  <div class="dash-empty">
-    <span class="material-symbols-outlined">dashboard_customize</span>
-    <p class="dash-empty__title">No widgets enabled</p>
-    <p class="dash-empty__text">Click "Widgets" above to add widgets to your dashboard.</p>
-  </div>
+    <div class="dash-empty">
+      <span class="material-symbols-outlined">dashboard_customize</span>
+      <p class="dash-empty__title">No widgets enabled</p>
+      <p class="dash-empty__text">Click "Widgets" above to add widgets to your dashboard.</p>
+    </div>
   }
-
 </div>

@@ -420,7 +420,11 @@ ol {
   &__item-icon {
     font-size: 17px;
     flex-shrink: 0;
-    font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 20;
+    font-variation-settings:
+      'FILL' 0,
+      'wght' 400,
+      'GRAD' 0,
+      'opsz' 20;
   }
 
   &__item-label {
@@ -498,6 +502,12 @@ ol {
 
   &.active {
     background: var(--color-primary);
+    color: white;
+  }
+
+  // Private (erster Button) grau wenn aktiv
+  &:first-child.active {
+    background: var(--color-text-muted);
     color: white;
   }
 }

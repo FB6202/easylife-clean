@@ -64,7 +64,9 @@
   border-radius: $radius-lg;
   overflow: hidden;
   background: var(--color-bg-card);
-  transition: box-shadow $transition-base, transform $transition-base;
+  transition:
+    box-shadow $transition-base,
+    transform $transition-base;
   cursor: pointer;
   display: flex;
   flex-direction: column;
@@ -232,7 +234,11 @@
 
   .material-symbols-outlined {
     font-size: 13px;
-    font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 20;
+    font-variation-settings:
+      'FILL' 1,
+      'wght' 400,
+      'GRAD' 0,
+      'opsz' 20;
   }
 
   &.status--active {
@@ -420,7 +426,6 @@
 // ── Image Upload ───────────────────────────────────────────
 .goal-image-upload {
   border-radius: $radius-md;
-  overflow: hidden;
 
   &__empty {
     @include flex-col;
@@ -457,6 +462,7 @@
   &__preview {
     position: relative;
     aspect-ratio: 16/6;
+    min-height: 120px;
     border-radius: $radius-md;
     overflow: hidden;
 
@@ -542,16 +548,44 @@
 
   .material-symbols-outlined {
     font-size: 14px;
-    font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 20;
+    font-variation-settings:
+      'FILL' 0,
+      'wght' 400,
+      'GRAD' 0,
+      'opsz' 20;
   }
 
+  // ── Hover per Status ──────────────────────────────────
+  &--active:hover {
+    border-color: var(--color-success-text);
+    color: var(--color-success-text);
+    background: var(--color-success-subtle);
+  }
+
+  &--completed:hover {
+    border-color: var(--color-info-text);
+    color: var(--color-info-text);
+    background: var(--color-info-subtle);
+  }
+
+  &--abandoned:hover {
+    border-color: var(--color-text-muted);
+    color: var(--color-text-muted);
+    background: var(--color-bg-hover);
+  }
+
+  // ── Active (ausgewählt) ───────────────────────────────
   &--active.active {
     background: var(--color-success-subtle);
     color: var(--color-success-text);
     border-color: var(--color-success-border);
 
     .material-symbols-outlined {
-      font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 20;
+      font-variation-settings:
+        'FILL' 1,
+        'wght' 400,
+        'GRAD' 0,
+        'opsz' 20;
     }
   }
 
@@ -561,7 +595,11 @@
     border-color: var(--color-info-border);
 
     .material-symbols-outlined {
-      font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 20;
+      font-variation-settings:
+        'FILL' 1,
+        'wght' 400,
+        'GRAD' 0,
+        'opsz' 20;
     }
   }
 
@@ -569,11 +607,6 @@
     background: var(--color-neutral-subtle);
     color: var(--color-neutral-text);
     border-color: var(--color-neutral-border);
-  }
-
-  &:hover:not(.active) {
-    border-color: var(--color-primary);
-    color: var(--color-primary);
   }
 }
 
@@ -605,14 +638,24 @@
     border-right: none;
   }
 
+  .material-symbols-outlined {
+    font-size: 16px;
+  }
+
+  &:hover {
+    background: var(--color-bg-hover);
+    color: var(--color-text-primary);
+  }
+
   &.active {
-    background: var(--color-primary-light);
-    color: var(--color-primary);
+    background: var(--color-primary);
+    color: white;
     font-weight: $font-weight-semibold;
   }
 
-  .material-symbols-outlined {
-    font-size: 16px;
+  &:first-child.active {
+    background: var(--color-text-muted);
+    color: white;
   }
 }
 
@@ -737,7 +780,11 @@
   &__item-icon {
     font-size: 17px;
     flex-shrink: 0;
-    font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 20;
+    font-variation-settings:
+      'FILL' 0,
+      'wght' 400,
+      'GRAD' 0,
+      'opsz' 20;
   }
 
   &__item-label {
@@ -1038,7 +1085,11 @@
 
     .material-symbols-outlined {
       font-size: 28px;
-      font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+      font-variation-settings:
+        'FILL' 1,
+        'wght' 400,
+        'GRAD' 0,
+        'opsz' 24;
     }
 
     &--danger {

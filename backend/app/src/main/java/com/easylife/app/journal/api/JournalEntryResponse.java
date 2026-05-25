@@ -1,5 +1,6 @@
 package com.easylife.app.journal.api;
 
+import com.easylife.app.categories.payload.CategoryPreview;
 import com.easylife.app.shared.enums.MoodLevel;
 import com.easylife.app.weekplan.api.WeekPlanSummary;
 
@@ -18,7 +19,7 @@ public record JournalEntryResponse(
         LocalDate entryDate,
         LocalDateTime createdAt,
         LocalDateTime updatedAt,
-        List<Long> categoryIds,
+        List<CategoryPreview> categories,
         Long weekPlanId,
         WeekPlanSummary weekPlan
 ) {}

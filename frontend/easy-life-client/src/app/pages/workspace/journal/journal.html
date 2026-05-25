@@ -7,12 +7,15 @@
     </p>
   </div>
   <div class="journal-header__actions">
-    <button class="btn-secondary" [class.btn-secondary--active]="activeFilterCount() > 0"
-      (click)="showFilter.set(true)">
+    <button
+      class="btn-secondary"
+      [class.btn-secondary--active]="activeFilterCount() > 0"
+      (click)="showFilter.set(true)"
+    >
       <span class="material-symbols-outlined">tune</span>
       Filters
       @if (activeFilterCount() > 0) {
-      <span class="filter-active-badge">{{ activeFilterCount() }}</span>
+        <span class="filter-active-badge">{{ activeFilterCount() }}</span>
       }
     </button>
     <button class="btn-primary" (click)="openCreate()">
@@ -25,402 +28,508 @@
 <!-- Entries -->
 <div class="journal-container">
   @for (entry of paginatedEntries(); track entry.id) {
-  <div class="journal-card" (click)="openEdit(entry)">
-    <div class="journal-card__aside">
-      <div class="journal-card__date">
-        <span class="journal-card__day">{{ entry.entryDay }}</span>
-        <span class="journal-card__month">{{ entry.entryMonth }} {{ entry.entryYear }}</span>
+    <div class="journal-card" (click)="openEdit(entry)">
+      <div class="journal-card__aside">
+        <div class="journal-card__date">
+          <span class="journal-card__day">{{ formatEntryDate(entry.entryDate).day }}</span>
+          <span class="journal-card__month">
+            {{ formatEntryDate(entry.entryDate).month }} {{ formatEntryDate(entry.entryDate).year }}
+          </span>
+        </div>
+        <div
+          class="journal-card__mood"
+          [style.color]="getMoodColor(entry.mood)"
+          [style.background]="getMoodColor(entry.mood) + '15'"
+        >
+          <span class="material-symbols-outlined">{{ getMoodIcon(entry.mood) }}</span>
+          <span class="journal-card__mood-label">{{ getMoodLabel(entry.mood) }}</span>
+        </div>
       </div>
-      <div class="journal-card__mood" [style.color]="getMoodColor(entry.mood)"
-        [style.background]="getMoodColor(entry.mood) + '15'">
-        <span class="material-symbols-outlined">{{ getMoodIcon(entry.mood) }}</span>
-        <span class="journal-card__mood-label">{{ getMoodLabel(entry.mood) }}</span>
+
+      <div class="journal-card__content">
+        <div class="journal-card__top">
+          <h3 class="journal-card__title">{{ entry.title }}</h3>
+          <div class="journal-card__badges">
+            @if (entry.learnings) {
+              <span class="journal-badge journal-badge--learnings">
+                <span class="material-symbols-outlined">lightbulb</span>Has learnings
+              </span>
+            }
+            @if (entry.gratitude) {
+              <span class="journal-badge journal-badge--gratitude">
+                <span class="material-symbols-outlined">favorite</span>Has gratitude
+              </span>
+            }
+            @if (entry.weekPlan) {
+              <span class="journal-badge journal-badge--weekplan">
+                <span class="material-symbols-outlined">view_week</span>
+                {{ entry.weekPlan.title }}
+              </span>
+            }
+          </div>
+        </div>
+
+        <div class="journal-card__sections">
+          <div class="journal-section journal-section--well">
+            <div class="journal-section__header">
+              <span class="material-symbols-outlined">trending_up</span>WHAT WENT WELL
+            </div>
+            <p class="journal-section__text">{{ entry.wentWell }}</p>
+          </div>
+          <div class="journal-section journal-section--bad">
+            <div class="journal-section__header">
+              <span class="material-symbols-outlined">trending_down</span>WHAT DIDN'T GO WELL
+            </div>
+            <p class="journal-section__text">{{ entry.wentBad }}</p>
+          </div>
+        </div>
+
+        <div class="journal-card__footer">
+          <div class="journal-card__cats">
+            @for (cat of entry.categories ?? []; track cat.id) {
+              <span
+                class="material-symbols-outlined journal-card__cat-icon"
+                [style.color]="cat.color"
+                >{{ cat.icon }}</span
+              >
+            }
+          </div>
+          <div class="journal-card__meta">
+            <span class="material-symbols-outlined">article</span>
+            {{ getWordCount(entry) }} words · {{ getReadMinutes(entry) }} min read
+          </div>
+        </div>
       </div>
     </div>
-
-    <div class="journal-card__content">
-      <div class="journal-card__top">
-        <h3 class="journal-card__title">{{ entry.title }}</h3>
-        <div class="journal-card__badges">
-          @if (entry.learnings) {
-          <span class="journal-badge journal-badge--learnings">
-            <span class="material-symbols-outlined">lightbulb</span>Has learnings
-          </span>
-          }
-          @if (entry.gratitude) {
-          <span class="journal-badge journal-badge--gratitude">
-            <span class="material-symbols-outlined">favorite</span>Has gratitude
-          </span>
-          }
-          @if (entry.weekPlan) {
-          <span class="journal-badge journal-badge--weekplan">
-            <span class="material-symbols-outlined">view_week</span>
-            {{ entry.weekPlan.title }}
-          </span>
-          }
-        </div>
-      </div>
-
-      <div class="journal-card__sections">
-        <div class="journal-section journal-section--well">
-          <div class="journal-section__header">
-            <span class="material-symbols-outlined">trending_up</span>WHAT WENT WELL
-          </div>
-          <p class="journal-section__text">{{ entry.wentWell }}</p>
-        </div>
-        <div class="journal-section journal-section--bad">
-          <div class="journal-section__header">
-            <span class="material-symbols-outlined">trending_down</span>WHAT DIDN'T GO WELL
-          </div>
-          <p class="journal-section__text">{{ entry.wentBad }}</p>
-        </div>
-      </div>
-
-      <div class="journal-card__footer">
-        <div class="journal-card__cats">
-          @for (cat of entry.categories; track cat.id) {
-          <span class="material-symbols-outlined journal-card__cat-icon" [style.color]="cat.color">{{ cat.icon }}</span>
-          }
-        </div>
-        <div class="journal-card__meta">
-          <span class="material-symbols-outlined">article</span>
-          {{ entry.wordCount | number }} words · {{ entry.readMinutes }} min read
-        </div>
-      </div>
-    </div>
-  </div>
   }
 
   <div class="journal-pagination">
-    <app-pagination [currentPage]="currentPage()" [totalPages]="totalPages()" [totalElements]="totalElements()"
-      [pageSize]="pageSize()" (pageChange)="onPageChange($event)" (pageSizeChange)="onPageSizeChange($event)"
-      (aiClick)="onAiClick()" />
+    <app-pagination
+      [currentPage]="currentPage()"
+      [totalPages]="totalPages()"
+      [totalElements]="totalElements()"
+      [pageSize]="pageSize()"
+      (pageChange)="onPageChange($event)"
+      (pageSizeChange)="onPageSizeChange($event)"
+      (aiClick)="onAiClick()"
+    />
   </div>
 </div>
 
 <!-- ══ FILTER PANEL ══════════════════════════════════════ -->
 @if (showFilter()) {
-<app-filter-panel title="Filter Journal" [fields]="journalFilterFields" [initialValues]="activeFilters()"
-  (apply)="onFilterApply($event)" (reset)="onFilterReset()" (close)="showFilter.set(false)" />
+  <app-filter-panel
+    title="Filter Journal"
+    [fields]="journalFilterFields()"
+    [initialValues]="activeFilters()"
+    (apply)="onFilterApply($event)"
+    (reset)="onFilterReset()"
+    (close)="showFilter.set(false)"
+  />
 }
 
 <!-- ══ CREATE MODAL ══════════════════════════════════════ -->
 @if (showCreateModal()) {
-<div class="modal-overlay" (click)="showCreateModal.set(false); showCatDropdown.set(false)">
-  <div class="journal-modal" (click)="$event.stopPropagation(); showCatDropdown.set(false)">
-
-    <div class="journal-modal__header">
-      <div>
-        <h2 class="journal-modal__title">New Journal Entry</h2>
-        <p class="journal-modal__subtitle">Reflect on your day and capture your thoughts.</p>
-      </div>
-      <button class="journal-modal__close" (click)="showCreateModal.set(false)">
-        <span class="material-symbols-outlined">close</span>
-      </button>
-    </div>
-
-    <input class="journal-modal__title-input" type="text" placeholder="Entry Title" [(ngModel)]="createForm().title" />
-
-    <div class="journal-modal__row">
-      <div class="form-group">
-        <label>Date</label>
-        <input type="date" [(ngModel)]="createForm().entryDate" />
-      </div>
-      <div class="form-group">
-        <label>Mood</label>
-        <div class="mood-picker">
-          @for (mood of moods; track mood) {
-          <button class="mood-btn" [class.mood-btn--active]="createForm().mood === mood"
-            [style.--mood-color]="getMoodColor(mood)" (click)="createForm.update(f => ({ ...f, mood: mood }))"
-            [title]="getMoodLabel(mood)">
-            <span class="material-symbols-outlined"
-              [style.color]="createForm().mood === mood ? 'white' : getMoodColor(mood)">
-              {{ getMoodIcon(mood) }}
-            </span>
-          </button>
-          }
+  <div class="modal-overlay" (click)="showCreateModal.set(false); showCatDropdown.set(false)">
+    <div class="journal-modal" (click)="$event.stopPropagation(); showCatDropdown.set(false)">
+      <div class="journal-modal__header">
+        <div>
+          <h2 class="journal-modal__title">New Journal Entry</h2>
+          <p class="journal-modal__subtitle">Reflect on your day and capture your thoughts.</p>
         </div>
-      </div>
-    </div>
-
-    <div class="form-group">
-      <label class="journal-modal__section-label journal-modal__section-label--well">
-        <span class="material-symbols-outlined">trending_up</span>What went well?
-      </label>
-      <textarea rows="3" placeholder="What positive things happened today?"
-        [(ngModel)]="createForm().wentWell"></textarea>
-    </div>
-
-    <div class="form-group">
-      <label class="journal-modal__section-label journal-modal__section-label--bad">
-        <span class="material-symbols-outlined">trending_down</span>What didn't go well?
-      </label>
-      <textarea rows="3" placeholder="What challenges did you face?" [(ngModel)]="createForm().wentBad"></textarea>
-    </div>
-
-    <div class="form-group">
-      <label class="journal-modal__section-label journal-modal__section-label--learnings">
-        <span class="material-symbols-outlined">lightbulb</span>
-        Learnings <span class="form-group__optional">optional</span>
-      </label>
-      <textarea rows="2" placeholder="What did you learn today?" [(ngModel)]="createForm().learnings"></textarea>
-    </div>
-
-    <div class="form-group">
-      <label class="journal-modal__section-label journal-modal__section-label--gratitude">
-        <span class="material-symbols-outlined">favorite</span>
-        Gratitude <span class="form-group__optional">optional</span>
-      </label>
-      <textarea rows="2" placeholder="What are you grateful for today?" [(ngModel)]="createForm().gratitude"></textarea>
-    </div>
-
-    <div class="form-group">
-      <label>
-        <span class="material-symbols-outlined" style="font-size: 15px; color: var(--color-primary)">view_week</span>
-        Link to Week Plan <span class="form-group__optional">optional</span>
-      </label>
-      <select [(ngModel)]="createForm().weekPlanId">
-        <option [ngValue]="null">No week plan</option>
-        @for (plan of availableWeekPlans(); track plan.id) {
-        <option [ngValue]="plan.id">{{ plan.title }} ({{ plan.startDate }} – {{ plan.endDate }})</option>
-        }
-      </select>
-    </div>
-
-    <!-- Categories Dropdown -->
-    <div class="form-group" (click)="$event.stopPropagation()">
-      <label>Categories</label>
-      <div class="modal-cat-dropdown">
-        <button class="modal-cat-dropdown__trigger"
-          [class.modal-cat-dropdown__trigger--active]="createForm().categoryIds.length > 0"
-          [class.modal-cat-dropdown__trigger--open]="showCatDropdown()" (click)="toggleCatDropdown($event)">
-          <div class="modal-cat-dropdown__trigger-left">
-            @if (createForm().categoryIds.length > 0) {
-            <div class="modal-cat-dropdown__dots">
-              @for (color of getSelectedCatColors(createForm().categoryIds); track color) {
-              <span class="modal-cat-dropdown__dot" [style.background]="color"></span>
-              }
-            </div>
-            }
-            <span class="modal-cat-dropdown__label">
-              {{ getCatDropdownLabel(createForm().categoryIds) }}
-            </span>
-          </div>
-          <span class="material-symbols-outlined modal-cat-dropdown__arrow">
-            {{ showCatDropdown() ? 'expand_less' : 'expand_more' }}
-          </span>
+        <button class="journal-modal__close" (click)="showCreateModal.set(false)">
+          <span class="material-symbols-outlined">close</span>
         </button>
-        @if (showCatDropdown()) {
-        <div class="modal-cat-dropdown__menu">
-          @for (cat of availableCategories(); track cat.id) {
-          <button class="modal-cat-dropdown__item"
-            [class.modal-cat-dropdown__item--selected]="createForm().categoryIds.includes(cat.id)"
-            (click)="toggleCreateCategory(cat.id)">
-            <div class="modal-cat-dropdown__item-check">
-              @if (createForm().categoryIds.includes(cat.id)) {
-              <span class="material-symbols-outlined">check</span>
+      </div>
+
+      <input
+        class="journal-modal__title-input"
+        type="text"
+        placeholder="Entry Title"
+        [(ngModel)]="createForm().title"
+      />
+
+      <div class="journal-modal__row">
+        <div class="form-group">
+          <label>Date</label>
+          <input type="date" [(ngModel)]="createForm().entryDate" />
+        </div>
+        <div class="form-group">
+          <label>Mood</label>
+          <div class="mood-picker">
+            @for (mood of moods; track mood) {
+              <button
+                class="mood-btn"
+                [class.mood-btn--active]="createForm().mood === mood"
+                [style.--mood-color]="getMoodColor(mood)"
+                (click)="createForm.update((f) => ({ ...f, mood: mood }))"
+                [title]="getMoodLabel(mood)"
+              >
+                <span
+                  class="material-symbols-outlined"
+                  [style.color]="createForm().mood === mood ? 'white' : getMoodColor(mood)"
+                >
+                  {{ getMoodIcon(mood) }}
+                </span>
+              </button>
+            }
+          </div>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="journal-modal__section-label journal-modal__section-label--well">
+          <span class="material-symbols-outlined">trending_up</span>What went well?
+        </label>
+        <textarea
+          rows="3"
+          placeholder="What positive things happened today?"
+          [(ngModel)]="createForm().wentWell"
+        ></textarea>
+      </div>
+
+      <div class="form-group">
+        <label class="journal-modal__section-label journal-modal__section-label--bad">
+          <span class="material-symbols-outlined">trending_down</span>What didn't go well?
+        </label>
+        <textarea
+          rows="3"
+          placeholder="What challenges did you face?"
+          [(ngModel)]="createForm().wentBad"
+        ></textarea>
+      </div>
+
+      <div class="form-group">
+        <label class="journal-modal__section-label journal-modal__section-label--learnings">
+          <span class="material-symbols-outlined">lightbulb</span>
+          Learnings <span class="form-group__optional">optional</span>
+        </label>
+        <textarea
+          rows="2"
+          placeholder="What did you learn today?"
+          [(ngModel)]="createForm().learnings"
+        ></textarea>
+      </div>
+
+      <div class="form-group">
+        <label class="journal-modal__section-label journal-modal__section-label--gratitude">
+          <span class="material-symbols-outlined">favorite</span>
+          Gratitude <span class="form-group__optional">optional</span>
+        </label>
+        <textarea
+          rows="2"
+          placeholder="What are you grateful for today?"
+          [(ngModel)]="createForm().gratitude"
+        ></textarea>
+      </div>
+
+      <div class="form-group">
+        <label>
+          <span
+            class="material-symbols-outlined"
+            style="font-size: 15px; color: var(--color-primary)"
+            >view_week</span
+          >
+          Link to Week Plan <span class="form-group__optional">optional</span>
+        </label>
+        <select [(ngModel)]="createForm().weekPlanId">
+          <option [ngValue]="null">No week plan</option>
+          @for (plan of availableWeekPlans(); track plan.id) {
+            <option [ngValue]="plan.id">{{ plan.title }}</option>
+          }
+        </select>
+      </div>
+
+      <div class="form-group" (click)="$event.stopPropagation()">
+        <label>Categories</label>
+        <div class="modal-cat-dropdown">
+          <button
+            class="modal-cat-dropdown__trigger"
+            [class.modal-cat-dropdown__trigger--active]="createForm().categoryIds.length > 0"
+            [class.modal-cat-dropdown__trigger--open]="showCatDropdown()"
+            (click)="toggleCatDropdown($event)"
+          >
+            <div class="modal-cat-dropdown__trigger-left">
+              @if (createForm().categoryIds.length > 0) {
+                <div class="modal-cat-dropdown__dots">
+                  @for (color of getSelectedCatColors(createForm().categoryIds); track color) {
+                    <span class="modal-cat-dropdown__dot" [style.background]="color"></span>
+                  }
+                </div>
+              }
+              <span class="modal-cat-dropdown__label">{{
+                getCatDropdownLabel(createForm().categoryIds)
+              }}</span>
+            </div>
+            <span class="material-symbols-outlined modal-cat-dropdown__arrow">
+              {{ showCatDropdown() ? 'expand_less' : 'expand_more' }}
+            </span>
+          </button>
+          @if (showCatDropdown()) {
+            <div class="modal-cat-dropdown__menu">
+              @for (cat of sortedCreateCategories(); track cat.id) {
+                <button
+                  class="modal-cat-dropdown__item"
+                  [class.modal-cat-dropdown__item--selected]="
+                    createForm().categoryIds.includes(cat.id)
+                  "
+                  (click)="toggleCreateCategory(cat.id)"
+                >
+                  <div class="modal-cat-dropdown__item-check">
+                    @if (createForm().categoryIds.includes(cat.id)) {
+                      <span class="material-symbols-outlined">check</span>
+                    }
+                  </div>
+                  <span
+                    class="material-symbols-outlined modal-cat-dropdown__item-icon"
+                    [style.color]="cat.color"
+                    >{{ cat.icon }}</span
+                  >
+                  <span class="modal-cat-dropdown__item-label">{{ cat.name }}</span>
+                </button>
+              }
+              @if (createForm().categoryIds.length > 0) {
+                <div class="modal-cat-dropdown__footer">
+                  <button
+                    class="modal-cat-dropdown__clear"
+                    (click)="
+                      createForm.update((f) => ({ ...f, categoryIds: [] }));
+                      $event.stopPropagation()
+                    "
+                  >
+                    <span class="material-symbols-outlined">close</span>Clear
+                  </button>
+                </div>
               }
             </div>
-            <span class="material-symbols-outlined modal-cat-dropdown__item-icon" [style.color]="cat.color">{{ cat.icon
-              }}</span>
-            <span class="modal-cat-dropdown__item-label">{{ cat.name }}</span>
-          </button>
-          }
-          @if (createForm().categoryIds.length > 0) {
-          <div class="modal-cat-dropdown__footer">
-            <button class="modal-cat-dropdown__clear"
-              (click)="createForm.update(f => ({ ...f, categoryIds: [] })); $event.stopPropagation()">
-              <span class="material-symbols-outlined">close</span>Clear
-            </button>
-          </div>
           }
         </div>
-        }
       </div>
-    </div>
 
-    <div class="journal-modal__footer">
-      <button class="btn-secondary" (click)="showCreateModal.set(false)">Cancel</button>
-      <button class="btn-primary" (click)="submitCreate()">Save Entry</button>
+      <div class="journal-modal__footer">
+        <button class="btn-secondary" (click)="showCreateModal.set(false)">Cancel</button>
+        <button class="btn-primary" (click)="submitCreate()">Save Entry</button>
+      </div>
     </div>
   </div>
-</div>
 }
 
 <!-- ══ EDIT MODAL ════════════════════════════════════════ -->
 @if (showEditModal() && selectedEntry()) {
-<div class="modal-overlay" (click)="showEditModal.set(false); showEditCatDropdown.set(false)">
-  <div class="journal-modal" (click)="$event.stopPropagation(); showEditCatDropdown.set(false)">
-
-    <div class="journal-modal__header">
-      <div>
-        <h2 class="journal-modal__title">Edit Entry</h2>
-        <p class="journal-modal__subtitle">{{ selectedEntry()!.entryDate }}</p>
-      </div>
-      <div class="journal-modal__header-actions">
-        <button class="journal-modal__action-btn journal-modal__action-btn--delete" (click)="openDeleteConfirm()"
-          title="Delete entry">
-          <span class="material-symbols-outlined">delete</span>
-        </button>
-        <button class="journal-modal__close" (click)="showEditModal.set(false)">
-          <span class="material-symbols-outlined">close</span>
-        </button>
-      </div>
-    </div>
-
-    <input class="journal-modal__title-input" type="text" placeholder="Entry Title" [(ngModel)]="editForm().title" />
-
-    <div class="journal-modal__row">
-      <div class="form-group">
-        <label>Date</label>
-        <input type="date" [(ngModel)]="editForm().entryDate" />
-      </div>
-      <div class="form-group">
-        <label>Mood</label>
-        <div class="mood-picker">
-          @for (mood of moods; track mood) {
-          <button class="mood-btn" [class.mood-btn--active]="editForm().mood === mood"
-            [style.--mood-color]="getMoodColor(mood)" (click)="editForm.update(f => ({ ...f, mood: mood }))"
-            [title]="getMoodLabel(mood)">
-            <span class="material-symbols-outlined"
-              [style.color]="editForm().mood === mood ? 'white' : getMoodColor(mood)">
-              {{ getMoodIcon(mood) }}
-            </span>
+  <div class="modal-overlay" (click)="showEditModal.set(false); showEditCatDropdown.set(false)">
+    <div class="journal-modal" (click)="$event.stopPropagation(); showEditCatDropdown.set(false)">
+      <div class="journal-modal__header">
+        <div>
+          <h2 class="journal-modal__title">Edit Entry</h2>
+          <p class="journal-modal__subtitle">{{ formatFullDate(selectedEntry()!.entryDate) }}</p>
+        </div>
+        <div class="journal-modal__header-actions">
+          <button
+            class="journal-modal__action-btn journal-modal__action-btn--delete"
+            (click)="openDeleteConfirm()"
+            title="Delete entry"
+          >
+            <span class="material-symbols-outlined">delete</span>
           </button>
-          }
+          <button class="journal-modal__close" (click)="showEditModal.set(false)">
+            <span class="material-symbols-outlined">close</span>
+          </button>
         </div>
       </div>
-    </div>
 
-    <div class="form-group">
-      <label class="journal-modal__section-label journal-modal__section-label--well">
-        <span class="material-symbols-outlined">trending_up</span>What went well?
-      </label>
-      <textarea rows="3" placeholder="What positive things happened today?"
-        [(ngModel)]="editForm().wentWell"></textarea>
-    </div>
+      <input
+        class="journal-modal__title-input"
+        type="text"
+        placeholder="Entry Title"
+        [(ngModel)]="editForm().title"
+      />
 
-    <div class="form-group">
-      <label class="journal-modal__section-label journal-modal__section-label--bad">
-        <span class="material-symbols-outlined">trending_down</span>What didn't go well?
-      </label>
-      <textarea rows="3" placeholder="What challenges did you face?" [(ngModel)]="editForm().wentBad"></textarea>
-    </div>
-
-    <div class="form-group">
-      <label class="journal-modal__section-label journal-modal__section-label--learnings">
-        <span class="material-symbols-outlined">lightbulb</span>
-        Learnings <span class="form-group__optional">optional</span>
-      </label>
-      <textarea rows="2" placeholder="What did you learn today?" [(ngModel)]="editForm().learnings"></textarea>
-    </div>
-
-    <div class="form-group">
-      <label class="journal-modal__section-label journal-modal__section-label--gratitude">
-        <span class="material-symbols-outlined">favorite</span>
-        Gratitude <span class="form-group__optional">optional</span>
-      </label>
-      <textarea rows="2" placeholder="What are you grateful for today?" [(ngModel)]="editForm().gratitude"></textarea>
-    </div>
-
-    <div class="form-group">
-      <label>
-        <span class="material-symbols-outlined" style="font-size: 15px; color: var(--color-primary)">view_week</span>
-        Link to Week Plan <span class="form-group__optional">optional</span>
-      </label>
-      @if (selectedEntry()!.weekPlan) {
-      <div class="journal-modal__weekplan-current">
-        <span class="material-symbols-outlined">view_week</span>
-        <span>{{ selectedEntry()!.weekPlan!.title }}</span>
-        <span class="journal-modal__weekplan-dates">
-          {{ selectedEntry()!.weekPlan!.startDate }} – {{ selectedEntry()!.weekPlan!.endDate }}
-        </span>
-      </div>
-      }
-      <select [(ngModel)]="editForm().weekPlanId">
-        <option [ngValue]="null">No week plan</option>
-        @for (plan of availableWeekPlans(); track plan.id) {
-        <option [ngValue]="plan.id">{{ plan.title }} ({{ plan.startDate }} – {{ plan.endDate }})</option>
-        }
-      </select>
-    </div>
-
-    <!-- Categories Dropdown -->
-    <div class="form-group" (click)="$event.stopPropagation()">
-      <label>Categories</label>
-      <div class="modal-cat-dropdown">
-        <button class="modal-cat-dropdown__trigger"
-          [class.modal-cat-dropdown__trigger--active]="editForm().categoryIds.length > 0"
-          [class.modal-cat-dropdown__trigger--open]="showEditCatDropdown()" (click)="toggleEditCatDropdown($event)">
-          <div class="modal-cat-dropdown__trigger-left">
-            @if (editForm().categoryIds.length > 0) {
-            <div class="modal-cat-dropdown__dots">
-              @for (color of getSelectedCatColors(editForm().categoryIds); track color) {
-              <span class="modal-cat-dropdown__dot" [style.background]="color"></span>
-              }
-            </div>
+      <div class="journal-modal__row">
+        <div class="form-group">
+          <label>Date</label>
+          <input type="date" [(ngModel)]="editForm().entryDate" />
+        </div>
+        <div class="form-group">
+          <label>Mood</label>
+          <div class="mood-picker">
+            @for (mood of moods; track mood) {
+              <button
+                class="mood-btn"
+                [class.mood-btn--active]="editForm().mood === mood"
+                [style.--mood-color]="getMoodColor(mood)"
+                (click)="editForm.update((f) => ({ ...f, mood: mood }))"
+                [title]="getMoodLabel(mood)"
+              >
+                <span
+                  class="material-symbols-outlined"
+                  [style.color]="editForm().mood === mood ? 'white' : getMoodColor(mood)"
+                >
+                  {{ getMoodIcon(mood) }}
+                </span>
+              </button>
             }
-            <span class="modal-cat-dropdown__label">
-              {{ getCatDropdownLabel(editForm().categoryIds) }}
-            </span>
           </div>
-          <span class="material-symbols-outlined modal-cat-dropdown__arrow">
-            {{ showEditCatDropdown() ? 'expand_less' : 'expand_more' }}
-          </span>
-        </button>
-        @if (showEditCatDropdown()) {
-        <div class="modal-cat-dropdown__menu">
-          @for (cat of availableCategories(); track cat.id) {
-          <button class="modal-cat-dropdown__item"
-            [class.modal-cat-dropdown__item--selected]="editForm().categoryIds.includes(cat.id)"
-            (click)="toggleEditCategory(cat.id)">
-            <div class="modal-cat-dropdown__item-check">
-              @if (editForm().categoryIds.includes(cat.id)) {
-              <span class="material-symbols-outlined">check</span>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="journal-modal__section-label journal-modal__section-label--well">
+          <span class="material-symbols-outlined">trending_up</span>What went well?
+        </label>
+        <textarea
+          rows="3"
+          placeholder="What positive things happened today?"
+          [(ngModel)]="editForm().wentWell"
+        ></textarea>
+      </div>
+
+      <div class="form-group">
+        <label class="journal-modal__section-label journal-modal__section-label--bad">
+          <span class="material-symbols-outlined">trending_down</span>What didn't go well?
+        </label>
+        <textarea
+          rows="3"
+          placeholder="What challenges did you face?"
+          [(ngModel)]="editForm().wentBad"
+        ></textarea>
+      </div>
+
+      <div class="form-group">
+        <label class="journal-modal__section-label journal-modal__section-label--learnings">
+          <span class="material-symbols-outlined">lightbulb</span>
+          Learnings <span class="form-group__optional">optional</span>
+        </label>
+        <textarea
+          rows="2"
+          placeholder="What did you learn today?"
+          [(ngModel)]="editForm().learnings"
+        ></textarea>
+      </div>
+
+      <div class="form-group">
+        <label class="journal-modal__section-label journal-modal__section-label--gratitude">
+          <span class="material-symbols-outlined">favorite</span>
+          Gratitude <span class="form-group__optional">optional</span>
+        </label>
+        <textarea
+          rows="2"
+          placeholder="What are you grateful for today?"
+          [(ngModel)]="editForm().gratitude"
+        ></textarea>
+      </div>
+
+      <div class="form-group">
+        <label>
+          <span
+            class="material-symbols-outlined"
+            style="font-size: 15px; color: var(--color-primary)"
+            >view_week</span
+          >
+          Link to Week Plan <span class="form-group__optional">optional</span>
+        </label>
+        @if (selectedEntry()!.weekPlan) {
+          <div class="journal-modal__weekplan-current">
+            <span class="material-symbols-outlined">view_week</span>
+            <span>{{ selectedEntry()!.weekPlan!.title }}</span>
+          </div>
+        }
+        <select [(ngModel)]="editForm().weekPlanId">
+          <option [ngValue]="null">No week plan</option>
+          @for (plan of availableWeekPlans(); track plan.id) {
+            <option [ngValue]="plan.id">{{ plan.title }}</option>
+          }
+        </select>
+      </div>
+
+      <div class="form-group" (click)="$event.stopPropagation()">
+        <label>Categories</label>
+        <div class="modal-cat-dropdown">
+          <button
+            class="modal-cat-dropdown__trigger"
+            [class.modal-cat-dropdown__trigger--active]="editForm().categoryIds.length > 0"
+            [class.modal-cat-dropdown__trigger--open]="showEditCatDropdown()"
+            (click)="toggleEditCatDropdown($event)"
+          >
+            <div class="modal-cat-dropdown__trigger-left">
+              @if (editForm().categoryIds.length > 0) {
+                <div class="modal-cat-dropdown__dots">
+                  @for (color of getSelectedCatColors(editForm().categoryIds); track color) {
+                    <span class="modal-cat-dropdown__dot" [style.background]="color"></span>
+                  }
+                </div>
+              }
+              <span class="modal-cat-dropdown__label">{{
+                getCatDropdownLabel(editForm().categoryIds)
+              }}</span>
+            </div>
+            <span class="material-symbols-outlined modal-cat-dropdown__arrow">
+              {{ showEditCatDropdown() ? 'expand_less' : 'expand_more' }}
+            </span>
+          </button>
+          @if (showEditCatDropdown()) {
+            <div class="modal-cat-dropdown__menu">
+              @for (cat of sortedEditCategories(); track cat.id) {
+                <button
+                  class="modal-cat-dropdown__item"
+                  [class.modal-cat-dropdown__item--selected]="
+                    editForm().categoryIds.includes(cat.id)
+                  "
+                  (click)="toggleEditCategory(cat.id)"
+                >
+                  <div class="modal-cat-dropdown__item-check">
+                    @if (editForm().categoryIds.includes(cat.id)) {
+                      <span class="material-symbols-outlined">check</span>
+                    }
+                  </div>
+                  <span
+                    class="material-symbols-outlined modal-cat-dropdown__item-icon"
+                    [style.color]="cat.color"
+                    >{{ cat.icon }}</span
+                  >
+                  <span class="modal-cat-dropdown__item-label">{{ cat.name }}</span>
+                </button>
+              }
+              @if (editForm().categoryIds.length > 0) {
+                <div class="modal-cat-dropdown__footer">
+                  <button
+                    class="modal-cat-dropdown__clear"
+                    (click)="
+                      editForm.update((f) => ({ ...f, categoryIds: [] })); $event.stopPropagation()
+                    "
+                  >
+                    <span class="material-symbols-outlined">close</span>Clear
+                  </button>
+                </div>
               }
             </div>
-            <span class="material-symbols-outlined modal-cat-dropdown__item-icon" [style.color]="cat.color">{{ cat.icon
-              }}</span>
-            <span class="modal-cat-dropdown__item-label">{{ cat.name }}</span>
-          </button>
-          }
-          @if (editForm().categoryIds.length > 0) {
-          <div class="modal-cat-dropdown__footer">
-            <button class="modal-cat-dropdown__clear"
-              (click)="editForm.update(f => ({ ...f, categoryIds: [] })); $event.stopPropagation()">
-              <span class="material-symbols-outlined">close</span>Clear
-            </button>
-          </div>
           }
         </div>
-        }
       </div>
-    </div>
 
-    <div class="journal-modal__footer">
-      <button class="btn-secondary" (click)="showEditModal.set(false)">Cancel</button>
-      <button class="btn-primary" (click)="submitEdit()">Save Changes</button>
+      <div class="journal-modal__footer">
+        <button class="btn-secondary" (click)="showEditModal.set(false)">Cancel</button>
+        <button class="btn-primary" (click)="submitEdit()">Save Changes</button>
+      </div>
     </div>
   </div>
-</div>
 }
 
 <!-- ══ DELETE CONFIRM ════════════════════════════════════ -->
 @if (showDeleteConfirm() && selectedEntry()) {
-<div class="modal-overlay" (click)="showDeleteConfirm.set(false)">
-  <div class="confirm-dialog" (click)="$event.stopPropagation()">
-    <div class="confirm-dialog__icon confirm-dialog__icon--danger">
-      <span class="material-symbols-outlined">delete</span>
-    </div>
-    <h3 class="confirm-dialog__title">Delete Entry</h3>
-    <p class="confirm-dialog__text">
-      Are you sure you want to delete <strong>"{{ selectedEntry()!.title }}"</strong>?
-      This action cannot be undone.
-    </p>
-    <div class="confirm-dialog__actions">
-      <button class="btn-secondary" (click)="showDeleteConfirm.set(false)">Cancel</button>
-      <button class="btn-danger" (click)="confirmDelete()">Delete Entry</button>
+  <div class="modal-overlay" (click)="showDeleteConfirm.set(false)">
+    <div class="confirm-dialog" (click)="$event.stopPropagation()">
+      <div class="confirm-dialog__icon confirm-dialog__icon--danger">
+        <span class="material-symbols-outlined">delete</span>
+      </div>
+      <h3 class="confirm-dialog__title">Delete Entry</h3>
+      <p class="confirm-dialog__text">
+        Are you sure you want to delete <strong>"{{ selectedEntry()!.title }}"</strong>? This action
+        cannot be undone.
+      </p>
+      <div class="confirm-dialog__actions">
+        <button class="btn-secondary" (click)="showDeleteConfirm.set(false)">Cancel</button>
+        <button class="btn-danger" (click)="confirmDelete()">Delete Entry</button>
+      </div>
     </div>
   </div>
-</div>
 }

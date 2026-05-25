@@ -37,24 +37,6 @@
   gap: $space-2;
   margin-bottom: $space-5;
   flex-wrap: wrap;
-
-  &__sort {
-    @include flex-start;
-    gap: $space-1;
-    margin-left: auto;
-    font-size: $font-size-xs;
-    color: var(--color-text-muted);
-    cursor: pointer;
-    transition: color $transition-fast;
-
-    .material-symbols-outlined {
-      font-size: 15px;
-    }
-
-    &:hover {
-      color: var(--color-text-primary);
-    }
-  }
 }
 
 .network-tag {
@@ -96,7 +78,7 @@
 // ── Table ──────────────────────────────────────────────────
 .network-table__header {
   display: grid;
-  grid-template-columns: 2fr 2fr 120px 100px 120px;
+  grid-template-columns: 2fr 2fr 120px 100px 180px;
   padding: $space-3 $space-6;
   background: var(--color-bg-input);
   border-bottom: 1px solid var(--color-border);
@@ -105,7 +87,7 @@
 
 .network-table__row {
   display: grid;
-  grid-template-columns: 2fr 2fr 120px 100px 120px;
+  grid-template-columns: 2fr 2fr 120px 100px 180px;
   padding: $space-4 $space-6;
   border-bottom: 1px solid var(--color-border-light);
   gap: $space-4;
@@ -163,6 +145,37 @@
   }
 }
 
+// ── Position Column ────────────────────────────────────────
+.contact-position {
+  @include flex-col;
+  gap: 3px;
+  min-width: 0;
+
+  &__role {
+    font-size: $font-size-sm;
+    font-weight: $font-weight-medium;
+    color: var(--color-text-primary);
+    @include truncate;
+  }
+
+  &__company {
+    @include flex-start;
+    gap: 3px;
+    font-size: $font-size-xs;
+    color: var(--color-text-muted);
+
+    .material-symbols-outlined {
+      font-size: 12px;
+      flex-shrink: 0;
+    }
+  }
+
+  &__empty {
+    color: var(--color-text-muted);
+    font-size: $font-size-sm;
+  }
+}
+
 // ── Skills ─────────────────────────────────────────────────
 .contact-skills {
   @include flex-start;
@@ -196,7 +209,11 @@
 
 .contact-cat-icon {
   font-size: 18px;
-  font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 20;
+  font-variation-settings:
+    'FILL' 0,
+    'wght' 400,
+    'GRAD' 0,
+    'opsz' 20;
 }
 
 // ── Type Badge ─────────────────────────────────────────────
@@ -238,17 +255,6 @@
     color: var(--color-neutral-text);
     border: 1px solid var(--color-neutral-border);
   }
-}
-
-// ── Last Contact ───────────────────────────────────────────
-.contact-last__icon {
-  font-size: 16px;
-  color: var(--color-text-muted);
-}
-
-.contact-last__text {
-  font-size: $font-size-sm;
-  color: var(--color-text-secondary);
 }
 
 // ══ MODAL OVERLAY ════════════════════════════════════════
@@ -517,7 +523,11 @@
 
     .material-symbols-outlined {
       font-size: 28px;
-      font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+      font-variation-settings:
+        'FILL' 1,
+        'wght' 400,
+        'GRAD' 0,
+        'opsz' 24;
     }
 
     &--danger {

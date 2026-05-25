@@ -197,7 +197,11 @@
 
 .task-category-icon {
   font-size: 18px;
-  font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 20;
+  font-variation-settings:
+    'FILL' 0,
+    'wght' 400,
+    'GRAD' 0,
+    'opsz' 20;
 }
 
 // ── Status ─────────────────────────────────────────────────
@@ -212,7 +216,11 @@
 
   &__icon {
     font-size: 14px;
-    font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 20;
+    font-variation-settings:
+      'FILL' 1,
+      'wght' 400,
+      'GRAD' 0,
+      'opsz' 20;
   }
 
   &.status--open {
@@ -308,14 +316,22 @@
 // ── Access Icon ────────────────────────────────────────────
 .task-access-icon {
   font-size: 20px;
-  font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 20;
+  font-variation-settings:
+    'FILL' 0,
+    'wght' 400,
+    'GRAD' 0,
+    'opsz' 20;
   display: flex;
   align-items: center;
   justify-content: center;
 
   &--public {
     color: var(--color-primary);
-    font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 20;
+    font-variation-settings:
+      'FILL' 1,
+      'wght' 400,
+      'GRAD' 0,
+      'opsz' 20;
   }
 
   &--private {
@@ -572,8 +588,29 @@
   }
 
   &:hover {
-    border-color: var(--color-primary);
-    color: var(--color-primary);
+    border-color: var(--color-border);
+    color: var(--color-text-muted);
+  }
+
+  &--critical:hover {
+    border-color: var(--color-priority-critical-border);
+    color: var(--color-priority-critical-text);
+  }
+  &--high:hover {
+    border-color: var(--color-priority-high-border);
+    color: var(--color-priority-high-text);
+  }
+  &--medium:hover {
+    border-color: var(--color-priority-medium-border);
+    color: var(--color-priority-medium-text);
+  }
+  &--low:hover {
+    border-color: var(--color-priority-low-border);
+    color: var(--color-priority-low-text);
+  }
+  &--optional:hover {
+    border-color: var(--color-priority-optional-border);
+    color: var(--color-priority-optional-text);
   }
 }
 
@@ -598,7 +635,11 @@
 
     .material-symbols-outlined {
       font-size: 28px;
-      font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+      font-variation-settings:
+        'FILL' 1,
+        'wght' 400,
+        'GRAD' 0,
+        'opsz' 24;
     }
 
     &--danger {
@@ -658,7 +699,11 @@
   font-size: 16px;
   color: var(--color-text-muted);
   cursor: help;
-  font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 20;
+  font-variation-settings:
+    'FILL' 0,
+    'wght' 400,
+    'GRAD' 0,
+    'opsz' 20;
 
   &:hover {
     color: var(--color-primary);

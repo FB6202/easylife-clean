@@ -5,12 +5,15 @@
     <p class="goals-header__subtitle">Manage and track your primary objectives and key results.</p>
   </div>
   <div class="goals-header__actions">
-    <button class="btn-secondary" [class.btn-secondary--active]="activeFilterCount() > 0"
-      (click)="showFilter.set(true)">
+    <button
+      class="btn-secondary"
+      [class.btn-secondary--active]="activeFilterCount() > 0"
+      (click)="showFilter.set(true)"
+    >
       <span class="material-symbols-outlined">tune</span>
       Filters
       @if (activeFilterCount() > 0) {
-      <span class="filter-active-badge">{{ activeFilterCount() }}</span>
+        <span class="filter-active-badge">{{ activeFilterCount() }}</span>
       }
     </button>
     <button class="btn-primary" (click)="openCreate()">
@@ -24,560 +27,751 @@
 <div class="goals-container">
   <div class="goals-grid">
     @for (goal of paginatedGoals(); track goal.id) {
-    <div class="goal-card" (click)="openEdit(goal)">
-      <div class="goal-card__image">
-        @if (goal.imagePath) {
-        <img [src]="goal.imagePath" [alt]="goal.title" />
-        } @else {
-        <div class="goal-card__image-placeholder">
-          <span class="material-symbols-outlined">flag</span>
+      <div class="goal-card" (click)="openEdit(goal)">
+        <div class="goal-card__image">
+          @if (goal.presignedImageUrl) {
+            <img [src]="goal.presignedImageUrl" [alt]="goal.title" />
+          } @else {
+            <div class="goal-card__image-placeholder">
+              <span class="material-symbols-outlined">flag</span>
+            </div>
+          }
         </div>
-        }
-      </div>
-      <div class="goal-card__body">
-        <div class="goal-card__meta-row">
-          <span [class]="'goal-status ' + getStatusClass(goal.status)">
-            <span class="material-symbols-outlined">{{ getStatusIcon(goal.status) }}</span>
-            {{ getStatusLabel(goal.status) }}
-          </span>
-          <span class="material-symbols-outlined goal-card__access"
-            [class.goal-card__access--public]="goal.accessType === 'PUBLIC'"
-            [class.goal-card__access--private]="goal.accessType === 'PRIVATE'">
-            {{ goal.accessType === 'PUBLIC' ? 'travel_explore' : 'lock' }}
-          </span>
-        </div>
-        <h3 class="goal-card__title">{{ goal.title }}</h3>
-        <p class="goal-card__desc">{{ goal.description }}</p>
-        <div class="goal-card__target">
-          <span class="material-symbols-outlined">my_location</span>
-          Target: {{ goal.measurableTarget }}
-        </div>
-        <div class="goal-card__progress">
-          <div class="goal-card__progress-info">
-            <span class="goal-card__progress-label">
-              {{ getTasksDone(goal) }} of {{ goal.targetValue }} {{ goal.targetUnit }} done
+        <div class="goal-card__body">
+          <div class="goal-card__meta-row">
+            <span [class]="'goal-status ' + getStatusClass(goal.status)">
+              <span class="material-symbols-outlined">{{ getStatusIcon(goal.status) }}</span>
+              {{ getStatusLabel(goal.status) }}
             </span>
-            <span class="goal-card__progress-pct">{{ goal.currentProgress }}%</span>
+            <span
+              class="material-symbols-outlined goal-card__access"
+              [class.goal-card__access--public]="goal.accessType === 'PUBLIC'"
+              [class.goal-card__access--private]="goal.accessType === 'PRIVATE'"
+            >
+              {{ goal.accessType === 'PUBLIC' ? 'travel_explore' : 'lock' }}
+            </span>
           </div>
-          <div class="progress-bar">
-            <div class="progress-fill" [style.width.%]="goal.currentProgress"></div>
+          <h3 class="goal-card__title">{{ goal.title }}</h3>
+          <p class="goal-card__desc">{{ goal.description }}</p>
+          <div class="goal-card__target">
+            <span class="material-symbols-outlined">my_location</span>
+            Target: {{ goal.measurableTarget }}
           </div>
-        </div>
-        <div class="goal-card__footer">
-          <div class="goal-card__deadline">
-            <span class="material-symbols-outlined">calendar_today</span>
-            {{ goal.deadline }}
+          <div class="goal-card__progress">
+            <div class="goal-card__progress-info">
+              <span class="goal-card__progress-label">
+                {{ getTasksDone(goal) }} of {{ goal.targetValue }} {{ goal.targetUnit }} done
+              </span>
+              <span class="goal-card__progress-pct">{{ goal.currentProgress }}%</span>
+            </div>
+            <div class="progress-bar">
+              <div class="progress-fill" [style.width.%]="goal.currentProgress"></div>
+            </div>
           </div>
-          <div class="goal-card__categories">
-            @for (cat of goal.categories; track cat.id) {
-            <span class="material-symbols-outlined goal-card__cat-icon" [style.color]="cat.color" [title]="cat.name">{{
-              cat.icon }}</span>
-            }
+          <div class="goal-card__footer">
+            <div class="goal-card__deadline">
+              <span class="material-symbols-outlined">calendar_today</span>
+              {{ formatDeadline(goal.deadline) }}
+            </div>
+            <div class="goal-card__categories">
+              @for (cat of goal.categories ?? []; track cat.id) {
+                <span
+                  class="material-symbols-outlined goal-card__cat-icon"
+                  [style.color]="cat.color"
+                  [title]="cat.name"
+                  >{{ cat.icon }}</span
+                >
+              }
+            </div>
           </div>
         </div>
       </div>
-    </div>
     }
   </div>
 
-  <app-pagination [currentPage]="currentPage()" [totalPages]="totalPages()" [totalElements]="totalElements()"
-    [pageSize]="pageSize()" (pageChange)="onPageChange($event)" (pageSizeChange)="onPageSizeChange($event)"
-    (aiClick)="onAiClick()" />
+  <app-pagination
+    [currentPage]="currentPage()"
+    [totalPages]="totalPages()"
+    [totalElements]="totalElements()"
+    [pageSize]="pageSize()"
+    (pageChange)="onPageChange($event)"
+    (pageSizeChange)="onPageSizeChange($event)"
+    (aiClick)="onAiClick()"
+  />
 </div>
 
 <!-- ══ FILTER PANEL ══════════════════════════════════════ -->
 @if (showFilter()) {
-<app-filter-panel title="Filter Goals" [fields]="goalFilterFields" [initialValues]="activeFilters()"
-  (apply)="onFilterApply($event)" (reset)="onFilterReset()" (close)="showFilter.set(false)" />
+  <app-filter-panel
+    title="Filter Goals"
+    [fields]="goalFilterFields()"
+    [initialValues]="activeFilters()"
+    (apply)="onFilterApply($event)"
+    (reset)="onFilterReset()"
+    (close)="showFilter.set(false)"
+  />
 }
 
 <!-- ══ CREATE MODAL ══════════════════════════════════════ -->
 @if (showCreateModal()) {
-<div class="modal-overlay" (click)="showCreateModal.set(false); showCatDropdown.set(false)">
-  <div class="goal-modal" (click)="$event.stopPropagation(); showCatDropdown.set(false)">
-
-    <div class="goal-modal__header">
-      <div>
-        <h2 class="goal-modal__title">New Goal</h2>
-        <p class="goal-modal__subtitle">Define a SMART goal and track your progress.</p>
-      </div>
-      <button class="goal-modal__close" (click)="showCreateModal.set(false)">
-        <span class="material-symbols-outlined">close</span>
-      </button>
-    </div>
-
-    <input class="goal-modal__title-input" type="text" placeholder="Goal Title" [(ngModel)]="createForm().title" />
-
-    <div class="goal-image-upload">
-      @if (getCreateImagePreview()) {
-      <div class="goal-image-upload__preview">
-        <img [src]="getCreateImagePreview()" alt="Goal image preview" />
-        <div class="goal-image-upload__overlay">
-          <label class="goal-image-upload__btn" for="create-image-input">
-            <span class="material-symbols-outlined">photo_camera</span>Change
-          </label>
-          <button class="goal-image-upload__btn goal-image-upload__btn--remove"
-            (click)="createForm.update(f => ({ ...f, imageFile: null }))">
-            <span class="material-symbols-outlined">delete</span>Remove
-          </button>
+  <div class="modal-overlay" (click)="showCreateModal.set(false); showCatDropdown.set(false)">
+    <div class="goal-modal" (click)="$event.stopPropagation(); showCatDropdown.set(false)">
+      <div class="goal-modal__header">
+        <div>
+          <h2 class="goal-modal__title">New Goal</h2>
+          <p class="goal-modal__subtitle">Define a SMART goal and track your progress.</p>
         </div>
-      </div>
-      } @else {
-      <label class="goal-image-upload__empty" for="create-image-input">
-        <span class="material-symbols-outlined">add_photo_alternate</span>
-        <span class="goal-image-upload__label">Upload cover image</span>
-        <span class="goal-image-upload__hint">JPG, PNG or WebP – optional</span>
-      </label>
-      }
-      <input id="create-image-input" type="file" accept="image/*" class="goal-image-upload__input"
-        (change)="onCreateImageSelect($event)" />
-    </div>
-
-    <div class="form-group">
-      <label>Description</label>
-      <textarea rows="2" placeholder="What do you want to achieve?" [(ngModel)]="createForm().description"></textarea>
-    </div>
-
-    <div class="goal-modal__section-label">
-      <span class="material-symbols-outlined">my_location</span>SMART Target
-    </div>
-
-    <div class="goal-modal__row">
-      <div class="form-group">
-        <label>Measurable Target</label>
-        <input type="text" placeholder="e.g. Run 10km, Save 5000€" [(ngModel)]="createForm().measurableTarget" />
-      </div>
-      <div class="form-group">
-        <label>Target Value</label>
-        <input type="number" placeholder="e.g. 100" [(ngModel)]="createForm().targetValue" />
-      </div>
-      <div class="form-group">
-        <label>Unit</label>
-        <input type="text" placeholder="e.g. km, €, hours" [(ngModel)]="createForm().targetUnit" />
-      </div>
-    </div>
-
-    <div class="goal-modal__row goal-modal__row--2">
-      <div class="form-group">
-        <label>Current Progress (%)</label>
-        <input type="number" min="0" max="100" placeholder="0" [(ngModel)]="createForm().currentProgress" />
-      </div>
-      <div class="form-group">
-        <label>Deadline</label>
-        <input type="date" [(ngModel)]="createForm().deadline" />
-      </div>
-    </div>
-
-    <div class="goal-modal__row goal-modal__row--2">
-      <div class="form-group">
-        <label>Status</label>
-        <div class="modal-status-picker">
-          @for (s of statuses; track s) {
-          <button
-            [class]="'modal-status-btn modal-status-btn--' + s.toLowerCase() + (createForm().status === s ? ' active' : '')"
-            (click)="createForm.update(f => ({ ...f, status: s }))">
-            <span class="material-symbols-outlined">{{ getStatusIcon(s) }}</span>
-            {{ getStatusLabel(s) }}
-          </button>
-          }
-        </div>
-      </div>
-      <div class="form-group">
-        <label>Access</label>
-        <div class="modal-access-toggle">
-          <button [class]="'modal-access-btn ' + (createForm().accessType === 'PRIVATE' ? 'active' : '')"
-            (click)="createForm.update(f => ({ ...f, accessType: 'PRIVATE' }))">
-            <span class="material-symbols-outlined">lock</span>Private
-          </button>
-          <button [class]="'modal-access-btn ' + (createForm().accessType === 'PUBLIC' ? 'active' : '')"
-            (click)="createForm.update(f => ({ ...f, accessType: 'PUBLIC' }))">
-            <span class="material-symbols-outlined">travel_explore</span>Public
-          </button>
-        </div>
-      </div>
-    </div>
-
-    <!-- Categories Dropdown -->
-    <div class="form-group" (click)="$event.stopPropagation()">
-      <label>Categories</label>
-      <div class="modal-cat-dropdown">
-        <button class="modal-cat-dropdown__trigger"
-          [class.modal-cat-dropdown__trigger--active]="createForm().categoryIds.length > 0"
-          [class.modal-cat-dropdown__trigger--open]="showCatDropdown()" (click)="toggleCatDropdown($event)">
-          <div class="modal-cat-dropdown__trigger-left">
-            @if (createForm().categoryIds.length > 0) {
-            <div class="modal-cat-dropdown__dots">
-              @for (color of getSelectedCatColors(createForm().categoryIds); track color) {
-              <span class="modal-cat-dropdown__dot" [style.background]="color"></span>
-              }
-            </div>
-            }
-            <span class="modal-cat-dropdown__label">
-              {{ getCatDropdownLabel(createForm().categoryIds) }}
-            </span>
-          </div>
-          <span class="material-symbols-outlined modal-cat-dropdown__arrow">
-            {{ showCatDropdown() ? 'expand_less' : 'expand_more' }}
-          </span>
+        <button class="goal-modal__close" (click)="showCreateModal.set(false)">
+          <span class="material-symbols-outlined">close</span>
         </button>
-        @if (showCatDropdown()) {
-        <div class="modal-cat-dropdown__menu">
-          @for (cat of availableCategories(); track cat.id) {
-          <button class="modal-cat-dropdown__item"
-            [class.modal-cat-dropdown__item--selected]="createForm().categoryIds.includes(cat.id)"
-            (click)="toggleCreateCategory(cat.id)">
-            <div class="modal-cat-dropdown__item-check">
-              @if (createForm().categoryIds.includes(cat.id)) {
-              <span class="material-symbols-outlined">check</span>
-              }
+      </div>
+
+      <input
+        class="goal-modal__title-input"
+        type="text"
+        placeholder="Goal Title"
+        [(ngModel)]="createForm().title"
+      />
+
+      <div class="goal-image-upload">
+        @if (getCreateImagePreview()) {
+          <div class="goal-image-upload__preview">
+            <img [src]="getCreateImagePreview()" alt="Goal image preview" />
+            <div class="goal-image-upload__overlay">
+              <label class="goal-image-upload__btn" for="create-image-input">
+                <span class="material-symbols-outlined">photo_camera</span>Change
+              </label>
+              <button
+                class="goal-image-upload__btn goal-image-upload__btn--remove"
+                (click)="createForm.update((f) => ({ ...f, imageFile: null }))"
+              >
+                <span class="material-symbols-outlined">delete</span>Remove
+              </button>
             </div>
-            <span class="material-symbols-outlined modal-cat-dropdown__item-icon" [style.color]="cat.color">{{ cat.icon
-              }}</span>
-            <span class="modal-cat-dropdown__item-label">{{ cat.name }}</span>
-          </button>
-          }
-          @if (createForm().categoryIds.length > 0) {
-          <div class="modal-cat-dropdown__footer">
-            <button class="modal-cat-dropdown__clear"
-              (click)="createForm.update(f => ({ ...f, categoryIds: [] })); $event.stopPropagation()">
-              <span class="material-symbols-outlined">close</span>Clear
+          </div>
+        } @else {
+          <label class="goal-image-upload__empty" for="create-image-input">
+            <span class="material-symbols-outlined">add_photo_alternate</span>
+            <span class="goal-image-upload__label">Upload cover image</span>
+            <span class="goal-image-upload__hint">JPG, PNG or WebP – optional</span>
+          </label>
+        }
+        <input
+          id="create-image-input"
+          type="file"
+          accept="image/*"
+          class="goal-image-upload__input"
+          (change)="onCreateImageSelect($event)"
+        />
+      </div>
+
+      <div class="form-group">
+        <label>Description</label>
+        <textarea
+          rows="2"
+          placeholder="What do you want to achieve?"
+          [(ngModel)]="createForm().description"
+        ></textarea>
+      </div>
+
+      <div class="goal-modal__section-label">
+        <span class="material-symbols-outlined">my_location</span>SMART Target
+      </div>
+
+      <div class="goal-modal__row">
+        <div class="form-group">
+          <label>Measurable Target</label>
+          <input
+            type="text"
+            placeholder="e.g. Run 10km, Save 5000€"
+            [(ngModel)]="createForm().measurableTarget"
+          />
+        </div>
+        <div class="form-group">
+          <label>Target Value</label>
+          <input type="number" placeholder="e.g. 100" [(ngModel)]="createForm().targetValue" />
+        </div>
+        <div class="form-group">
+          <label>Unit</label>
+          <input
+            type="text"
+            placeholder="e.g. km, €, hours"
+            [(ngModel)]="createForm().targetUnit"
+          />
+        </div>
+      </div>
+
+      <div class="goal-modal__row goal-modal__row--2">
+        <div class="form-group">
+          <label>Current Progress (%)</label>
+          <input
+            type="number"
+            min="0"
+            max="100"
+            placeholder="0"
+            [(ngModel)]="createForm().currentProgress"
+          />
+        </div>
+        <div class="form-group">
+          <label>Deadline</label>
+          <input type="date" [(ngModel)]="createForm().deadline" />
+        </div>
+      </div>
+
+      <div class="goal-modal__row goal-modal__row--2">
+        <div class="form-group">
+          <label>Status</label>
+          <div class="modal-status-picker">
+            @for (s of statuses; track s) {
+              <button
+                [class]="
+                  'modal-status-btn modal-status-btn--' +
+                  s.toLowerCase() +
+                  (createForm().status === s ? ' active' : '')
+                "
+                (click)="createForm.update((f) => ({ ...f, status: s }))"
+              >
+                <span class="material-symbols-outlined">{{ getStatusIcon(s) }}</span>
+                {{ getStatusLabel(s) }}
+              </button>
+            }
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Access</label>
+          <div class="modal-access-toggle">
+            <button
+              [class]="
+                'modal-access-btn ' + (createForm().accessType === 'PRIVATE' ? 'active' : '')
+              "
+              (click)="createForm.update((f) => ({ ...f, accessType: 'PRIVATE' }))"
+            >
+              <span class="material-symbols-outlined">lock</span>Private
+            </button>
+            <button
+              [class]="'modal-access-btn ' + (createForm().accessType === 'PUBLIC' ? 'active' : '')"
+              (click)="createForm.update((f) => ({ ...f, accessType: 'PUBLIC' }))"
+            >
+              <span class="material-symbols-outlined">travel_explore</span>Public
             </button>
           </div>
+        </div>
+      </div>
+
+      <div class="form-group" (click)="$event.stopPropagation()">
+        <label>Categories</label>
+        <div class="modal-cat-dropdown">
+          <button
+            class="modal-cat-dropdown__trigger"
+            [class.modal-cat-dropdown__trigger--active]="createForm().categoryIds.length > 0"
+            [class.modal-cat-dropdown__trigger--open]="showCatDropdown()"
+            (click)="toggleCatDropdown($event)"
+          >
+            <div class="modal-cat-dropdown__trigger-left">
+              @if (createForm().categoryIds.length > 0) {
+                <div class="modal-cat-dropdown__dots">
+                  @for (color of getSelectedCatColors(createForm().categoryIds); track color) {
+                    <span class="modal-cat-dropdown__dot" [style.background]="color"></span>
+                  }
+                </div>
+              }
+              <span class="modal-cat-dropdown__label">
+                {{ getCatDropdownLabel(createForm().categoryIds) }}
+              </span>
+            </div>
+            <span class="material-symbols-outlined modal-cat-dropdown__arrow">
+              {{ showCatDropdown() ? 'expand_less' : 'expand_more' }}
+            </span>
+          </button>
+          @if (showCatDropdown()) {
+            <div class="modal-cat-dropdown__menu">
+              @for (cat of sortedCreateCategories(); track cat.id) {
+                <button
+                  class="modal-cat-dropdown__item"
+                  [class.modal-cat-dropdown__item--selected]="
+                    createForm().categoryIds.includes(cat.id)
+                  "
+                  (click)="toggleCreateCategory(cat.id)"
+                >
+                  <div class="modal-cat-dropdown__item-check">
+                    @if (createForm().categoryIds.includes(cat.id)) {
+                      <span class="material-symbols-outlined">check</span>
+                    }
+                  </div>
+                  <span
+                    class="material-symbols-outlined modal-cat-dropdown__item-icon"
+                    [style.color]="cat.color"
+                    >{{ cat.icon }}</span
+                  >
+                  <span class="modal-cat-dropdown__item-label">{{ cat.name }}</span>
+                </button>
+              }
+              @if (createForm().categoryIds.length > 0) {
+                <div class="modal-cat-dropdown__footer">
+                  <button
+                    class="modal-cat-dropdown__clear"
+                    (click)="
+                      createForm.update((f) => ({ ...f, categoryIds: [] }));
+                      $event.stopPropagation()
+                    "
+                  >
+                    <span class="material-symbols-outlined">close</span>Clear
+                  </button>
+                </div>
+              }
+            </div>
           }
         </div>
+      </div>
+
+      <div class="goal-modal__section-label">
+        <span class="material-symbols-outlined">checklist</span>
+        Goal Tasks
+        <button class="goal-modal__add-task-btn" (click)="addTaskToCreate()">
+          <span class="material-symbols-outlined">add</span>Add Task
+        </button>
+      </div>
+
+      <div class="goal-tasks-list">
+        @for (task of createForm().tasks; track $index; let i = $index) {
+          <div class="goal-task-row">
+            <input
+              type="text"
+              class="goal-task-row__title"
+              placeholder="Task title..."
+              [value]="task.title"
+              (input)="updateCreateTask(i, 'title', $any($event.target).value)"
+            />
+            <div class="goal-task-row__meta">
+              <div class="goal-task-row__contribution">
+                <span class="goal-task-row__contribution-label">
+                  <span class="material-symbols-outlined">percent</span>Contribution to goal
+                </span>
+                <div class="goal-task-row__contribution-input-wrap">
+                  <input
+                    type="number"
+                    class="goal-task-row__progress"
+                    min="0"
+                    max="100"
+                    [value]="task.progressContribution"
+                    (input)="
+                      updateCreateTask(i, 'progressContribution', +$any($event.target).value)
+                    "
+                  />
+                  <span class="goal-task-row__contribution-unit">%</span>
+                </div>
+                <div class="goal-task-row__contribution-bar">
+                  <div
+                    class="goal-task-row__contribution-fill"
+                    [style.width.%]="task.progressContribution"
+                  ></div>
+                </div>
+              </div>
+              <div class="goal-task-row__date-wrap">
+                <span class="goal-task-row__contribution-label">
+                  <span class="material-symbols-outlined">event</span>Due date
+                </span>
+                <input
+                  type="date"
+                  class="goal-task-row__date"
+                  [value]="task.dueDate"
+                  (input)="updateCreateTask(i, 'dueDate', $any($event.target).value)"
+                />
+              </div>
+              <button
+                class="goal-task-row__remove"
+                (click)="removeTaskFromCreate(i)"
+                title="Remove task"
+              >
+                <span class="material-symbols-outlined">close</span>
+              </button>
+            </div>
+          </div>
+        }
+        @if (createForm().tasks.length === 0) {
+          <p class="goal-tasks-empty">No tasks yet. Add tasks to break down your goal.</p>
         }
       </div>
-    </div>
 
-    <div class="goal-modal__section-label">
-      <span class="material-symbols-outlined">checklist</span>
-      Goal Tasks
-      <button class="goal-modal__add-task-btn" (click)="addTaskToCreate()">
-        <span class="material-symbols-outlined">add</span>Add Task
-      </button>
-    </div>
-
-    <div class="goal-tasks-list">
-      @for (task of createForm().tasks; track $index; let i = $index) {
-      <div class="goal-task-row">
-        <input type="text" class="goal-task-row__title" placeholder="Task title..." [value]="task.title"
-          (input)="updateCreateTask(i, 'title', $any($event.target).value)" />
-        <div class="goal-task-row__meta">
-          <div class="goal-task-row__contribution">
-            <span class="goal-task-row__contribution-label">
-              <span class="material-symbols-outlined">percent</span>
-              Contribution to goal
-            </span>
-            <div class="goal-task-row__contribution-input-wrap">
-              <input type="number" class="goal-task-row__progress" min="0" max="100" [value]="task.progressContribution"
-                (input)="updateCreateTask(i, 'progressContribution', +$any($event.target).value)" />
-              <span class="goal-task-row__contribution-unit">%</span>
-            </div>
-            <div class="goal-task-row__contribution-bar">
-              <div class="goal-task-row__contribution-fill" [style.width.%]="task.progressContribution"></div>
-            </div>
-          </div>
-          <div class="goal-task-row__date-wrap">
-            <span class="goal-task-row__contribution-label">
-              <span class="material-symbols-outlined">event</span>
-              Due date
-            </span>
-            <input type="date" class="goal-task-row__date" [value]="task.dueDate"
-              (input)="updateCreateTask(i, 'dueDate', $any($event.target).value)" />
-          </div>
-          <button class="goal-task-row__remove" (click)="removeTaskFromCreate(i)" title="Remove task">
-            <span class="material-symbols-outlined">close</span>
-          </button>
+      @if (createForm().tasks.length > 0) {
+        <div
+          class="goal-tasks-total"
+          [class.goal-tasks-total--ok]="getCreateTaskTotal() === 100"
+          [class.goal-tasks-total--over]="getCreateTaskTotal() > 100"
+        >
+          <span class="material-symbols-outlined">
+            {{
+              getCreateTaskTotal() === 100
+                ? 'check_circle'
+                : getCreateTaskTotal() > 100
+                  ? 'error'
+                  : 'info'
+            }}
+          </span>
+          <span
+            >Total contribution: <strong>{{ getCreateTaskTotal() }}%</strong></span
+          >
+          @if (getCreateTaskTotal() === 100) {
+            <span class="goal-tasks-total__hint">Tasks cover the full goal.</span>
+          } @else if (getCreateTaskTotal() > 100) {
+            <span class="goal-tasks-total__hint">Over 100% — reduce some contributions.</span>
+          } @else {
+            <span class="goal-tasks-total__hint"
+              >{{ 100 - getCreateTaskTotal() }}% unassigned.</span
+            >
+          }
         </div>
+      }
+
+      <div class="goal-modal__footer">
+        <button class="btn-secondary" (click)="showCreateModal.set(false)">Cancel</button>
+        <button class="btn-primary" (click)="submitCreate()">Create Goal</button>
       </div>
-      }
-      @if (createForm().tasks.length === 0) {
-      <p class="goal-tasks-empty">No tasks yet. Add tasks to break down your goal.</p>
-      }
-    </div>
-
-    @if (createForm().tasks.length > 0) {
-    <div class="goal-tasks-total" [class.goal-tasks-total--ok]="getCreateTaskTotal() === 100"
-      [class.goal-tasks-total--over]="getCreateTaskTotal() > 100">
-      <span class="material-symbols-outlined">
-        {{ getCreateTaskTotal() === 100 ? 'check_circle' : getCreateTaskTotal() > 100 ? 'error' : 'info' }}
-      </span>
-      <span>Total contribution: <strong>{{ getCreateTaskTotal() }}%</strong></span>
-      @if (getCreateTaskTotal() === 100) {
-      <span class="goal-tasks-total__hint">Tasks cover the full goal.</span>
-      } @else if (getCreateTaskTotal() > 100) {
-      <span class="goal-tasks-total__hint">Over 100% — reduce some contributions.</span>
-      } @else {
-      <span class="goal-tasks-total__hint">{{ 100 - getCreateTaskTotal() }}% unassigned.</span>
-      }
-    </div>
-    }
-
-    <div class="goal-modal__footer">
-      <button class="btn-secondary" (click)="showCreateModal.set(false)">Cancel</button>
-      <button class="btn-primary" (click)="submitCreate()">Create Goal</button>
     </div>
   </div>
-</div>
 }
 
 <!-- ══ EDIT MODAL ════════════════════════════════════════ -->
 @if (showEditModal() && selectedGoal()) {
-<div class="modal-overlay" (click)="showEditModal.set(false); showEditCatDropdown.set(false)">
-  <div class="goal-modal" (click)="$event.stopPropagation(); showEditCatDropdown.set(false)">
-
-    <div class="goal-modal__header">
-      <div>
-        <h2 class="goal-modal__title">Edit Goal</h2>
-        <p class="goal-modal__subtitle">Update your goal details and progress.</p>
-      </div>
-      <div class="goal-modal__header-actions">
-        <button class="goal-modal__action-btn goal-modal__action-btn--delete"
-          (click)="openDeleteConfirm(selectedGoal()!)" title="Delete goal">
-          <span class="material-symbols-outlined">delete</span>
-        </button>
-        <button class="goal-modal__close" (click)="showEditModal.set(false)">
-          <span class="material-symbols-outlined">close</span>
-        </button>
-      </div>
-    </div>
-
-    <input class="goal-modal__title-input" type="text" placeholder="Goal Title" [(ngModel)]="editForm().title" />
-
-    <div class="goal-image-upload">
-      @if (getEditImagePreview()) {
-      <div class="goal-image-upload__preview">
-        <img [src]="getEditImagePreview()" alt="Goal image preview" />
-        <div class="goal-image-upload__overlay">
-          <label class="goal-image-upload__btn" for="edit-image-input">
-            <span class="material-symbols-outlined">photo_camera</span>Change
-          </label>
-          <button class="goal-image-upload__btn goal-image-upload__btn--remove"
-            (click)="editForm.update(f => ({ ...f, imageFile: null }))">
-            <span class="material-symbols-outlined">delete</span>Remove
-          </button>
+  <div class="modal-overlay" (click)="showEditModal.set(false); showEditCatDropdown.set(false)">
+    <div class="goal-modal" (click)="$event.stopPropagation(); showEditCatDropdown.set(false)">
+      <div class="goal-modal__header">
+        <div>
+          <h2 class="goal-modal__title">Edit Goal</h2>
+          <p class="goal-modal__subtitle">Update your goal details and progress.</p>
         </div>
-      </div>
-      } @else {
-      <label class="goal-image-upload__empty" for="edit-image-input">
-        <span class="material-symbols-outlined">add_photo_alternate</span>
-        <span class="goal-image-upload__label">Upload cover image</span>
-        <span class="goal-image-upload__hint">JPG, PNG or WebP – optional</span>
-      </label>
-      }
-      <input id="edit-image-input" type="file" accept="image/*" class="goal-image-upload__input"
-        (change)="onEditImageSelect($event)" />
-    </div>
-
-    <div class="form-group">
-      <label>Description</label>
-      <textarea rows="2" placeholder="What do you want to achieve?" [(ngModel)]="editForm().description"></textarea>
-    </div>
-
-    <div class="goal-modal__section-label">
-      <span class="material-symbols-outlined">my_location</span>SMART Target
-    </div>
-
-    <div class="goal-modal__row">
-      <div class="form-group">
-        <label>Measurable Target</label>
-        <input type="text" placeholder="e.g. Run 10km, Save 5000€" [(ngModel)]="editForm().measurableTarget" />
-      </div>
-      <div class="form-group">
-        <label>Target Value</label>
-        <input type="number" placeholder="e.g. 100" [(ngModel)]="editForm().targetValue" />
-      </div>
-      <div class="form-group">
-        <label>Unit</label>
-        <input type="text" placeholder="e.g. km, €, hours" [(ngModel)]="editForm().targetUnit" />
-      </div>
-    </div>
-
-    <div class="goal-modal__row goal-modal__row--2">
-      <div class="form-group">
-        <label>Current Progress (%)</label>
-        <input type="number" min="0" max="100" placeholder="0" [(ngModel)]="editForm().currentProgress" />
-      </div>
-      <div class="form-group">
-        <label>Deadline</label>
-        <input type="date" [(ngModel)]="editForm().deadline" />
-      </div>
-    </div>
-
-    <div class="goal-modal__row goal-modal__row--2">
-      <div class="form-group">
-        <label>Status</label>
-        <div class="modal-status-picker">
-          @for (s of statuses; track s) {
+        <div class="goal-modal__header-actions">
           <button
-            [class]="'modal-status-btn modal-status-btn--' + s.toLowerCase() + (editForm().status === s ? ' active' : '')"
-            (click)="editForm.update(f => ({ ...f, status: s }))">
-            <span class="material-symbols-outlined">{{ getStatusIcon(s) }}</span>
-            {{ getStatusLabel(s) }}
+            class="goal-modal__action-btn goal-modal__action-btn--delete"
+            (click)="openDeleteConfirm(selectedGoal()!)"
+            title="Delete goal"
+          >
+            <span class="material-symbols-outlined">delete</span>
           </button>
-          }
-        </div>
-      </div>
-      <div class="form-group">
-        <label>Access</label>
-        <div class="modal-access-toggle">
-          <button [class]="'modal-access-btn ' + (editForm().accessType === 'PRIVATE' ? 'active' : '')"
-            (click)="editForm.update(f => ({ ...f, accessType: 'PRIVATE' }))">
-            <span class="material-symbols-outlined">lock</span>Private
-          </button>
-          <button [class]="'modal-access-btn ' + (editForm().accessType === 'PUBLIC' ? 'active' : '')"
-            (click)="editForm.update(f => ({ ...f, accessType: 'PUBLIC' }))">
-            <span class="material-symbols-outlined">travel_explore</span>Public
-          </button>
-        </div>
-      </div>
-    </div>
-
-    <!-- Categories Dropdown -->
-    <div class="form-group" (click)="$event.stopPropagation()">
-      <label>Categories</label>
-      <div class="modal-cat-dropdown">
-        <button class="modal-cat-dropdown__trigger"
-          [class.modal-cat-dropdown__trigger--active]="editForm().categoryIds.length > 0"
-          [class.modal-cat-dropdown__trigger--open]="showEditCatDropdown()" (click)="toggleEditCatDropdown($event)">
-          <div class="modal-cat-dropdown__trigger-left">
-            @if (editForm().categoryIds.length > 0) {
-            <div class="modal-cat-dropdown__dots">
-              @for (color of getSelectedCatColors(editForm().categoryIds); track color) {
-              <span class="modal-cat-dropdown__dot" [style.background]="color"></span>
-              }
-            </div>
-            }
-            <span class="modal-cat-dropdown__label">
-              {{ getCatDropdownLabel(editForm().categoryIds) }}
-            </span>
-          </div>
-          <span class="material-symbols-outlined modal-cat-dropdown__arrow">
-            {{ showEditCatDropdown() ? 'expand_less' : 'expand_more' }}
-          </span>
-        </button>
-        @if (showEditCatDropdown()) {
-        <div class="modal-cat-dropdown__menu">
-          @for (cat of availableCategories(); track cat.id) {
-          <button class="modal-cat-dropdown__item"
-            [class.modal-cat-dropdown__item--selected]="editForm().categoryIds.includes(cat.id)"
-            (click)="toggleEditCategory(cat.id)">
-            <div class="modal-cat-dropdown__item-check">
-              @if (editForm().categoryIds.includes(cat.id)) {
-              <span class="material-symbols-outlined">check</span>
-              }
-            </div>
-            <span class="material-symbols-outlined modal-cat-dropdown__item-icon" [style.color]="cat.color">{{ cat.icon
-              }}</span>
-            <span class="modal-cat-dropdown__item-label">{{ cat.name }}</span>
-          </button>
-          }
-          @if (editForm().categoryIds.length > 0) {
-          <div class="modal-cat-dropdown__footer">
-            <button class="modal-cat-dropdown__clear"
-              (click)="editForm.update(f => ({ ...f, categoryIds: [] })); $event.stopPropagation()">
-              <span class="material-symbols-outlined">close</span>Clear
-            </button>
-          </div>
-          }
-        </div>
-        }
-      </div>
-    </div>
-
-    <div class="goal-modal__section-label">
-      <span class="material-symbols-outlined">checklist</span>
-      Goal Tasks
-      <button class="goal-modal__add-task-btn" (click)="addTaskToEdit()">
-        <span class="material-symbols-outlined">add</span>Add Task
-      </button>
-    </div>
-
-    <div class="goal-tasks-list">
-      @for (task of editForm().tasks; track $index; let i = $index) {
-      <div class="goal-task-row">
-        <div class="goal-task-row__check">
-          <input type="checkbox" [checked]="task.done"
-            (change)="updateEditTask(i, 'done', $any($event.target).checked)" />
-        </div>
-        <input type="text" class="goal-task-row__title" [class.goal-task-row__title--done]="task.done"
-          placeholder="Task title..." [value]="task.title"
-          (input)="updateEditTask(i, 'title', $any($event.target).value)" />
-        <div class="goal-task-row__meta">
-          <div class="goal-task-row__contribution">
-            <span class="goal-task-row__contribution-label">
-              <span class="material-symbols-outlined">percent</span>
-              Contribution to goal
-            </span>
-            <div class="goal-task-row__contribution-input-wrap">
-              <input type="number" class="goal-task-row__progress" min="0" max="100" [value]="task.progressContribution"
-                (input)="updateEditTask(i, 'progressContribution', +$any($event.target).value)" />
-              <span class="goal-task-row__contribution-unit">%</span>
-            </div>
-            <div class="goal-task-row__contribution-bar">
-              <div class="goal-task-row__contribution-fill" [style.width.%]="task.progressContribution"></div>
-            </div>
-          </div>
-          <div class="goal-task-row__date-wrap">
-            <span class="goal-task-row__contribution-label">
-              <span class="material-symbols-outlined">event</span>
-              Due date
-            </span>
-            <input type="date" class="goal-task-row__date" [value]="task.dueDate"
-              (input)="updateEditTask(i, 'dueDate', $any($event.target).value)" />
-          </div>
-          <button class="goal-task-row__remove" (click)="removeTaskFromEdit(i)" title="Remove task">
+          <button class="goal-modal__close" (click)="showEditModal.set(false)">
             <span class="material-symbols-outlined">close</span>
           </button>
         </div>
       </div>
-      }
-      @if (editForm().tasks.length === 0) {
-      <p class="goal-tasks-empty">No tasks yet. Add tasks to break down your goal.</p>
-      }
-    </div>
 
-    @if (editForm().tasks.length > 0) {
-    <div class="goal-tasks-total" [class.goal-tasks-total--ok]="getEditTaskTotal() === 100"
-      [class.goal-tasks-total--over]="getEditTaskTotal() > 100">
-      <span class="material-symbols-outlined">
-        {{ getEditTaskTotal() === 100 ? 'check_circle' : getEditTaskTotal() > 100 ? 'error' : 'info' }}
-      </span>
-      <span>Total contribution: <strong>{{ getEditTaskTotal() }}%</strong></span>
-      @if (getEditTaskTotal() === 100) {
-      <span class="goal-tasks-total__hint">Tasks cover the full goal.</span>
-      } @else if (getEditTaskTotal() > 100) {
-      <span class="goal-tasks-total__hint">Over 100% — reduce some contributions.</span>
-      } @else {
-      <span class="goal-tasks-total__hint">{{ 100 - getEditTaskTotal() }}% unassigned.</span>
-      }
-    </div>
-    }
+      <input
+        class="goal-modal__title-input"
+        type="text"
+        placeholder="Goal Title"
+        [(ngModel)]="editForm().title"
+      />
 
-    <div class="goal-modal__footer">
-      <button class="btn-secondary" (click)="showEditModal.set(false)">Cancel</button>
-      <button class="btn-primary" (click)="submitEdit()">Save Changes</button>
+      <div class="goal-image-upload">
+        @if (getEditImagePreview()) {
+          <div class="goal-image-upload__preview">
+            <img [src]="getEditImagePreview()" alt="Goal image preview" />
+            <div class="goal-image-upload__overlay">
+              <label class="goal-image-upload__btn" for="edit-image-input">
+                <span class="material-symbols-outlined">photo_camera</span>Change
+              </label>
+              <button
+                class="goal-image-upload__btn goal-image-upload__btn--remove"
+                (click)="editForm.update((f) => ({ ...f, imageFile: null }))"
+              >
+                <span class="material-symbols-outlined">delete</span>Remove
+              </button>
+            </div>
+          </div>
+        } @else {
+          <label class="goal-image-upload__empty" for="edit-image-input">
+            <span class="material-symbols-outlined">add_photo_alternate</span>
+            <span class="goal-image-upload__label">Upload cover image</span>
+            <span class="goal-image-upload__hint">JPG, PNG or WebP – optional</span>
+          </label>
+        }
+        <input
+          id="edit-image-input"
+          type="file"
+          accept="image/*"
+          class="goal-image-upload__input"
+          (change)="onEditImageSelect($event)"
+        />
+      </div>
+
+      <div class="form-group">
+        <label>Description</label>
+        <textarea
+          rows="2"
+          placeholder="What do you want to achieve?"
+          [(ngModel)]="editForm().description"
+        ></textarea>
+      </div>
+
+      <div class="goal-modal__section-label">
+        <span class="material-symbols-outlined">my_location</span>SMART Target
+      </div>
+
+      <div class="goal-modal__row">
+        <div class="form-group">
+          <label>Measurable Target</label>
+          <input
+            type="text"
+            placeholder="e.g. Run 10km, Save 5000€"
+            [(ngModel)]="editForm().measurableTarget"
+          />
+        </div>
+        <div class="form-group">
+          <label>Target Value</label>
+          <input type="number" placeholder="e.g. 100" [(ngModel)]="editForm().targetValue" />
+        </div>
+        <div class="form-group">
+          <label>Unit</label>
+          <input type="text" placeholder="e.g. km, €, hours" [(ngModel)]="editForm().targetUnit" />
+        </div>
+      </div>
+
+      <div class="goal-modal__row goal-modal__row--2">
+        <div class="form-group">
+          <label>Current Progress (%)</label>
+          <input
+            type="number"
+            min="0"
+            max="100"
+            placeholder="0"
+            [(ngModel)]="editForm().currentProgress"
+          />
+        </div>
+        <div class="form-group">
+          <label>Deadline</label>
+          <input type="date" [(ngModel)]="editForm().deadline" />
+        </div>
+      </div>
+
+      <div class="goal-modal__row goal-modal__row--2">
+        <div class="form-group">
+          <label>Status</label>
+          <div class="modal-status-picker">
+            @for (s of statuses; track s) {
+              <button
+                [class]="
+                  'modal-status-btn modal-status-btn--' +
+                  s.toLowerCase() +
+                  (editForm().status === s ? ' active' : '')
+                "
+                (click)="editForm.update((f) => ({ ...f, status: s }))"
+              >
+                <span class="material-symbols-outlined">{{ getStatusIcon(s) }}</span>
+                {{ getStatusLabel(s) }}
+              </button>
+            }
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Access</label>
+          <div class="modal-access-toggle">
+            <button
+              [class]="'modal-access-btn ' + (editForm().accessType === 'PRIVATE' ? 'active' : '')"
+              (click)="editForm.update((f) => ({ ...f, accessType: 'PRIVATE' }))"
+            >
+              <span class="material-symbols-outlined">lock</span>Private
+            </button>
+            <button
+              [class]="'modal-access-btn ' + (editForm().accessType === 'PUBLIC' ? 'active' : '')"
+              (click)="editForm.update((f) => ({ ...f, accessType: 'PUBLIC' }))"
+            >
+              <span class="material-symbols-outlined">travel_explore</span>Public
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-group" (click)="$event.stopPropagation()">
+        <label>Categories</label>
+        <div class="modal-cat-dropdown">
+          <button
+            class="modal-cat-dropdown__trigger"
+            [class.modal-cat-dropdown__trigger--active]="editForm().categoryIds.length > 0"
+            [class.modal-cat-dropdown__trigger--open]="showEditCatDropdown()"
+            (click)="toggleEditCatDropdown($event)"
+          >
+            <div class="modal-cat-dropdown__trigger-left">
+              @if (editForm().categoryIds.length > 0) {
+                <div class="modal-cat-dropdown__dots">
+                  @for (color of getSelectedCatColors(editForm().categoryIds); track color) {
+                    <span class="modal-cat-dropdown__dot" [style.background]="color"></span>
+                  }
+                </div>
+              }
+              <span class="modal-cat-dropdown__label">
+                {{ getCatDropdownLabel(editForm().categoryIds) }}
+              </span>
+            </div>
+            <span class="material-symbols-outlined modal-cat-dropdown__arrow">
+              {{ showEditCatDropdown() ? 'expand_less' : 'expand_more' }}
+            </span>
+          </button>
+          @if (showEditCatDropdown()) {
+            <div class="modal-cat-dropdown__menu">
+              @for (cat of sortedEditCategories(); track cat.id) {
+                <button
+                  class="modal-cat-dropdown__item"
+                  [class.modal-cat-dropdown__item--selected]="
+                    editForm().categoryIds.includes(cat.id)
+                  "
+                  (click)="toggleEditCategory(cat.id)"
+                >
+                  <div class="modal-cat-dropdown__item-check">
+                    @if (editForm().categoryIds.includes(cat.id)) {
+                      <span class="material-symbols-outlined">check</span>
+                    }
+                  </div>
+                  <span
+                    class="material-symbols-outlined modal-cat-dropdown__item-icon"
+                    [style.color]="cat.color"
+                    >{{ cat.icon }}</span
+                  >
+                  <span class="modal-cat-dropdown__item-label">{{ cat.name }}</span>
+                </button>
+              }
+              @if (editForm().categoryIds.length > 0) {
+                <div class="modal-cat-dropdown__footer">
+                  <button
+                    class="modal-cat-dropdown__clear"
+                    (click)="
+                      editForm.update((f) => ({ ...f, categoryIds: [] })); $event.stopPropagation()
+                    "
+                  >
+                    <span class="material-symbols-outlined">close</span>Clear
+                  </button>
+                </div>
+              }
+            </div>
+          }
+        </div>
+      </div>
+
+      <div class="goal-modal__section-label">
+        <span class="material-symbols-outlined">checklist</span>
+        Goal Tasks
+        <button class="goal-modal__add-task-btn" (click)="addTaskToEdit()">
+          <span class="material-symbols-outlined">add</span>Add Task
+        </button>
+      </div>
+
+      <div class="goal-tasks-list">
+        @for (task of editForm().tasks; track $index; let i = $index) {
+          <div class="goal-task-row">
+            <div class="goal-task-row__check">
+              <input
+                type="checkbox"
+                [checked]="task.done"
+                (change)="updateEditTask(i, 'done', $any($event.target).checked)"
+              />
+            </div>
+            <input
+              type="text"
+              class="goal-task-row__title"
+              [class.goal-task-row__title--done]="task.done"
+              placeholder="Task title..."
+              [value]="task.title"
+              (input)="updateEditTask(i, 'title', $any($event.target).value)"
+            />
+            <div class="goal-task-row__meta">
+              <div class="goal-task-row__contribution">
+                <span class="goal-task-row__contribution-label">
+                  <span class="material-symbols-outlined">percent</span>Contribution to goal
+                </span>
+                <div class="goal-task-row__contribution-input-wrap">
+                  <input
+                    type="number"
+                    class="goal-task-row__progress"
+                    min="0"
+                    max="100"
+                    [value]="task.progressContribution"
+                    (input)="updateEditTask(i, 'progressContribution', +$any($event.target).value)"
+                  />
+                  <span class="goal-task-row__contribution-unit">%</span>
+                </div>
+                <div class="goal-task-row__contribution-bar">
+                  <div
+                    class="goal-task-row__contribution-fill"
+                    [style.width.%]="task.progressContribution"
+                  ></div>
+                </div>
+              </div>
+              <div class="goal-task-row__date-wrap">
+                <span class="goal-task-row__contribution-label">
+                  <span class="material-symbols-outlined">event</span>Due date
+                </span>
+                <input
+                  type="date"
+                  class="goal-task-row__date"
+                  [value]="task.dueDate"
+                  (input)="updateEditTask(i, 'dueDate', $any($event.target).value)"
+                />
+              </div>
+              <button
+                class="goal-task-row__remove"
+                (click)="removeTaskFromEdit(i)"
+                title="Remove task"
+              >
+                <span class="material-symbols-outlined">close</span>
+              </button>
+            </div>
+          </div>
+        }
+        @if (editForm().tasks.length === 0) {
+          <p class="goal-tasks-empty">No tasks yet. Add tasks to break down your goal.</p>
+        }
+      </div>
+
+      @if (editForm().tasks.length > 0) {
+        <div
+          class="goal-tasks-total"
+          [class.goal-tasks-total--ok]="getEditTaskTotal() === 100"
+          [class.goal-tasks-total--over]="getEditTaskTotal() > 100"
+        >
+          <span class="material-symbols-outlined">
+            {{
+              getEditTaskTotal() === 100
+                ? 'check_circle'
+                : getEditTaskTotal() > 100
+                  ? 'error'
+                  : 'info'
+            }}
+          </span>
+          <span
+            >Total contribution: <strong>{{ getEditTaskTotal() }}%</strong></span
+          >
+          @if (getEditTaskTotal() === 100) {
+            <span class="goal-tasks-total__hint">Tasks cover the full goal.</span>
+          } @else if (getEditTaskTotal() > 100) {
+            <span class="goal-tasks-total__hint">Over 100% — reduce some contributions.</span>
+          } @else {
+            <span class="goal-tasks-total__hint">{{ 100 - getEditTaskTotal() }}% unassigned.</span>
+          }
+        </div>
+      }
+
+      <div class="goal-modal__footer">
+        <button class="btn-secondary" (click)="showEditModal.set(false)">Cancel</button>
+        <button class="btn-primary" (click)="submitEdit()">Save Changes</button>
+      </div>
     </div>
   </div>
-</div>
 }
 
 <!-- ══ DELETE CONFIRM ════════════════════════════════════ -->
 @if (showDeleteConfirm() && selectedGoal()) {
-<div class="modal-overlay" (click)="showDeleteConfirm.set(false)">
-  <div class="confirm-dialog" (click)="$event.stopPropagation()">
-    <div class="confirm-dialog__icon confirm-dialog__icon--danger">
-      <span class="material-symbols-outlined">delete</span>
-    </div>
-    <h3 class="confirm-dialog__title">Delete Goal</h3>
-    <p class="confirm-dialog__text">
-      Are you sure you want to delete <strong>"{{ selectedGoal()!.title }}"</strong>?
-      All associated tasks will also be deleted.
-    </p>
-    <div class="confirm-dialog__actions">
-      <button class="btn-secondary" (click)="showDeleteConfirm.set(false)">Cancel</button>
-      <button class="btn-danger" (click)="confirmDelete()">Delete Goal</button>
+  <div class="modal-overlay" (click)="showDeleteConfirm.set(false)">
+    <div class="confirm-dialog" (click)="$event.stopPropagation()">
+      <div class="confirm-dialog__icon confirm-dialog__icon--danger">
+        <span class="material-symbols-outlined">delete</span>
+      </div>
+      <h3 class="confirm-dialog__title">Delete Goal</h3>
+      <p class="confirm-dialog__text">
+        Are you sure you want to delete <strong>"{{ selectedGoal()!.title }}"</strong>? All
+        associated tasks will also be deleted.
+      </p>
+      <div class="confirm-dialog__actions">
+        <button class="btn-secondary" (click)="showDeleteConfirm.set(false)">Cancel</button>
+        <button class="btn-danger" (click)="confirmDelete()">Delete Goal</button>
+      </div>
     </div>
   </div>
-</div>
 }

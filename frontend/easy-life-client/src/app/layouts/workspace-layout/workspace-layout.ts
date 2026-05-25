@@ -1,21 +1,34 @@
-import { Component, signal } from '@angular/core';
+import { Component, signal, inject, computed, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, Router, ActivatedRoute } from '@angular/router';
 import { SettingsModalComponent } from '../../shared/components/settings-modal/settings-modal';
-import { AiAgentWidgetComponent } from '../../shared/components/ai-agent/ai-agent';
+import { UserService } from '../../core/services/user-service';
+import { environment } from '../../../environments/environment';
 
 @Component({
   selector: 'app-workspace-layout',
-  imports: [CommonModule, RouterModule, SettingsModalComponent, AiAgentWidgetComponent],
+  imports: [CommonModule, RouterModule, SettingsModalComponent],
   templateUrl: './workspace-layout.html',
   styleUrl: './workspace-layout.scss',
 })
-export class WorkspaceLayoutComponent {
+export class WorkspaceLayoutComponent implements OnInit {
+  private readonly userService = inject(UserService);
+  private readonly router = inject(Router);
+  private readonly route = inject(ActivatedRoute);
+
   sidebarCollapsed = signal(false);
   showSettings = signal(false);
 
-  readonly username: string;
+  // ── User ───────────────────────────────────────────────
+  readonly currentUser = this.userService.currentUser;
 
+  readonly displayName = computed(
+    () => this.currentUser()?.profile?.firstname ?? this.currentUser()?.username ?? 'there',
+  );
+
+  readonly username = this.route.snapshot.paramMap.get('username') ?? 'user';
+
+  // ── Nav Items ──────────────────────────────────────────
   readonly managementItems = [
     { route: 'dashboard', label: 'Dashboard', icon: 'grid_view' },
     { route: 'tasks', label: 'Tasks', icon: 'check_circle' },
@@ -34,20 +47,21 @@ export class WorkspaceLayoutComponent {
     { route: 'notifications', label: 'Notifications', icon: 'notifications', badge: true },
   ];
 
-  readonly unreadNotificationCount = signal(3);
+  readonly unreadNotificationCount = signal(0); // TODO: NotificationService
 
-  constructor(
-    private router: Router,
-    private route: ActivatedRoute,
-  ) {
-    this.username = this.route.snapshot.paramMap.get('username') ?? 'user';
+  // ── Lifecycle ──────────────────────────────────────────
+  ngOnInit(): void {
+    if (!this.userService.currentUser()) {
+      this.userService.loadById(environment.userId);
+    }
   }
 
-  toggleSidebar() {
+  // ── Methods ────────────────────────────────────────────
+  toggleSidebar(): void {
     this.sidebarCollapsed.update((v) => !v);
   }
 
-  navigateToProfile(section?: string) {
+  navigateToProfile(section?: string): void {
     this.router.navigate([`/workspace/${this.username}/profile`]).then(() => {
       if (section) {
         setTimeout(() => {
@@ -58,7 +72,7 @@ export class WorkspaceLayoutComponent {
     });
   }
 
-  onSettingsNavigate(event: { path: string; section?: string }) {
+  onSettingsNavigate(event: { path: string; section?: string }): void {
     this.showSettings.set(false);
     if (event.section) {
       this.navigateToProfile(event.section);

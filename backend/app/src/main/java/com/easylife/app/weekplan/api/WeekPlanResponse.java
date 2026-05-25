@@ -1,5 +1,6 @@
 package com.easylife.app.weekplan.api;
 
+import com.easylife.app.categories.payload.CategoryPreview;
 import com.easylife.app.shared.enums.WeekPlanStatus;
 
 import java.time.LocalDate;
@@ -16,7 +17,7 @@ public record WeekPlanResponse(
         String reflection,
         LocalDateTime createdAt,
         LocalDateTime updatedAt,
-        List<Long> categoryIds,
+        List<CategoryPreview> categories,
         List<WeekPlanItemResponse> items,
         int itemsDone,
         int itemsTotal

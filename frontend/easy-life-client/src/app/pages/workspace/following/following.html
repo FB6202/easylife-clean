@@ -5,12 +5,15 @@
     <p class="following-header__subtitle">Manage who you follow and who follows you.</p>
   </div>
   <div class="following-header__actions">
-    <button class="btn-secondary" [class.btn-secondary--active]="activeFilterCount() > 0"
-      (click)="showFilter.set(true)">
+    <button
+      class="btn-secondary"
+      [class.btn-secondary--active]="activeFilterCount() > 0"
+      (click)="showFilter.set(true)"
+    >
       <span class="material-symbols-outlined">tune</span>
       Filters
       @if (activeFilterCount() > 0) {
-      <span class="filter-active-badge">{{ activeFilterCount() }}</span>
+        <span class="filter-active-badge">{{ activeFilterCount() }}</span>
       }
     </button>
     <button class="btn-primary" (click)="goToSearch()">
@@ -22,119 +25,141 @@
 
 <!-- Pending Requests -->
 @if (pendingRequests().length > 0) {
-<div class="pending-section">
-  <div class="pending-section__header">
-    <h2 class="pending-section__title">Pending Requests</h2>
-    <span class="pending-section__badge">{{ pendingCount() }} New</span>
-  </div>
-  <div class="pending-grid">
-    @for (request of pendingRequests(); track request.id) {
-    <div class="pending-card">
-      <div class="pending-card__user">
-        <div class="user-avatar" [style.background]="request.avatarColor">
-          {{ request.initials }}
-        </div>
-        <div class="pending-card__info">
-          <span class="pending-card__name">{{ request.firstname }} {{ request.lastname }}</span>
-          <span class="pending-card__username">{{ request.username }}</span>
-        </div>
-      </div>
-      <div class="pending-card__actions">
-        <button class="pending-card__btn pending-card__btn--decline" (click)="declineRequest(request.id)">
-          <span class="material-symbols-outlined">close</span>
-        </button>
-        <button class="pending-card__btn pending-card__btn--accept" (click)="acceptRequest(request.id)">
-          <span class="material-symbols-outlined">check</span>
-        </button>
-      </div>
+  <div class="pending-section">
+    <div class="pending-section__header">
+      <h2 class="pending-section__title">Pending Requests</h2>
+      <span class="pending-section__badge">{{ pendingCount() }} New</span>
     </div>
-    }
+    <div class="pending-grid">
+      @for (request of pendingRequests(); track request.followId) {
+        <div class="pending-card">
+          <div class="pending-card__user">
+            <div class="user-avatar" [style.background]="request.avatarColor">
+              {{ request.initials }}
+            </div>
+            <div class="pending-card__info">
+              <span class="pending-card__name">{{ request.displayName }}</span>
+              <span class="pending-card__username">@{{ request.username }}</span>
+            </div>
+          </div>
+          <div class="pending-card__actions">
+            <button
+              class="pending-card__btn pending-card__btn--decline"
+              (click)="declineRequest(request.followId)"
+            >
+              <span class="material-symbols-outlined">close</span>
+            </button>
+            <button
+              class="pending-card__btn pending-card__btn--accept"
+              (click)="acceptRequest(request.followId)"
+            >
+              <span class="material-symbols-outlined">check</span>
+            </button>
+          </div>
+        </div>
+      }
+    </div>
   </div>
-</div>
 }
 
 <!-- Tabs + List -->
 <div class="following-container">
-  <!-- Tabs -->
   <div class="following-tabs">
-    <button [class]="'following-tab ' + (activeTab() === 'following' ? 'following-tab--active' : '')"
-      (click)="setTab('following')">
+    <button
+      [class]="'following-tab ' + (activeTab() === 'following' ? 'following-tab--active' : '')"
+      (click)="setTab('following')"
+    >
       Following
       <span class="following-tab__count">{{ following().length }}</span>
     </button>
-    <button [class]="'following-tab ' + (activeTab() === 'followers' ? 'following-tab--active' : '')"
-      (click)="setTab('followers')">
+    <button
+      [class]="'following-tab ' + (activeTab() === 'followers' ? 'following-tab--active' : '')"
+      (click)="setTab('followers')"
+    >
       Followers
       <span class="following-tab__count">{{ followers().length }}</span>
     </button>
   </div>
 
-  <!-- List -->
   <div class="following-list">
-    @for (user of paginatedList(); track user.id) {
-    <div class="follow-row">
-      <div class="follow-row__user">
-        <div class="user-avatar" [style.background]="user.avatarColor">
-          {{ user.initials }}
+    @for (user of paginatedList(); track user.followId) {
+      <div class="follow-row">
+        <div class="follow-row__user">
+          <div class="user-avatar" [style.background]="user.avatarColor">
+            {{ user.initials }}
+          </div>
+          <div class="follow-row__info">
+            <span class="follow-row__name">{{ user.displayName }}</span>
+            <span class="follow-row__username">@{{ user.username }}</span>
+          </div>
+          @if (user.status === 'PENDING') {
+            <span class="follow-status follow-status--pending">REQUESTED</span>
+          } @else {
+            <span class="follow-status follow-status--accepted">FOLLOWING</span>
+          }
         </div>
-        <div class="follow-row__info">
-          <span class="follow-row__name">{{ user.firstname }} {{ user.lastname }}</span>
-          <span class="follow-row__username">{{ user.username }}</span>
-        </div>
-        @if (user.followStatus === 'PENDING') {
-        <span class="follow-status follow-status--pending">REQUESTED</span>
-        } @else {
-        <span class="follow-status follow-status--accepted">FOLLOWING</span>
-        }
-      </div>
 
-      <div class="follow-row__actions">
-        <button class="btn-secondary" (click)="goToProfile(user.id); $event.stopPropagation()">
-          <span class="material-symbols-outlined">person</span>
-          View Profile
-        </button>
-        @if (activeTab() === 'following') {
-        @if (user.followStatus === 'PENDING') {
-        <button class="btn-secondary btn-sm" (click)="cancelRequest(user.id)">
-          Cancel Request
-        </button>
-        } @else {
-        <button class="follow-btn-unfollow btn-sm" (click)="unfollow(user.id)">
-          Unfollow
-        </button>
-        }
-        }
+        <div class="follow-row__actions">
+          <button
+            class="btn-secondary"
+            (click)="goToProfile(user.userId); $event.stopPropagation()"
+          >
+            <span class="material-symbols-outlined">person</span>
+            View Profile
+          </button>
+          @if (activeTab() === 'following') {
+            @if (user.status === 'PENDING') {
+              <button class="btn-secondary btn-sm" (click)="cancelRequest(user.followId)">
+                Cancel Request
+              </button>
+            } @else {
+              <button class="follow-btn-unfollow btn-sm" (click)="unfollow(user.followId)">
+                Unfollow
+              </button>
+            }
+          }
+        </div>
       </div>
-    </div>
     }
 
     @if (activeList().length === 0) {
-    <div class="empty-state">
-      <span class="material-symbols-outlined empty-state__icon">
-        {{ activeTab() === 'following' ? 'person_add' : 'group' }}
-      </span>
-      <span class="empty-state__title">
-        {{ activeTab() === 'following' ? 'Not following anyone yet' : 'No followers yet' }}
-      </span>
-      <span class="empty-state__text">
-        {{
-        activeTab() === 'following'
-        ? 'Find people to follow and see their public goals and categories.'
-        : 'Share your public goals to attract followers.'
-        }}
-      </span>
-    </div>
+      <div class="empty-state">
+        <span class="material-symbols-outlined empty-state__icon">
+          {{ activeTab() === 'following' ? 'person_add' : 'group' }}
+        </span>
+        <span class="empty-state__title">
+          {{ activeTab() === 'following' ? 'Not following anyone yet' : 'No followers yet' }}
+        </span>
+        <span class="empty-state__text">
+          {{
+            activeTab() === 'following'
+              ? 'Find people to follow and see their public goals and categories.'
+              : 'Share your public goals to attract followers.'
+          }}
+        </span>
+      </div>
     }
   </div>
 
-  <!-- Pagination -->
-  <app-pagination [currentPage]="currentPage()" [totalPages]="totalPages()" [totalElements]="totalElements()"
-    [pageSize]="pageSize()" (pageChange)="onPageChange($event)" (pageSizeChange)="onPageSizeChange($event)"
-    (aiClick)="onAiClick()" />
+  <app-pagination
+    [currentPage]="currentPage()"
+    [totalPages]="totalPages()"
+    [totalElements]="totalElements()"
+    [pageSize]="pageSize()"
+    (pageChange)="onPageChange($event)"
+    (pageSizeChange)="onPageSizeChange($event)"
+    (aiClick)="onAiClick()"
+  />
 </div>
 
 <!-- ══ FILTER PANEL ══════════════════════════════════════ -->
 @if (showFilter()) {
-<app-filter-panel title="Filter Network" [fields]="followingFilterFields" [initialValues]="activeFilters()"
-  (apply)="onFilterApply($event)" (reset)="onFilterReset()" (close)="showFilter.set(false)" />
+  <app-filter-panel
+    title="Filter Network"
+    [fields]="followingFilterFields()"
+    [initialValues]="activeFilters()"
+    (apply)="onFilterApply($event)"
+    (reset)="onFilterReset()"
+    (close)="showFilter.set(false)"
+  />
 }

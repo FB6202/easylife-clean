@@ -1,20 +1,19 @@
 package com.easylife.app.goals;
 
-import com.easylife.app.goals.payload.GoalRequest;
-import com.easylife.app.goals.payload.GoalResponse;
-import com.easylife.app.goals.payload.GoalTaskRequest;
-import com.easylife.app.goals.payload.GoalTaskResponse;
+import com.easylife.app.categories.payload.CategoryPreview;
+import com.easylife.app.goals.payload.*;
 import com.easylife.app.shared.enums.AccessType;
 import com.easylife.app.shared.enums.GoalStatus;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.List;
 
 @Component
 class GoalMapper {
 
-    public GoalResponse toResponse(Goal goal, String presignedImageUrl) {
+    public GoalResponse toResponse(Goal goal, List<CategoryPreview> categories, String presignedImageUrl) {
         return new GoalResponse(
                 goal.getId(),
                 goal.getTitle(),
@@ -27,7 +26,7 @@ class GoalMapper {
                 goal.getStatus(),
                 goal.getAccessType(),
                 goal.getCreatedAt(),
-                goal.getCategoryIds(),
+                categories,
                 goal.getTasks() != null
                         ? goal.getTasks().stream().map(this::toTaskResponse).toList()
                         : new ArrayList<>(),
@@ -36,7 +35,7 @@ class GoalMapper {
     }
 
     public GoalResponse toResponse(Goal goal) {
-        return toResponse(goal, null);
+        return toResponse(goal, new ArrayList<>(), null);
     }
 
     public GoalTaskResponse toTaskResponse(GoalTask task) {
@@ -101,5 +100,4 @@ class GoalMapper {
         task.setProgressContribution(request.progressContribution());
         task.setDueDate(request.dueDate());
     }
-
 }

@@ -1,6 +1,5 @@
 <div class="filter-overlay" (click)="onOverlayClick()">
   <div class="filter-panel" (click)="$event.stopPropagation()">
-
     <!-- Header -->
     <div class="filter-panel__header">
       <div class="filter-panel__header-left">
@@ -10,11 +9,11 @@
         <div>
           <h2 class="filter-panel__title">{{ title() }}</h2>
           @if (activeCount() > 0) {
-          <p class="filter-panel__active-hint">
-            {{ activeCount() }} filter{{ activeCount() !== 1 ? 's' : '' }} active
-          </p>
+            <p class="filter-panel__active-hint">
+              {{ activeCount() }} filter{{ activeCount() !== 1 ? 's' : '' }} active
+            </p>
           } @else {
-          <p class="filter-panel__active-hint">No filters applied</p>
+            <p class="filter-panel__active-hint">No filters applied</p>
           }
         </div>
       </div>
@@ -26,152 +25,182 @@
     <!-- Fields -->
     <div class="filter-panel__fields" (click)="closeAllDropdowns()">
       @for (field of fields(); track field.key) {
-      <div class="filter-field">
-
-        <label class="filter-field__label">
-          @if (field.icon) {
-          <span class="material-symbols-outlined">{{ field.icon }}</span>
-          }
-          {{ field.label }}
-        </label>
-
-        <!-- Text -->
-        @if (field.type === 'text') {
-        <div class="filter-field__input-wrap">
-          <span class="material-symbols-outlined filter-field__input-icon">search</span>
-          <input type="text" class="filter-field__input" [placeholder]="field.placeholder ?? 'Search...'"
-            [value]="getValue(field.key)" (input)="setValue(field.key, $any($event.target).value)" />
-          @if (getValue(field.key)) {
-          <button class="filter-field__clear" (click)="setValue(field.key, '')">
-            <span class="material-symbols-outlined">close</span>
-          </button>
-          }
-        </div>
-        }
-
-        <!-- Select -->
-        @if (field.type === 'select') {
-        <div class="filter-field__select-wrap">
-          <select class="filter-field__select" [value]="getValue(field.key)"
-            (change)="setValue(field.key, $any($event.target).value)">
-            <option value="">All</option>
-            @for (opt of field.options; track opt.value) {
-            <option [value]="opt.value">{{ opt.label }}</option>
+        <div class="filter-field">
+          <label class="filter-field__label">
+            @if (field.icon) {
+              <span class="material-symbols-outlined">{{ field.icon }}</span>
             }
-          </select>
-          <span class="material-symbols-outlined filter-field__select-arrow">expand_more</span>
-        </div>
-        }
+            {{ field.label }}
+          </label>
 
-        <!-- Multiselect Pills -->
-        @if (field.type === 'multiselect') {
-        <div class="filter-field__pills">
-          @for (opt of field.options; track opt.value) {
-          <button class="filter-pill" [class.filter-pill--active]="isSelected(field.key, opt.value.toString())"
-            [style.--pill-color]="opt.color" (click)="toggleMultiOption(field.key, opt.value.toString())">
-            @if (opt.icon) {
-            <span class="material-symbols-outlined"
-              [style.color]="isSelected(field.key, opt.value.toString()) ? 'white' : opt.color">
-              {{ opt.icon }}
-            </span>
-            }
-            {{ opt.label }}
-          </button>
-          }
-        </div>
-        }
-
-        <!-- Multiselect Dropdown -->
-        @if (field.type === 'multiselect-dropdown') {
-        <div class="filter-dropdown" (click)="$event.stopPropagation()">
-
-          <button class="filter-dropdown__trigger"
-            [class.filter-dropdown__trigger--active]="getArrayValue(field.key).length > 0"
-            [class.filter-dropdown__trigger--open]="isDropdownOpen(field.key)"
-            (click)="toggleDropdown(field.key, $event)">
-            <div class="filter-dropdown__trigger-left">
-              @if (getArrayValue(field.key).length > 0) {
-              <div class="filter-dropdown__selected-dots">
-                @for (opt of getSelectedOptions(field.key, field.options).slice(0, 3); track opt.value) {
-                <span class="filter-dropdown__dot" [style.background]="opt.color"></span>
-                }
-              </div>
+          <!-- Text -->
+          @if (field.type === 'text') {
+            <div class="filter-field__input-wrap">
+              <span class="material-symbols-outlined filter-field__input-icon">search</span>
+              <input
+                type="text"
+                class="filter-field__input"
+                [placeholder]="field.placeholder ?? 'Search...'"
+                [value]="getValue(field.key)"
+                (input)="setValue(field.key, $any($event.target).value)"
+              />
+              @if (getValue(field.key)) {
+                <button class="filter-field__clear" (click)="setValue(field.key, '')">
+                  <span class="material-symbols-outlined">close</span>
+                </button>
               }
-              <span class="filter-dropdown__label">
-                {{ getDropdownLabel(field.key, field.options) }}
-              </span>
             </div>
-            <span class="material-symbols-outlined filter-dropdown__arrow">
-              {{ isDropdownOpen(field.key) ? 'expand_less' : 'expand_more' }}
-            </span>
-          </button>
+          }
 
-          @if (isDropdownOpen(field.key)) {
-          <div class="filter-dropdown__menu">
-            @for (opt of field.options; track opt.value) {
-            <button class="filter-dropdown__item"
-              [class.filter-dropdown__item--selected]="isSelected(field.key, opt.value.toString())"
-              (click)="toggleMultiOption(field.key, opt.value.toString())">
-              <div class="filter-dropdown__item-check">
-                @if (isSelected(field.key, opt.value.toString())) {
-                <span class="material-symbols-outlined">check</span>
-                }
-              </div>
-              @if (opt.icon) {
-              <span class="material-symbols-outlined filter-dropdown__item-icon" [style.color]="opt.color">
-                {{ opt.icon }}
-              </span>
-              } @else if (opt.color) {
-              <span class="filter-dropdown__item-dot" [style.background]="opt.color"></span>
+          <!-- Multiselect Pills -->
+          @if (field.type === 'select') {
+            <div class="filter-field__pills">
+              @for (opt of field.options; track opt.value) {
+                <button
+                  class="filter-pill"
+                  [class.filter-pill--active]="getValue(field.key) === opt.value.toString()"
+                  [style.--pill-color]="opt.color"
+                  (click)="
+                    setValue(
+                      field.key,
+                      getValue(field.key) === opt.value.toString() ? '' : opt.value.toString()
+                    )
+                  "
+                >
+                  @if (opt.icon) {
+                    <span
+                      class="material-symbols-outlined"
+                      [style.color]="
+                        getValue(field.key) === opt.value.toString() ? 'white' : opt.color
+                      "
+                    >
+                      {{ opt.icon }}
+                    </span>
+                  }
+                  {{ opt.label }}
+                </button>
               }
-              <span class="filter-dropdown__item-label">{{ opt.label }}</span>
-            </button>
-            }
+            </div>
+          }
 
-            @if (getArrayValue(field.key).length > 0) {
-            <div class="filter-dropdown__footer">
-              <button class="filter-dropdown__clear" (click)="clearArray(field.key)">
-                <span class="material-symbols-outlined">close</span>
-                Clear selection
+          <!-- Multiselect Dropdown -->
+          @if (field.type === 'multiselect-dropdown') {
+            <div class="filter-dropdown" (click)="$event.stopPropagation()">
+              <button
+                class="filter-dropdown__trigger"
+                [class.filter-dropdown__trigger--active]="getArrayValue(field.key).length > 0"
+                [class.filter-dropdown__trigger--open]="isDropdownOpen(field.key)"
+                (click)="toggleDropdown(field.key, $event)"
+              >
+                <div class="filter-dropdown__trigger-left">
+                  @if (getArrayValue(field.key).length > 0) {
+                    <div class="filter-dropdown__selected-dots">
+                      @for (
+                        opt of getSelectedOptions(field.key, field.options).slice(0, 3);
+                        track opt.value
+                      ) {
+                        <span class="filter-dropdown__dot" [style.background]="opt.color"></span>
+                      }
+                    </div>
+                  }
+                  <span class="filter-dropdown__label">
+                    {{ getDropdownLabel(field.key, field.options) }}
+                  </span>
+                </div>
+                <span class="material-symbols-outlined filter-dropdown__arrow">
+                  {{ isDropdownOpen(field.key) ? 'expand_less' : 'expand_more' }}
+                </span>
               </button>
+
+              @if (isDropdownOpen(field.key)) {
+                <div class="filter-dropdown__menu">
+                  @for (opt of field.options; track opt.value) {
+                    <button
+                      class="filter-dropdown__item"
+                      [class.filter-dropdown__item--selected]="
+                        isSelected(field.key, opt.value.toString())
+                      "
+                      (click)="toggleMultiOption(field.key, opt.value.toString())"
+                    >
+                      <div class="filter-dropdown__item-check">
+                        @if (isSelected(field.key, opt.value.toString())) {
+                          <span class="material-symbols-outlined">check</span>
+                        }
+                      </div>
+                      @if (opt.icon) {
+                        <span
+                          class="material-symbols-outlined filter-dropdown__item-icon"
+                          [style.color]="opt.color"
+                        >
+                          {{ opt.icon }}
+                        </span>
+                      } @else if (opt.color) {
+                        <span
+                          class="filter-dropdown__item-dot"
+                          [style.background]="opt.color"
+                        ></span>
+                      }
+                      <span class="filter-dropdown__item-label">{{ opt.label }}</span>
+                    </button>
+                  }
+
+                  @if (getArrayValue(field.key).length > 0) {
+                    <div class="filter-dropdown__footer">
+                      <button class="filter-dropdown__clear" (click)="clearArray(field.key)">
+                        <span class="material-symbols-outlined">close</span>
+                        Clear selection
+                      </button>
+                    </div>
+                  }
+                </div>
+              }
             </div>
-            }
-          </div>
           }
 
+          <!-- Date -->
+          @if (field.type === 'date') {
+            <input
+              type="date"
+              class="filter-field__date"
+              [value]="getValue(field.key)"
+              (change)="setValue(field.key, $any($event.target).value)"
+            />
+          }
+
+          <!-- Date Range -->
+          @if (field.type === 'date-range') {
+            <div class="filter-field__date-range">
+              <input
+                type="date"
+                class="filter-field__date"
+                [value]="getValue(field.key + '_from')"
+                (change)="setValue(field.key + '_from', $any($event.target).value)"
+              />
+              <span class="filter-field__date-sep">to</span>
+              <input
+                type="date"
+                class="filter-field__date"
+                [value]="getValue(field.key + '_to')"
+                (change)="setValue(field.key + '_to', $any($event.target).value)"
+              />
+            </div>
+          }
+
+          <!-- Toggle -->
+          @if (field.type === 'toggle') {
+            <label class="filter-toggle">
+              <input
+                type="checkbox"
+                [checked]="getBoolValue(field.key)"
+                (change)="setValue(field.key, $any($event.target).checked)"
+              />
+              <span class="filter-toggle__slider"></span>
+              <span class="filter-toggle__label">
+                {{ getBoolValue(field.key) ? 'Yes' : 'No' }}
+              </span>
+            </label>
+          }
         </div>
-        }
-
-        <!-- Date -->
-        @if (field.type === 'date') {
-        <input type="date" class="filter-field__date" [value]="getValue(field.key)"
-          (change)="setValue(field.key, $any($event.target).value)" />
-        }
-
-        <!-- Date Range -->
-        @if (field.type === 'date-range') {
-        <div class="filter-field__date-range">
-          <input type="date" class="filter-field__date" [value]="getValue(field.key + '_from')"
-            (change)="setValue(field.key + '_from', $any($event.target).value)" />
-          <span class="filter-field__date-sep">to</span>
-          <input type="date" class="filter-field__date" [value]="getValue(field.key + '_to')"
-            (change)="setValue(field.key + '_to', $any($event.target).value)" />
-        </div>
-        }
-
-        <!-- Toggle -->
-        @if (field.type === 'toggle') {
-        <label class="filter-toggle">
-          <input type="checkbox" [checked]="getBoolValue(field.key)"
-            (change)="setValue(field.key, $any($event.target).checked)" />
-          <span class="filter-toggle__slider"></span>
-          <span class="filter-toggle__label">
-            {{ getBoolValue(field.key) ? 'Yes' : 'No' }}
-          </span>
-        </label>
-        }
-
-      </div>
       }
     </div>
 
@@ -186,11 +215,10 @@
         <button class="btn-primary" (click)="onApply()">
           Apply
           @if (activeCount() > 0) {
-          <span class="filter-panel__apply-badge">{{ activeCount() }}</span>
+            <span class="filter-panel__apply-badge">{{ activeCount() }}</span>
           }
         </button>
       </div>
     </div>
-
   </div>
 </div>

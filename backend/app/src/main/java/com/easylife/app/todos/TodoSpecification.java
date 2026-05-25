@@ -50,9 +50,11 @@ class TodoSpecification {
     }
 
     private static Specification<Todo> byCategoryIds(List<Long> categoryIds) {
-        return (root, query, cb) ->
-                categoryIds == null || categoryIds.isEmpty() ? null
-                        : root.join("categoryIds").in(categoryIds);
+        return (root, query, cb) -> {
+            if (categoryIds == null || categoryIds.isEmpty()) return null;
+            query.distinct(true);
+            return root.join("categoryIds").in(categoryIds);
+        };
     }
 
 }

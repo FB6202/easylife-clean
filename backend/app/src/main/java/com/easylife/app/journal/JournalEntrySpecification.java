@@ -30,15 +30,16 @@ class JournalEntrySpecification {
         return (root, query, cb) -> {
             if (from == null && to == null) return null;
             if (from == null) return cb.lessThanOrEqualTo(root.get("entryDate"), to);
-            if (to == null) return cb.greaterThanOrEqualTo(root.get("entryDate"), from);
+            if (to == null)   return cb.greaterThanOrEqualTo(root.get("entryDate"), from);
             return cb.between(root.get("entryDate"), from, to);
         };
     }
 
     private static Specification<JournalEntry> byCategoryIds(List<Long> categoryIds) {
-        return (root, query, cb) ->
-                categoryIds == null || categoryIds.isEmpty() ? null
-                        : root.join("categoryIds").in(categoryIds);
+        return (root, query, cb) -> {
+            if (categoryIds == null || categoryIds.isEmpty()) return null;
+            query.distinct(true);
+            return root.join("categoryIds").in(categoryIds);
+        };
     }
-
 }

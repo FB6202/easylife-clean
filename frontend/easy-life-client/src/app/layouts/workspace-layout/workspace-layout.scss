@@ -10,15 +10,11 @@
   transition: grid-template-columns $transition-base;
 
   &.sidebar-collapsed {
-    grid-template-columns: 0px 1fr;
-
-    .sidebar {
-      transform: translateX(-100%);
-      pointer-events: none;
-    }
+    grid-template-columns: 64px 1fr;
   }
 }
 
+// ── Sidebar ────────────────────────────────────────────────
 // ── Sidebar ────────────────────────────────────────────────
 .sidebar {
   @include flex-col;
@@ -28,17 +24,33 @@
   position: sticky;
   top: 0;
   overflow: hidden;
-  transition: transform $transition-base;
+  transition: all $transition-base;
   z-index: 50;
+  width: 220px;
 
   &__logo {
     padding: $space-5 $space-5 $space-4;
     border-bottom: 1px solid var(--color-border-light);
+    display: flex;
+    align-items: center;
+    min-height: 64px;
+  }
 
-    img {
-      height: 32px;
-      width: auto;
-    }
+  &__logo-full {
+    height: 32px;
+    width: auto;
+    transition: opacity $transition-base;
+  }
+
+  &__logo-icon {
+    display: none;
+    font-size: 24px;
+    color: var(--color-primary);
+    font-variation-settings:
+      'FILL' 1,
+      'wght' 400,
+      'GRAD' 0,
+      'opsz' 24;
   }
 
   &__nav {
@@ -47,6 +59,7 @@
     flex: 1;
     padding: $space-4 $space-3;
     overflow-y: auto;
+    overflow-x: hidden;
     @include scrollbar-thin;
   }
 
@@ -64,6 +77,9 @@
     letter-spacing: 0.08em;
     padding: 0 $space-3;
     margin-bottom: $space-2;
+    transition: opacity $transition-base;
+    white-space: nowrap;
+    overflow: hidden;
   }
 
   &__item {
@@ -81,6 +97,8 @@
     background: none;
     font-family: $font-family;
     width: 100%;
+    position: relative;
+    white-space: nowrap;
 
     &:hover {
       background: var(--color-bg-hover);
@@ -117,6 +135,8 @@
 
   &__label {
     flex: 1;
+    transition: opacity $transition-base;
+    overflow: hidden;
   }
 
   &__badge {
@@ -130,6 +150,7 @@
     min-width: 18px;
     text-align: center;
     line-height: 16px;
+    transition: all $transition-base;
   }
 
   &__logout {
@@ -144,6 +165,232 @@
   &__footer {
     padding: $space-3;
     border-top: 1px solid var(--color-border-light);
+  }
+}
+
+// ── Collapsed Sidebar ──────────────────────────────────────
+.sidebar-collapsed {
+  .sidebar {
+    width: 64px;
+    overflow: visible;
+
+    &__logo {
+      padding: $space-4 0;
+      justify-content: center;
+    }
+
+    &__logo-full {
+      display: none;
+    }
+
+    &__logo-icon {
+      display: block;
+    }
+
+    &__nav {
+      padding: $space-4 $space-2;
+      align-items: center;
+      overflow: visible;
+    }
+
+    &__section {
+      margin-bottom: $space-2;
+      align-items: center;
+      width: 100%;
+    }
+
+    &__section-label {
+      opacity: 0;
+      height: 0;
+      margin: 0;
+      padding: 0;
+      pointer-events: none;
+    }
+
+    &__label {
+      opacity: 0;
+      width: 0;
+      pointer-events: none;
+    }
+
+    &__badge {
+      opacity: 1;
+      width: auto;
+      margin-left: 0;
+      pointer-events: none;
+      position: absolute;
+      top: 2px;
+      right: 2px;
+      min-width: 16px;
+      height: 16px;
+      font-size: 9px;
+      padding: 0 4px;
+      line-height: 16px;
+    }
+
+    &__item {
+      justify-content: center;
+      padding: $space-2;
+      width: 40px;
+      margin: 0 auto;
+      gap: 0;
+
+      &::after {
+        content: attr(data-label);
+        position: absolute;
+        left: calc(100% + 12px);
+        top: 50%;
+        transform: translateY(-50%);
+        background: var(--color-text-primary);
+        color: var(--color-bg-card);
+        font-size: $font-size-xs;
+        font-weight: $font-weight-medium;
+        padding: $space-1 $space-3;
+        border-radius: $radius-md;
+        white-space: nowrap;
+        pointer-events: none;
+        z-index: 200;
+        box-shadow: var(--shadow-md);
+        opacity: 0;
+        transition: opacity $transition-fast;
+      }
+
+      &::before {
+        content: '';
+        position: absolute;
+        left: calc(100% + 6px);
+        top: 50%;
+        transform: translateY(-50%);
+        border: 5px solid transparent;
+        border-right-color: var(--color-text-primary);
+        pointer-events: none;
+        z-index: 200;
+        opacity: 0;
+        transition: opacity $transition-fast;
+      }
+
+      &:hover::after,
+      &:hover::before {
+        opacity: 1;
+      }
+    }
+
+    &__footer {
+      padding: $space-3 $space-2;
+    }
+  }
+}
+
+// ── Collapsed Sidebar ──────────────────────────────────────
+.sidebar-collapsed {
+  .sidebar {
+    width: 64px;
+    overflow: visible;
+
+    &__logo {
+      padding: $space-4 0;
+      justify-content: center;
+    }
+
+    &__logo-full {
+      display: none;
+    }
+
+    &__logo-icon {
+      display: block;
+    }
+
+    &__nav {
+      padding: $space-4 $space-2;
+      align-items: center;
+      overflow: visible;
+    }
+
+    &__section {
+      margin-bottom: $space-2;
+      align-items: center;
+      width: 100%;
+    }
+
+    &__section-label {
+      opacity: 0;
+      height: 0;
+      margin: 0;
+      padding: 0;
+      pointer-events: none;
+    }
+
+    &__label {
+      opacity: 0;
+      width: 0;
+      pointer-events: none;
+    }
+
+    &__badge {
+      opacity: 1;
+      width: auto;
+      margin-left: 0;
+      pointer-events: none;
+      position: absolute;
+      top: 2px;
+      right: 2px;
+      min-width: 16px;
+      height: 16px;
+      font-size: 9px;
+      padding: 0 4px;
+      line-height: 16px;
+    }
+
+    &__item {
+      justify-content: center;
+      padding: $space-2;
+      width: 40px;
+      margin: 0 auto;
+      gap: 0;
+
+      &::after {
+        content: attr(data-label);
+        position: absolute;
+        left: calc(100% + 12px);
+        top: 50%;
+        transform: translateY(-50%);
+        background: var(--color-text-primary);
+        color: var(--color-bg-card);
+        font-size: $font-size-xs;
+        font-weight: $font-weight-medium;
+        padding: $space-1 $space-3;
+        border-radius: $radius-md;
+        white-space: nowrap;
+        pointer-events: none;
+        z-index: 200;
+        box-shadow: var(--shadow-md);
+        opacity: 0;
+        transition: opacity $transition-fast;
+      }
+
+      &::before {
+        content: '';
+        position: absolute;
+        left: calc(100% + 6px);
+        top: 50%;
+        transform: translateY(-50%);
+        border: 5px solid transparent;
+        border-right-color: var(--color-text-primary);
+        pointer-events: none;
+        z-index: 200;
+        opacity: 0;
+        transition: opacity $transition-fast;
+      }
+
+      &:hover::after,
+      &:hover::before {
+        opacity: 1;
+      }
+    }
+
+    &__footer {
+      padding: $space-3 $space-2;
+    }
   }
 }
 
@@ -171,6 +418,7 @@
     @include flex-start;
     gap: $space-3;
   }
+
   &__right {
     @include flex-start;
     gap: $space-3;
@@ -182,6 +430,7 @@
     height: 36px;
     border-radius: $radius-md;
     @include flex-center;
+
     .material-symbols-outlined {
       font-size: 22px;
     }

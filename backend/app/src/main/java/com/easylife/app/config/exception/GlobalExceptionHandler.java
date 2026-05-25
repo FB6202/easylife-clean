@@ -80,16 +80,16 @@ public class GlobalExceptionHandler {
                 ));
     }
 
-    @ExceptionHandler(Exception.class)
-    public ResponseEntity<ErrorResponse> handleGenericException(
-            Exception ex) {
-        return ResponseEntity
-                .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(new ErrorResponse(
-                        HttpStatus.INTERNAL_SERVER_ERROR.value(),
-                        "An unexpected error occurred",
-                        LocalDateTime.now()
-                ));
-    }
+//    @ExceptionHandler(Exception.class)
+//    public ResponseEntity<ErrorResponse> handleGenericException(
+//            Exception ex) {
+//        return ResponseEntity
+//                .status(HttpStatus.INTERNAL_SERVER_ERROR)
+//                .body(new ErrorResponse(
+//                        HttpStatus.INTERNAL_SERVER_ERROR.value(),
+//                        "An unexpected error occurred",
+//                        LocalDateTime.now()
+//                ));
+//    }
 
 }

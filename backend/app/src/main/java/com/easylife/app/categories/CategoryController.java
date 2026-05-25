@@ -1,8 +1,10 @@
 package com.easylife.app.categories;
 
+import com.easylife.app.categories.payload.CategoryFilter;
 import com.easylife.app.categories.payload.CategoryRequest;
 import com.easylife.app.categories.payload.CategoryResponse;
 import com.easylife.app.shared.enums.AccessType;
+import com.easylife.app.shared.payload.PageResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -34,9 +36,12 @@ public class CategoryController {
     }
 
     @GetMapping
-    public ResponseEntity<List<CategoryResponse>> findAll(
-            @RequestParam Long userId) {
-        return ResponseEntity.ok(categoryService.findAll(userId));
+    public ResponseEntity<PageResponse<CategoryResponse>> findAll(
+            @RequestParam Long userId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @ModelAttribute CategoryFilter filter) {
+        return ResponseEntity.ok(categoryService.findAll(userId, filter, page, size));
     }
 
     @GetMapping("/access-type")

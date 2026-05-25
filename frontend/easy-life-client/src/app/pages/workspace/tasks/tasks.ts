@@ -1,42 +1,33 @@
-import { Component, signal, computed } from '@angular/core';
+import { Component, signal, computed, inject, OnInit, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { PaginationComponent } from '../../../shared/components/pagination/pagination';
-import { FilterPanelComponent, FilterField, FilterValues } from '../../../shared/components/filter/filter';
+import {
+  FilterPanelComponent,
+  FilterField,
+  FilterValues,
+} from '../../../shared/components/filter/filter';
+import { TodoService } from '../../../core/services/todo-service';
+import {
+  TodoResponse,
+  TodoFilter,
+  CategoryPreview,
+  AccessType,
+} from '../../../core/models/todo.model';
+import { environment } from '../../../../environments/environment';
 import { AiAgentService } from '../../../core/services/ai-agent';
+import { CategoryService } from '../../../core/services/category-service';
+import { CategoryResponse as CategoryResponseModel } from '../../../core/models/category.model';
 
 type TodoStatus = 'OPEN' | 'IN_PROGRESS' | 'DONE';
 type Priority = 'CRITICAL' | 'HIGH' | 'MEDIUM' | 'LOW' | 'OPTIONAL';
-type AccessType = 'PRIVATE' | 'PUBLIC';
-
-interface CategoryPreview {
-  id: number;
-  name: string;
-  icon: string;
-  color: string;
-}
-
-interface Task {
-  id: number;
-  title: string;
-  description: string;
-  categories: CategoryPreview[];
-  status: TodoStatus;
-  priority: Priority;
-  accessType: AccessType;
-  dueDay: string;
-  dueMonth: string;
-  dueYear: string;
-  dueDate: string;
-  done: boolean;
-}
 
 interface TaskForm {
   title: string;
   description: string;
   status: TodoStatus;
   priority: Priority;
-  accessType: AccessType;
+  accessType: 'PRIVATE' | 'PUBLIC';
   dueDate: string;
   categoryIds: number[];
 }
@@ -45,249 +36,343 @@ interface TaskForm {
   selector: 'app-tasks',
   imports: [CommonModule, FormsModule, PaginationComponent, FilterPanelComponent],
   templateUrl: './tasks.html',
-  styleUrl: './tasks.scss'
+  styleUrl: './tasks.scss',
 })
-export class TasksComponent {
+export class TasksComponent implements OnInit {
+  private readonly userId = environment.userId;
 
-  constructor(private aiAgent: AiAgentService) { }
+  private readonly todoService = inject(TodoService);
+  private readonly categoryService = inject(CategoryService);
+  private readonly aiAgent = inject(AiAgentService);
 
   readonly priorities: Priority[] = ['CRITICAL', 'HIGH', 'MEDIUM', 'LOW', 'OPTIONAL'];
   readonly statuses: TodoStatus[] = ['OPEN', 'IN_PROGRESS', 'DONE'];
 
-  readonly availableCategories = signal<CategoryPreview[]>([
-    { id: 1, name: 'Work', icon: 'work', color: '#1976d2' },
-    { id: 2, name: 'Finance', icon: 'payments', color: '#f57c00' },
-    { id: 3, name: 'Health', icon: 'self_improvement', color: '#43a047' },
-    { id: 4, name: 'Personal', icon: 'person', color: '#9c27b0' },
-    { id: 5, name: 'Learning', icon: 'school', color: '#e91e63' },
-  ]);
+  // ── Service State (read-only Zugriff) ──────────────────────────────────────
+  readonly paginatedTasks = this.todoService.todos;
+  readonly currentPage = this.todoService.currentPage;
+  readonly pageSize = this.todoService.pageSize;
+  readonly totalPages = this.todoService.totalPages;
+  readonly totalElements = this.todoService.totalElements;
+  readonly pendingCount = this.todoService.pendingCount;
+  readonly inProgressCount = this.todoService.inProgressCount;
+  readonly doneCount = this.todoService.doneCount;
 
-  readonly tasks = signal<Task[]>([
-    { id: 1, title: 'Review Annual Financial Report Q4', description: 'Analyze the fiscal growth trends for this quarter', categories: [{ id: 2, name: 'Finance', icon: 'payments', color: '#f57c00' }, { id: 1, name: 'Work', icon: 'work', color: '#1976d2' }], status: 'IN_PROGRESS', priority: 'HIGH', accessType: 'PRIVATE', dueDay: '24', dueMonth: 'OCT', dueYear: '2025', dueDate: '2025-10-24', done: false },
-    { id: 2, title: 'Monthly Team Synergy Workshop', description: 'Interactive session focusing on team collaboration', categories: [{ id: 1, name: 'Work', icon: 'work', color: '#1976d2' }, { id: 3, name: 'Health', icon: 'self_improvement', color: '#43a047' }], status: 'OPEN', priority: 'MEDIUM', accessType: 'PUBLIC', dueDay: '02', dueMonth: 'NOV', dueYear: '2025', dueDate: '2025-11-02', done: false },
-    { id: 3, title: 'Product Website Refresh Design', description: 'Finalizing the visual identity and component library', categories: [{ id: 4, name: 'Personal', icon: 'person', color: '#9c27b0' }], status: 'DONE', priority: 'LOW', accessType: 'PUBLIC', dueDay: '12', dueMonth: 'OCT', dueYear: '2025', dueDate: '2025-10-12', done: true },
-    { id: 4, title: 'R&D Lab Protocol Audit', description: 'Safety inspection and documentation review', categories: [{ id: 1, name: 'Work', icon: 'work', color: '#1976d2' }, { id: 2, name: 'Finance', icon: 'payments', color: '#f57c00' }], status: 'IN_PROGRESS', priority: 'HIGH', accessType: 'PRIVATE', dueDay: '28', dueMonth: 'OCT', dueYear: '2025', dueDate: '2025-10-28', done: false },
-    { id: 5, title: 'Finalize Q4 Marketing Budget', description: 'Allocate budgets across channels for Q4 campaign', categories: [{ id: 2, name: 'Finance', icon: 'payments', color: '#f57c00' }], status: 'OPEN', priority: 'CRITICAL', accessType: 'PRIVATE', dueDay: '15', dueMonth: 'NOV', dueYear: '2025', dueDate: '2025-11-15', done: false },
-    { id: 6, title: 'Onboard New Developer', description: 'Set up environment and review onboarding docs', categories: [{ id: 1, name: 'Work', icon: 'work', color: '#1976d2' }], status: 'OPEN', priority: 'MEDIUM', accessType: 'PRIVATE', dueDay: '05', dueMonth: 'NOV', dueYear: '2025', dueDate: '2025-11-05', done: false },
-    { id: 7, title: 'Redesign Email Newsletter Template', description: 'Update to match new brand guidelines', categories: [{ id: 1, name: 'Work', icon: 'work', color: '#1976d2' }, { id: 4, name: 'Personal', icon: 'person', color: '#9c27b0' }], status: 'OPEN', priority: 'LOW', accessType: 'PUBLIC', dueDay: '20', dueMonth: 'NOV', dueYear: '2025', dueDate: '2025-11-20', done: false },
-    { id: 8, title: 'Run End-to-End Test Suite', description: 'Full regression test before the release', categories: [{ id: 1, name: 'Work', icon: 'work', color: '#1976d2' }], status: 'OPEN', priority: 'HIGH', accessType: 'PRIVATE', dueDay: '10', dueMonth: 'NOV', dueYear: '2025', dueDate: '2025-11-10', done: false },
-    { id: 9, title: 'Investor Update Presentation', description: 'Prepare Q3 highlights for investor meeting', categories: [{ id: 2, name: 'Finance', icon: 'payments', color: '#f57c00' }, { id: 1, name: 'Work', icon: 'work', color: '#1976d2' }], status: 'OPEN', priority: 'CRITICAL', accessType: 'PRIVATE', dueDay: '08', dueMonth: 'NOV', dueYear: '2025', dueDate: '2025-11-08', done: false },
-    { id: 10, title: 'Update Privacy Policy', description: 'Align with new GDPR requirements', categories: [{ id: 1, name: 'Work', icon: 'work', color: '#1976d2' }], status: 'DONE', priority: 'MEDIUM', accessType: 'PUBLIC', dueDay: '01', dueMonth: 'OCT', dueYear: '2025', dueDate: '2025-10-01', done: true },
-  ]);
-
-  // ── Pagination ─────────────────────────────────────────
-  readonly currentPage = signal(0);
-  readonly pageSize = signal(10);
-  readonly totalElements = computed(() => this.tasks().length);
-  readonly totalPages = computed(() => Math.ceil(this.totalElements() / this.pageSize()));
-  readonly paginatedTasks = computed(() => {
-    const start = this.currentPage() * this.pageSize();
-    return this.tasks().slice(start, start + this.pageSize());
-  });
-  onPageChange(page: number) { this.currentPage.set(page); }
-  onPageSizeChange(size: number) { this.pageSize.set(size); this.currentPage.set(0); }
-  onAiClick() { this.aiAgent.open() }
-
-  // ── Stats ──────────────────────────────────────────────
-  readonly pendingCount = computed(() => this.tasks().filter(t => t.status === 'OPEN').length);
-  readonly inProgressCount = computed(() => this.tasks().filter(t => t.status === 'IN_PROGRESS').length);
-  readonly doneCount = computed(() => this.tasks().filter(t => t.status === 'DONE').length);
-  readonly totalPending = this.pendingCount;
-  readonly totalInProgress = this.inProgressCount;
-  readonly totalDone = this.doneCount;
-
+  // ── Derived ────────────────────────────────────────────────────────────────
   readonly productivityScore = computed(() => {
-    const total = this.tasks().length;
-    if (total === 0) return 0;
+    const total = this.totalElements();
+    if (!total) return 0;
     return Math.round((this.doneCount() / total) * 10 * 10) / 10;
   });
 
   readonly productivityLabel = computed(() => {
-    const score = this.productivityScore();
-    if (score >= 9) return 'Elite';
-    if (score >= 7) return 'High';
-    if (score >= 5) return 'Good';
+    const s = this.productivityScore();
+    if (s >= 9) return 'Elite';
+    if (s >= 7) return 'High';
+    if (s >= 5) return 'Good';
     return 'Building';
   });
 
-  // ── Filter ─────────────────────────────────────────────
+  // ── Categories (wird vom API geladen) ──────────────────────────────────────
+  readonly availableCategories = this.categoryService.allCategories;
+
+  // ── Filter ─────────────────────────────────────────────────────────────────
   showFilter = signal(false);
   activeFilters = signal<FilterValues>({});
 
-  readonly taskFilterFields: FilterField[] = [
-    { key: 'search', label: 'Search', type: 'text', icon: 'search', placeholder: 'Search tasks...' },
+  readonly taskFilterFields = computed((): FilterField[] => [
     {
-      key: 'status', label: 'Status', type: 'multiselect', icon: 'radio_button_checked',
+      key: 'status',
+      label: 'Status',
+      type: 'select',
+      icon: 'radio_button_checked',
       options: [
         { value: 'OPEN', label: 'Open', icon: 'radio_button_unchecked', color: '#1976d2' },
         { value: 'IN_PROGRESS', label: 'Ongoing', icon: 'pending', color: '#f9a825' },
         { value: 'DONE', label: 'Done', icon: 'check_circle', color: '#43a047' },
-      ]
+      ],
     },
     {
-      key: 'priority', label: 'Priority', type: 'multiselect', icon: 'flag',
+      key: 'priority',
+      label: 'Priority',
+      type: 'select',
+      icon: 'flag',
       options: [
         { value: 'CRITICAL', label: 'Critical', color: '#d32f2f' },
         { value: 'HIGH', label: 'High', color: '#f57c00' },
         { value: 'MEDIUM', label: 'Medium', color: '#f9a825' },
         { value: 'LOW', label: 'Low', color: '#1976d2' },
         { value: 'OPTIONAL', label: 'Optional', color: '#757575' },
-      ]
+      ],
     },
     {
-      key: 'categories', label: 'Categories', type: 'multiselect-dropdown', icon: 'category',
-      options: [
-        { value: '1', label: 'Work', icon: 'work', color: '#1976d2' },
-        { value: '2', label: 'Finance', icon: 'payments', color: '#f57c00' },
-        { value: '3', label: 'Health', icon: 'self_improvement', color: '#43a047' },
-        { value: '4', label: 'Personal', icon: 'person', color: '#9c27b0' },
-        { value: '5', label: 'Learning', icon: 'school', color: '#e91e63' },
-      ]
-    },
-    {
-      key: 'access', label: 'Access', type: 'multiselect', icon: 'lock',
+      key: 'access',
+      label: 'Access',
+      type: 'select',
+      icon: 'lock',
       options: [
         { value: 'PRIVATE', label: 'Private', icon: 'lock', color: '#757575' },
         { value: 'PUBLIC', label: 'Public', icon: 'travel_explore', color: '#43a047' },
-      ]
+      ],
     },
-    { key: 'dueDate', label: 'Due Date Range', type: 'date-range', icon: 'calendar_today' },
-  ];
+    {
+      key: 'categories',
+      label: 'Categories',
+      type: 'multiselect-dropdown',
+      icon: 'category',
+      options: this.availableCategories().map((c) => ({
+        value: String(c.id),
+        label: c.name,
+        icon: c.icon,
+        color: c.color,
+      })),
+    },
+    { key: 'dueDateFrom', label: 'Due Date From', type: 'date', icon: 'calendar_today' },
+    { key: 'dueDateTo', label: 'Due Date To', type: 'date', icon: 'calendar_today' },
+  ]);
 
-  readonly activeFilterCount = computed(() =>
-    Object.values(this.activeFilters()).filter(v => {
-      if (!v || v === '') return false;
-      if (Array.isArray(v)) return v.length > 0;
-      return true;
-    }).length
+  readonly activeFilterCount = computed(
+    () =>
+      Object.values(this.activeFilters()).filter((v) => {
+        if (!v || v === '') return false;
+        if (Array.isArray(v)) return v.length > 0;
+        return true;
+      }).length,
   );
 
-  onFilterApply(values: FilterValues) { this.activeFilters.set(values); this.showFilter.set(false); }
-  onFilterReset() { this.activeFilters.set({}); }
+  readonly sortedCreateCategories = computed(() => {
+    const cats = this.availableCategories();
+    if (!Array.isArray(cats)) return [];
+    const selected = this.createForm().categoryIds;
+    return [...cats].sort((a, b) => {
+      const aSelected = selected.includes(a.id) ? 0 : 1;
+      const bSelected = selected.includes(b.id) ? 0 : 1;
+      return aSelected - bSelected;
+    });
+  });
 
-  // ── Category Dropdown ──────────────────────────────────
+  readonly sortedEditCategories = computed(() => {
+    const cats = this.availableCategories();
+    if (!Array.isArray(cats)) return [];
+    const selected = this.editForm().categoryIds;
+    return [...cats].sort((a, b) => {
+      const aSelected = selected.includes(a.id) ? 0 : 1;
+      const bSelected = selected.includes(b.id) ? 0 : 1;
+      return aSelected - bSelected;
+    });
+  });
+
+  onFilterApply(values: FilterValues): void {
+    this.activeFilters.set(values);
+
+    const categoryIds = (values['categories'] as string[] | undefined)
+      ?.map(Number)
+      .filter((n) => !isNaN(n));
+
+    const filter: TodoFilter = {
+      status: (values['status'] as TodoStatus) || undefined,
+      priority: (values['priority'] as Priority) || undefined,
+      accessType: (values['access'] as AccessType) || undefined,
+      dueDateFrom: (values['dueDateFrom'] as string) || undefined,
+      dueDateTo: (values['dueDateTo'] as string) || undefined,
+      categoryIds: categoryIds?.length ? categoryIds : undefined,
+    };
+
+    this.todoService.loadAll(this.userId, 0, filter);
+    this.showFilter.set(false);
+  }
+
+  onFilterReset(): void {
+    this.activeFilters.set({});
+    this.todoService.loadAll(this.userId, 0);
+    this.showFilter.set(false);
+  }
+
+  // ── Pagination ─────────────────────────────────────────────────────────────
+  onPageSizeChange(size: number): void {
+    this.todoService.pageSize.set(size);
+    this.todoService.loadAll(this.userId, 0, this.buildFilterFromActive());
+  }
+
+  onPageChange(page: number): void {
+    this.todoService.loadAll(this.userId, page, this.buildFilterFromActive());
+  }
+
+  onAiClick(): void {
+    this.aiAgent.open();
+  }
+
+  // ── Category Dropdown ──────────────────────────────────────────────────────
   showCatDropdown = signal(false);
   showEditCatDropdown = signal(false);
 
-  toggleCatDropdown(event: Event) {
+  toggleCatDropdown(event: Event): void {
     event.stopPropagation();
-    this.showCatDropdown.update(v => !v);
+    this.showCatDropdown.update((v) => !v);
     this.showEditCatDropdown.set(false);
   }
 
-  toggleEditCatDropdown(event: Event) {
+  toggleEditCatDropdown(event: Event): void {
     event.stopPropagation();
-    this.showEditCatDropdown.update(v => !v);
+    this.showEditCatDropdown.update((v) => !v);
     this.showCatDropdown.set(false);
   }
 
-  getCatDropdownLabel(categoryIds: number[]): string {
-    if (categoryIds.length === 0) return 'Select categories...';
-    if (categoryIds.length === 1)
-      return this.availableCategories().find(c => c.id === categoryIds[0])?.name ?? '1 selected';
-    return `${categoryIds.length} selected`;
-  }
-
   getSelectedCatColors(categoryIds: number[]): string[] {
-    return this.availableCategories()
-      .filter(c => categoryIds.includes(c.id))
-      .map(c => c.color)
+    const cats = this.availableCategories();
+    if (!Array.isArray(cats) || !cats.length) return [];
+    return cats
+      .filter((c) => categoryIds.includes(c.id))
+      .map((c) => c.color)
       .slice(0, 3);
   }
 
-  // ── Modals ─────────────────────────────────────────────
+  getCatDropdownLabel(categoryIds: number[]): string {
+    if (!categoryIds.length) return 'Select categories...';
+    const cats = this.availableCategories();
+    if (!Array.isArray(cats)) return `${categoryIds.length} selected`;
+    if (categoryIds.length === 1)
+      return cats.find((c) => c.id === categoryIds[0])?.name ?? '1 selected';
+    return `${categoryIds.length} selected`;
+  }
+
+  // ── Modal State ────────────────────────────────────────────────────────────
   showCreateModal = signal(false);
   showEditModal = signal(false);
   showDeleteConfirm = signal(false);
   showDoneConfirm = signal(false);
   activeMenu = signal<number | null>(null);
-  selectedTask = signal<Task | null>(null);
+  selectedTask = signal<TodoResponse | null>(null);
 
   createForm = signal<TaskForm>({
-    title: '', description: '', status: 'OPEN', priority: 'MEDIUM',
-    accessType: 'PRIVATE', dueDate: '', categoryIds: []
+    title: '',
+    description: '',
+    status: 'OPEN',
+    priority: 'MEDIUM',
+    accessType: 'PRIVATE',
+    dueDate: '',
+    categoryIds: [],
   });
 
   editForm = signal<TaskForm>({
-    title: '', description: '', status: 'OPEN', priority: 'MEDIUM',
-    accessType: 'PRIVATE', dueDate: '', categoryIds: []
+    title: '',
+    description: '',
+    status: 'OPEN',
+    priority: 'MEDIUM',
+    accessType: 'PRIVATE',
+    dueDate: '',
+    categoryIds: [],
   });
 
-  openCreate() {
-    this.createForm.set({ title: '', description: '', status: 'OPEN', priority: 'MEDIUM', accessType: 'PRIVATE', dueDate: '', categoryIds: [] });
+  // ── Create (TODO: todoService.create() sobald implementiert) ───────────────
+  openCreate(): void {
+    this.createForm.set({
+      title: '',
+      description: '',
+      status: 'OPEN',
+      priority: 'MEDIUM',
+      accessType: 'PRIVATE',
+      dueDate: '',
+      categoryIds: [],
+    });
     this.showCatDropdown.set(false);
     this.showCreateModal.set(true);
   }
 
-  submitCreate() {
+  submitCreate(): void {
     if (!this.createForm().title.trim()) return;
-    console.log('Create task:', this.createForm());
+    // TODO: this.todoService.create(this.userId, this.createForm());
+    console.log('TODO create:', this.createForm());
     this.showCreateModal.set(false);
   }
 
-  openEdit(task: Task) {
+  // ── Edit (findById wird aufgerufen für frischen Stand) ────────────────────
+  openEdit(task: TodoResponse): void {
+    this.todoService.loadById(this.userId, task.id);
     this.selectedTask.set(task);
     this.editForm.set({
-      title: task.title, description: task.description,
-      status: task.status, priority: task.priority,
-      accessType: task.accessType, dueDate: task.dueDate,
-      categoryIds: task.categories.map(c => c.id)
+      title: task.title,
+      description: task.description ?? '',
+      status: task.status,
+      priority: task.priority,
+      accessType: task.accessType,
+      dueDate: task.dueDate ?? '',
+      categoryIds: task.categories?.map((c) => c.id) ?? [],
     });
     this.showEditCatDropdown.set(false);
     this.showEditModal.set(true);
     this.activeMenu.set(null);
   }
 
-  submitEdit() {
+  submitEdit(): void {
     if (!this.editForm().title.trim()) return;
-    console.log('Update task:', this.selectedTask()?.id, this.editForm());
+    // TODO: this.todoService.update(this.userId, this.selectedTask()!.id, this.editForm());
+    console.log('TODO update:', this.selectedTask()?.id, this.editForm());
     this.showEditModal.set(false);
   }
 
-  openDoneConfirm(task: Task) {
+  // ── Done (TODO: todoService.update() sobald implementiert) ────────────────
+  openDoneConfirm(task: TodoResponse): void {
     this.selectedTask.set(task);
     this.showDoneConfirm.set(true);
     this.activeMenu.set(null);
   }
 
-  confirmDone() {
-    const id = this.selectedTask()?.id;
-    if (id) this.tasks.update(ts => ts.map(t => t.id === id ? { ...t, status: 'DONE', done: true } : t));
+  confirmDone(): void {
+    // TODO: this.todoService.update(this.userId, id, { ...task, status: 'DONE' });
+    console.log('TODO mark done:', this.selectedTask()?.id);
     this.showDoneConfirm.set(false);
     this.selectedTask.set(null);
   }
 
-  openDeleteConfirm(task: Task) {
+  // ── Delete (TODO: todoService.delete() sobald implementiert) ──────────────
+  openDeleteConfirm(task: TodoResponse): void {
     this.selectedTask.set(task);
     this.showEditModal.set(false);
     this.showDeleteConfirm.set(true);
     this.activeMenu.set(null);
   }
 
-  confirmDelete() {
-    const id = this.selectedTask()?.id;
-    if (id) this.tasks.update(ts => ts.filter(t => t.id !== id));
+  confirmDelete(): void {
+    // TODO: this.todoService.delete(this.userId, this.selectedTask()!.id);
+    console.log('TODO delete:', this.selectedTask()?.id);
     this.showDeleteConfirm.set(false);
     this.selectedTask.set(null);
   }
 
-  toggleMenu(id: number, event: Event) {
+  // ── Menu & Category Toggles ────────────────────────────────────────────────
+  toggleMenu(id: number, event: Event): void {
     event.stopPropagation();
-    this.activeMenu.update(current => current === id ? null : id);
+    this.activeMenu.update((current) => (current === id ? null : id));
   }
 
-  toggleCreateCategory(id: number) {
-    this.createForm.update(f => ({
+  toggleCreateCategory(id: number): void {
+    this.createForm.update((f) => ({
       ...f,
-      categoryIds: f.categoryIds.includes(id) ? f.categoryIds.filter(i => i !== id) : [...f.categoryIds, id]
+      categoryIds: f.categoryIds.includes(id)
+        ? f.categoryIds.filter((i) => i !== id)
+        : [...f.categoryIds, id],
     }));
   }
 
-  toggleEditCategory(id: number) {
-    this.editForm.update(f => ({
+  toggleEditCategory(id: number): void {
+    this.editForm.update((f) => ({
       ...f,
-      categoryIds: f.categoryIds.includes(id) ? f.categoryIds.filter(i => i !== id) : [...f.categoryIds, id]
+      categoryIds: f.categoryIds.includes(id)
+        ? f.categoryIds.filter((i) => i !== id)
+        : [...f.categoryIds, id],
     }));
+  }
+
+  // ── Helpers ────────────────────────────────────────────────────────────────
+  formatDueDate(dateStr: string | null): { day: string; month: string; year: string } {
+    if (!dateStr) return { day: '--', month: '---', year: '----' };
+    const d = new Date(dateStr + 'T00:00:00');
+    return {
+      day: d.getDate().toString().padStart(2, '0'),
+      month: d.toLocaleString('en', { month: 'short' }).toUpperCase(),
+      year: d.getFullYear().toString(),
+    };
   }
 
   getStatusLabel(status: TodoStatus): string {
@@ -295,7 +380,9 @@ export class TasksComponent {
   }
 
   getStatusClass(status: TodoStatus): string {
-    return { OPEN: 'status--open', IN_PROGRESS: 'status--in-progress', DONE: 'status--done' }[status];
+    return { OPEN: 'status--open', IN_PROGRESS: 'status--in-progress', DONE: 'status--done' }[
+      status
+    ];
   }
 
   getStatusIcon(status: TodoStatus): string {
@@ -308,5 +395,32 @@ export class TasksComponent {
 
   getPriorityClass(priority: Priority): string {
     return 'priority--' + priority.toLowerCase();
+  }
+
+  @HostListener('document:click')
+  onDocumentClick(): void {
+    this.activeMenu.set(null);
+  }
+
+  // ── Lifecycle ──────────────────────────────────────────────────────────────
+  ngOnInit(): void {
+    this.todoService.loadAll(this.userId);
+    this.categoryService.loadAllFlat(this.userId);
+  }
+
+  // ── Private ────────────────────────────────────────────────────────────────
+  private buildFilterFromActive(): TodoFilter {
+    const v = this.activeFilters();
+    const categoryIds = (v['categories'] as string[] | undefined)
+      ?.map(Number)
+      .filter((n) => !isNaN(n));
+    return {
+      status: (v['status'] as TodoStatus) || undefined,
+      priority: (v['priority'] as Priority) || undefined,
+      accessType: (v['access'] as AccessType) || undefined,
+      dueDateFrom: (v['dueDateFrom'] as string) || undefined,
+      dueDateTo: (v['dueDateTo'] as string) || undefined,
+      categoryIds: categoryIds?.length ? categoryIds : undefined,
+    };
   }
 }

@@ -1,5 +1,6 @@
 package com.easylife.app.todos;
 
+import com.easylife.app.categories.payload.CategoryPreview;
 import com.easylife.app.shared.enums.AccessType;
 import com.easylife.app.shared.enums.TodoStatus;
 import com.easylife.app.todos.payload.TodoRequest;
@@ -8,11 +9,12 @@ import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.List;
 
 @Component
 class TodoMapper {
 
-    public TodoResponse toResponse(Todo todo) {
+    public TodoResponse toResponse(Todo todo, List<CategoryPreview> categories) {
         return new TodoResponse(
                 todo.getId(),
                 todo.getTitle(),
@@ -22,7 +24,7 @@ class TodoMapper {
                 todo.getAccessType(),
                 todo.getDueDate(),
                 todo.getCreatedAt(),
-                todo.getCategoryIds()
+                categories
         );
     }
 
@@ -49,5 +51,4 @@ class TodoMapper {
         todo.setDueDate(request.dueDate());
         todo.setCategoryIds(request.categoryIds() != null ? request.categoryIds() : new ArrayList<>());
     }
-
 }

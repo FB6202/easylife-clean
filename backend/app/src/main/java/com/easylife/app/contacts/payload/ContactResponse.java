@@ -1,5 +1,6 @@
 package com.easylife.app.contacts.payload;
 
+import com.easylife.app.categories.payload.CategoryPreview;
 import com.easylife.app.shared.enums.RelationshipType;
 
 import java.time.LocalDate;
@@ -22,5 +23,5 @@ public record ContactResponse(
         LocalDateTime createdAt,
         RelationshipType relationshipType,
         List<ContactNoteResponse> contactNotes,
-        List<Long> categoryIds
+        List<CategoryPreview> categories
 ) {}

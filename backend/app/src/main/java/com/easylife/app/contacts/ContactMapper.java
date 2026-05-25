@@ -1,18 +1,27 @@
 package com.easylife.app.contacts;
 
-import com.easylife.app.contacts.payload.ContactNoteRequest;
-import com.easylife.app.contacts.payload.ContactNoteResponse;
-import com.easylife.app.contacts.payload.ContactRequest;
-import com.easylife.app.contacts.payload.ContactResponse;
+import com.easylife.app.categories.api.CategoryApi;
+import com.easylife.app.categories.payload.CategoryPreview;
+import com.easylife.app.contacts.payload.*;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.List;
 
 @Component
 class ContactMapper {
 
+    private final CategoryApi categoryApi;
+
+    ContactMapper(CategoryApi categoryApi) {
+        this.categoryApi = categoryApi;
+    }
+
     public ContactResponse toResponse(Contact contact) {
+        List<CategoryPreview> categories =
+                categoryApi.findPreviewsByIds(contact.getCategoryIds());
+
         return new ContactResponse(
                 contact.getId(),
                 contact.getFirstname(),
@@ -31,7 +40,7 @@ class ContactMapper {
                 contact.getContactNotes() != null
                         ? contact.getContactNotes().stream().map(this::toNoteResponse).toList()
                         : new ArrayList<>(),
-                contact.getCategoryIds()
+                categories
         );
     }
 
@@ -59,7 +68,8 @@ class ContactMapper {
                 .relationshipType(request.relationshipType())
                 .createdAt(LocalDateTime.now())
                 .userId(userId)
-                .categoryIds(request.categoryIds() != null ? request.categoryIds() : new ArrayList<>())
+                .categoryIds(request.categoryIds() != null
+                        ? request.categoryIds() : new ArrayList<>())
                 .contactNotes(new ArrayList<>())
                 .build();
     }
@@ -85,7 +95,7 @@ class ContactMapper {
         contact.setTags(request.tags());
         contact.setLastContactedAt(request.lastContactedAt());
         contact.setRelationshipType(request.relationshipType());
-        contact.setCategoryIds(request.categoryIds() != null ? request.categoryIds() : new ArrayList<>());
+        contact.setCategoryIds(request.categoryIds() != null
+                ? request.categoryIds() : new ArrayList<>());
     }
-
 }

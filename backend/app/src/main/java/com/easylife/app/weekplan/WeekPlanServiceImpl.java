@@ -1,40 +1,36 @@
 package com.easylife.app.weekplan;
 
+import com.easylife.app.categories.api.CategoryApi;
 import com.easylife.app.shared.payload.PageResponse;
 import com.easylife.app.weekplan.api.*;
 import jakarta.persistence.EntityNotFoundException;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
 import java.util.List;
 
 @Service
+@RequiredArgsConstructor
 class WeekPlanServiceImpl implements WeekPlanService, WeekPlanApi {
 
-    private final WeekPlanRepository weekPlanRepository;
-    private final WeekPlanItemRepository weekPlanItemRepository;
-    private final WeekPlanMapper mapper;
-
-    WeekPlanServiceImpl(
-            WeekPlanRepository weekPlanRepository,
-            WeekPlanItemRepository weekPlanItemRepository,
-            WeekPlanMapper mapper
-    ) {
-        this.weekPlanRepository = weekPlanRepository;
-        this.weekPlanItemRepository = weekPlanItemRepository;
-        this.mapper = mapper;
-    }
+    private final WeekPlanRepository     weekPlanRepository;
+    private final WeekPlanMapper         mapper;
+    private final CategoryApi            categoryApi;
 
     @Override
     public PageResponse<WeekPlanResponse> findAll(Long userId, int page, int size, WeekPlanFilter filter) {
         PageRequest pageRequest = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "startDate"));
         Page<WeekPlan> result = weekPlanRepository.findAll(
-                WeekPlanSpecification.build(userId, filter), pageRequest
-        );
+                WeekPlanSpecification.build(userId, filter), pageRequest);
         return new PageResponse<>(
-                result.getContent().stream().map(mapper::toResponse).toList(),
+                result.getContent().stream()
+                        .map(wp -> mapper.toResponse(wp,
+                                categoryApi.findPreviewsByIds(wp.getCategoryIds())))
+                        .toList(),
                 result.getNumber(),
                 result.getSize(),
                 result.getTotalElements(),
@@ -44,22 +40,20 @@ class WeekPlanServiceImpl implements WeekPlanService, WeekPlanApi {
 
     @Override
     public WeekPlanResponse findById(Long id, Long userId) {
-        return mapper.toResponse(getWeekPlan(id, userId));
+        WeekPlan wp = getWeekPlan(id, userId);
+        return mapper.toResponse(wp, categoryApi.findPreviewsByIds(wp.getCategoryIds()));
     }
 
     @Override
     @Transactional
     public WeekPlanResponse create(WeekPlanRequest request, Long userId) {
         WeekPlan weekPlan = mapper.toEntity(request, userId);
-
         if (request.items() != null) {
-            List<WeekPlanItem> items = request.items().stream()
-                    .map(itemReq -> mapper.toItemEntity(itemReq, weekPlan))
-                    .toList();
-            weekPlan.getItems().addAll(items);
+            weekPlan.getItems().addAll(request.items().stream()
+                    .map(i -> mapper.toItemEntity(i, weekPlan)).toList());
         }
-
-        return mapper.toResponse(weekPlanRepository.save(weekPlan));
+        WeekPlan saved = weekPlanRepository.save(weekPlan);
+        return mapper.toResponse(saved, categoryApi.findPreviewsByIds(saved.getCategoryIds()));
     }
 
     @Override
@@ -67,99 +61,91 @@ class WeekPlanServiceImpl implements WeekPlanService, WeekPlanApi {
     public WeekPlanResponse update(Long id, WeekPlanRequest request, Long userId) {
         WeekPlan weekPlan = getWeekPlan(id, userId);
         mapper.applyRequest(weekPlan, request);
-
         if (request.items() != null) {
             weekPlan.getItems().clear();
-            List<WeekPlanItem> items = request.items().stream()
-                    .map(itemReq -> mapper.toItemEntity(itemReq, weekPlan))
-                    .toList();
-            weekPlan.getItems().addAll(items);
+            weekPlan.getItems().addAll(request.items().stream()
+                    .map(i -> mapper.toItemEntity(i, weekPlan)).toList());
         }
-
-        return mapper.toResponse(weekPlanRepository.save(weekPlan));
+        WeekPlan saved = weekPlanRepository.save(weekPlan);
+        return mapper.toResponse(saved, categoryApi.findPreviewsByIds(saved.getCategoryIds()));
     }
 
     @Override
     @Transactional
     public void delete(Long id, Long userId) {
-        WeekPlan weekPlan = getWeekPlan(id, userId);
-        weekPlanRepository.delete(weekPlan);
+        weekPlanRepository.delete(getWeekPlan(id, userId));
     }
 
     @Override
     @Transactional
     public WeekPlanResponse updateStatus(Long id, String status, Long userId) {
-        WeekPlan weekPlan = getWeekPlan(id, userId);
-        weekPlan.setStatus(com.easylife.app.shared.enums.WeekPlanStatus.valueOf(status));
-        return mapper.toResponse(weekPlanRepository.save(weekPlan));
+        WeekPlan wp = getWeekPlan(id, userId);
+        wp.setStatus(com.easylife.app.shared.enums.WeekPlanStatus.valueOf(status));
+        WeekPlan saved = weekPlanRepository.save(wp);
+        return mapper.toResponse(saved, categoryApi.findPreviewsByIds(saved.getCategoryIds()));
     }
 
     @Override
     @Transactional
     public WeekPlanResponse updateReflection(Long id, String reflection, Long userId) {
-        WeekPlan weekPlan = getWeekPlan(id, userId);
-        weekPlan.setReflection(reflection);
-        return mapper.toResponse(weekPlanRepository.save(weekPlan));
+        WeekPlan wp = getWeekPlan(id, userId);
+        wp.setReflection(reflection);
+        WeekPlan saved = weekPlanRepository.save(wp);
+        return mapper.toResponse(saved, categoryApi.findPreviewsByIds(saved.getCategoryIds()));
     }
-
-    // ── Items ──────────────────────────────────────────────
 
     @Override
     @Transactional
     public WeekPlanResponse addItem(Long weekPlanId, WeekPlanItemRequest request, Long userId) {
-        WeekPlan weekPlan = getWeekPlan(weekPlanId, userId);
-        WeekPlanItem item = mapper.toItemEntity(request, weekPlan);
-        weekPlan.getItems().add(item);
-        return mapper.toResponse(weekPlanRepository.save(weekPlan));
+        WeekPlan wp = getWeekPlan(weekPlanId, userId);
+        wp.getItems().add(mapper.toItemEntity(request, wp));
+        WeekPlan saved = weekPlanRepository.save(wp);
+        return mapper.toResponse(saved, categoryApi.findPreviewsByIds(saved.getCategoryIds()));
     }
 
     @Override
     @Transactional
     public WeekPlanResponse updateItem(Long weekPlanId, Long itemId, WeekPlanItemRequest request, Long userId) {
-        WeekPlan weekPlan = getWeekPlan(weekPlanId, userId);
-        WeekPlanItem item = getItem(weekPlan, itemId);
-        mapper.applyItemRequest(item, request);
-        return mapper.toResponse(weekPlanRepository.save(weekPlan));
+        WeekPlan wp = getWeekPlan(weekPlanId, userId);
+        mapper.applyItemRequest(getItem(wp, itemId), request);
+        WeekPlan saved = weekPlanRepository.save(wp);
+        return mapper.toResponse(saved, categoryApi.findPreviewsByIds(saved.getCategoryIds()));
     }
 
     @Override
     @Transactional
     public WeekPlanResponse toggleItem(Long weekPlanId, Long itemId, Long userId) {
-        WeekPlan weekPlan = getWeekPlan(weekPlanId, userId);
-        WeekPlanItem item = getItem(weekPlan, itemId);
+        WeekPlan wp = getWeekPlan(weekPlanId, userId);
+        WeekPlanItem item = getItem(wp, itemId);
         item.setDone(!item.getDone());
-        return mapper.toResponse(weekPlanRepository.save(weekPlan));
+        WeekPlan saved = weekPlanRepository.save(wp);
+        return mapper.toResponse(saved, categoryApi.findPreviewsByIds(saved.getCategoryIds()));
     }
 
     @Override
     @Transactional
     public WeekPlanResponse removeItem(Long weekPlanId, Long itemId, Long userId) {
-        WeekPlan weekPlan = getWeekPlan(weekPlanId, userId);
-        weekPlan.getItems().removeIf(i -> i.getId().equals(itemId));
-        return mapper.toResponse(weekPlanRepository.save(weekPlan));
+        WeekPlan wp = getWeekPlan(weekPlanId, userId);
+        wp.getItems().removeIf(i -> i.getId().equals(itemId));
+        WeekPlan saved = weekPlanRepository.save(wp);
+        return mapper.toResponse(saved, categoryApi.findPreviewsByIds(saved.getCategoryIds()));
     }
-
-    // ── Helpers ────────────────────────────────────────────
 
     private WeekPlan getWeekPlan(Long id, Long userId) {
         return weekPlanRepository.findByIdAndUserId(id, userId)
-                .orElseThrow(() -> new EntityNotFoundException(
-                        "WeekPlan not found with id: " + id
-                ));
+                .orElseThrow(() -> new EntityNotFoundException("WeekPlan not found: " + id));
     }
 
-    private WeekPlanItem getItem(WeekPlan weekPlan, Long itemId) {
-        return weekPlan.getItems().stream()
+    private WeekPlanItem getItem(WeekPlan wp, Long itemId) {
+        return wp.getItems().stream()
                 .filter(i -> i.getId().equals(itemId))
                 .findFirst()
-                .orElseThrow(() -> new EntityNotFoundException(
-                        "WeekPlanItem not found with id: " + itemId
-                ));
+                .orElseThrow(() -> new EntityNotFoundException("WeekPlanItem not found: " + itemId));
     }
 
     @Override
     public boolean existsByIdAndUserId(Long weekPlanId, Long userId) {
-        return weekPlanRepository.findByIdAndUserId(weekPlanId, userId).isPresent();
+        return weekPlanRepository.existsByIdAndUserId(weekPlanId, userId);
     }
 
     @Override
@@ -168,12 +154,10 @@ class WeekPlanServiceImpl implements WeekPlanService, WeekPlanApi {
                 .map(wp -> new WeekPlanSummary(
                         wp.getId(),
                         wp.getTitle(),
-                        wp.getStartDate().toString(),
-                        wp.getEndDate().toString()
+                        wp.getStartDate() != null ? wp.getStartDate().toString() : null,
+                        wp.getEndDate()   != null ? wp.getEndDate().toString()   : null
                 ))
-                .orElseThrow(() -> new jakarta.persistence.EntityNotFoundException(
-                        "WeekPlan not found: " + weekPlanId
-                ));
+                .orElse(null);
     }
 
 }

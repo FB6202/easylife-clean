@@ -1,5 +1,6 @@
 package com.easylife.app.todos.payload;
 
+import com.easylife.app.categories.payload.CategoryPreview;
 import com.easylife.app.shared.enums.AccessType;
 import com.easylife.app.shared.enums.Priority;
 import com.easylife.app.shared.enums.TodoStatus;
@@ -17,5 +18,5 @@ public record TodoResponse(
         AccessType accessType,
         LocalDate dueDate,
         LocalDateTime createdAt,
-        List<Long> categoryIds
+        List<CategoryPreview> categories
 ) {}

@@ -33,7 +33,10 @@ class DocumentServiceImpl implements DocumentService {
         validateCategories(request.categoryIds(), userId);
         Document document = documentMapper.toEntity(request, userId, filePath);
         document.setUploadedAt(LocalDateTime.now());
-        return documentMapper.toResponse(documentRepository.save(document), null);
+        Document saved = documentRepository.save(document);
+        return documentMapper.toResponse(saved,
+                categoryApi.findPreviewsByIds(saved.getCategoryIds()),
+                null);
     }
 
     @Override
@@ -42,6 +45,7 @@ class DocumentServiceImpl implements DocumentService {
                 .orElseThrow(() -> new EntityNotFoundException("Document not found"));
         return documentMapper.toResponse(
                 document,
+                categoryApi.findPreviewsByIds(document.getCategoryIds()),
                 storageApi.generateDownloadUrl(document.getFilePath())
         );
     }
@@ -54,6 +58,7 @@ class DocumentServiceImpl implements DocumentService {
                 result.getContent().stream()
                         .map(doc -> documentMapper.toResponse(
                                 doc,
+                                categoryApi.findPreviewsByIds(doc.getCategoryIds()),
                                 storageApi.generateDownloadUrl(doc.getFilePath())))
                         .toList(),
                 result.getNumber(),
@@ -70,7 +75,10 @@ class DocumentServiceImpl implements DocumentService {
         validateCategories(request.categoryIds(), userId);
         documentMapper.update(document, request);
         document.setUpdatedAt(LocalDateTime.now());
-        return documentMapper.toResponse(documentRepository.save(document), null);
+        Document saved = documentRepository.save(document);
+        return documentMapper.toResponse(saved,
+                categoryApi.findPreviewsByIds(saved.getCategoryIds()),
+                null);
     }
 
     @Override

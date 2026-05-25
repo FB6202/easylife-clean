@@ -1,11 +1,17 @@
 package com.easylife.app.categories;
 
 import com.easylife.app.categories.api.CategoryApi;
+import com.easylife.app.categories.payload.CategoryFilter;
+import com.easylife.app.categories.payload.CategoryPreview;
 import com.easylife.app.categories.payload.CategoryRequest;
 import com.easylife.app.categories.payload.CategoryResponse;
 import com.easylife.app.shared.enums.AccessType;
+import com.easylife.app.shared.payload.PageResponse;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -36,11 +42,16 @@ class CategoryServiceImpl implements CategoryService, CategoryApi {
     }
 
     @Override
-    public List<CategoryResponse> findAll(Long userId) {
-        return categoryRepository.findAllByUserId(userId)
-                .stream()
-                .map(categoryMapper::toResponse)
-                .toList();
+    public PageResponse<CategoryResponse> findAll(Long userId, CategoryFilter filter, int page, int size) {
+        Specification<Category> spec = CategorySpecification.build(userId, filter);
+        Page<Category> result = categoryRepository.findAll(spec, PageRequest.of(page, size));
+        return new PageResponse<>(
+                result.getContent().stream().map(categoryMapper::toResponse).toList(),
+                result.getNumber(),
+                result.getSize(),
+                result.getTotalElements(),
+                result.getTotalPages()
+        );
     }
 
     @Override
@@ -83,6 +94,15 @@ class CategoryServiceImpl implements CategoryService, CategoryApi {
     @Override
     public long countPublicByUserId(Long userId) {
         return categoryRepository.countByUserIdAndAccessType(userId, AccessType.PUBLIC);
+    }
+
+    @Override
+    public List<CategoryPreview> findPreviewsByIds(List<Long> ids) {
+        if (ids == null || ids.isEmpty()) return List.of();
+        return categoryRepository.findAllById(ids)
+                .stream()
+                .map(c -> new CategoryPreview(c.getId(), c.getName(), c.getIcon(), c.getColor()))
+                .toList();
     }
 
 }

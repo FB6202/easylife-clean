@@ -28,14 +28,17 @@ class TodoServiceImpl implements TodoService {
         validateCategories(request.categoryIds(), userId);
         Todo todo = todoMapper.toEntity(request, userId);
         todo.setCreatedAt(LocalDateTime.now());
-        return todoMapper.toResponse(todoRepository.save(todo));
+        Todo saved = todoRepository.save(todo);
+        return todoMapper.toResponse(saved,
+                categoryApi.findPreviewsByIds(saved.getCategoryIds()));
     }
 
     @Override
     public TodoResponse findById(Long id, Long userId) {
-        return todoRepository.findByIdAndUserId(id, userId)
-                .map(todoMapper::toResponse)
+        Todo todo = todoRepository.findByIdAndUserId(id, userId)
                 .orElseThrow(() -> new EntityNotFoundException("Todo not found"));
+        return todoMapper.toResponse(todo,
+                categoryApi.findPreviewsByIds(todo.getCategoryIds()));
     }
 
     @Override
@@ -43,7 +46,10 @@ class TodoServiceImpl implements TodoService {
         Specification<Todo> spec = TodoSpecification.build(userId, filter);
         Page<Todo> result = todoRepository.findAll(spec, PageRequest.of(page, size));
         return new PageResponse<>(
-                result.getContent().stream().map(todoMapper::toResponse).toList(),
+                result.getContent().stream()
+                        .map(todo -> todoMapper.toResponse(todo,
+                                categoryApi.findPreviewsByIds(todo.getCategoryIds())))
+                        .toList(),
                 result.getNumber(),
                 result.getSize(),
                 result.getTotalElements(),
@@ -58,7 +64,9 @@ class TodoServiceImpl implements TodoService {
         validateCategories(request.categoryIds(), userId);
         todoMapper.update(todo, request);
         todo.setUpdatedAt(LocalDateTime.now());
-        return todoMapper.toResponse(todoRepository.save(todo));
+        Todo saved = todoRepository.save(todo);
+        return todoMapper.toResponse(saved,
+                categoryApi.findPreviewsByIds(saved.getCategoryIds()));
     }
 
     @Override

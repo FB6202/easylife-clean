@@ -1,7 +1,10 @@
-import { Component, signal } from '@angular/core';
+import { Component, signal, inject, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
+import { UserService } from '../../../core/services/user-service';
+import { ThemeService } from '../../../core/services/theme';
+import { environment } from '../../../../environments/environment';
 
 type ColorTheme = 'LIGHT' | 'DARK' | 'SYSTEM';
 type Language = 'DE' | 'EN';
@@ -13,44 +16,47 @@ type Language = 'DE' | 'EN';
   styleUrl: './profile.scss',
 })
 export class ProfileComponent {
+  private readonly userService = inject(UserService);
+  private readonly themeService = inject(ThemeService);
+  private readonly router = inject(Router);
+  private readonly route = inject(ActivatedRoute);
+
   hasChanges = signal(false);
   showDeleteConfirm = signal(false);
 
-  // Profile
-  firstname = signal('Felix');
-  lastname = signal('Müller');
-  email = signal('felix@easylife.app');
+  // ── Profile ────────────────────────────────────────────
+  firstname = signal('');
+  lastname = signal('');
+  email = signal('');
+  bio = signal('');
   mobileNumber = signal('');
-  bio = signal(
-    'Building Easy Life - a productivity suite for intentional people. Passionate about deep work, systems thinking and great software.',
-  );
   readonly bioMaxLength = 240;
 
-  // Address
-  country = signal('Germany');
-  street = signal('Musterstraße');
-  number = signal('42');
-  additionalInfo = signal('');
-  zipCode = signal('40210');
-  city = signal('Düsseldorf');
+  // ── Address ────────────────────────────────────────────
+  street = signal('');
+  city = signal('');
+  state = signal('');
+  country = signal('');
+  zip = signal('');
 
-  // Preferences
+  // ── Preferences ────────────────────────────────────────
   webColorTheme = signal<ColorTheme>('LIGHT');
   mobileColorTheme = signal<ColorTheme>('SYSTEM');
   language = signal<Language>('EN');
-  emailNotifications = signal(true);
+  emailNotifications = signal(false);
   pushNotifications = signal(false);
 
-  // Security
+  // ── Security ───────────────────────────────────────────
   currentPassword = signal('');
   newPassword = signal('');
   confirmPassword = signal('');
   twoFactorEnabled = signal(false);
   sessionTimeout = signal('30');
 
-  // Billing
+  // ── Billing ────────────────────────────────────────────
   readonly currentPlan = signal<'FREE' | 'PLUS' | 'PRO'>('FREE');
 
+  // ── Static Options ─────────────────────────────────────
   readonly sessionTimeoutOptions = [
     { value: '15', label: '15 minutes' },
     { value: '30', label: '30 minutes' },
@@ -113,29 +119,87 @@ export class ProfileComponent {
     },
   ];
 
-  constructor(
-    private router: Router,
-    private route: ActivatedRoute,
-  ) { }
+  constructor() {
+    // User-Daten in Form-Signals übertragen sobald geladen
+    effect(() => {
+      const user = this.userService.currentUser();
+      if (!user) return;
 
-  getInitials(): string {
-    return `${this.firstname().charAt(0)}${this.lastname().charAt(0)}`.toUpperCase();
+      // Profile
+      this.firstname.set(user.profile?.firstname ?? '');
+      this.lastname.set(user.profile?.lastname ?? '');
+      this.email.set(user.email ?? '');
+      this.bio.set(user.profile?.bio ?? '');
+      this.mobileNumber.set(user.profile?.mobileNumber ?? '');
+
+      // Address
+      const addr = user.profile?.address;
+      this.street.set(addr?.street ?? '');
+      this.city.set(addr?.city ?? '');
+      this.state.set(addr?.state ?? '');
+      this.country.set(addr?.country ?? '');
+      this.zip.set(addr?.zip ?? '');
+
+      // Settings
+      const settings = user.settings;
+      if (settings) {
+        const theme = settings.theme as ColorTheme;
+        this.webColorTheme.set(theme ?? 'LIGHT');
+        this.language.set((settings.language as Language) ?? 'EN');
+        this.emailNotifications.set(settings.notifications ?? false);
+      }
+
+      // Theme auch im ThemeService syncen
+      this.themeService.setTheme(this.webColorTheme());
+    });
+
+    // Falls User noch nicht geladen
+    if (!this.userService.currentUser()) {
+      this.userService.loadById(environment.userId);
+    }
   }
 
-  markChanged() {
+  // ── Helpers ────────────────────────────────────────────
+  getInitials(): string {
+    const f = this.firstname().charAt(0);
+    const l = this.lastname().charAt(0);
+    return (f + l).toUpperCase() || '?';
+  }
+
+  markChanged(): void {
     this.hasChanges.set(true);
   }
 
-  onSave() {
-    console.log('Save profile');
+  onSave(): void {
+    // TODO: userService.updateProfile() + updateAddress() + updateSettings()
+    console.log('TODO save profile');
     this.hasChanges.set(false);
   }
 
-  onDiscard() {
+  onDiscard(): void {
+    // Felder aus User zurücksetzen
+    const user = this.userService.currentUser();
+    if (user) {
+      this.firstname.set(user.profile?.firstname ?? '');
+      this.lastname.set(user.profile?.lastname ?? '');
+      this.bio.set(user.profile?.bio ?? '');
+      const addr = user.profile?.address;
+      this.street.set(addr?.street ?? '');
+      this.city.set(addr?.city ?? '');
+      this.state.set(addr?.state ?? '');
+      this.country.set(addr?.country ?? '');
+      this.zip.set(addr?.zip ?? '');
+    }
     this.hasChanges.set(false);
   }
 
-  scrollToSection(sectionId: string) {
+  setWebTheme(theme: ColorTheme): void {
+    this.webColorTheme.set(theme);
+    this.themeService.setTheme(theme);
+    this.markChanged();
+  }
+
+  scrollToSection(sectionId: string): void {
     setTimeout(() => {
       const el = document.getElementById(sectionId);
       if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
