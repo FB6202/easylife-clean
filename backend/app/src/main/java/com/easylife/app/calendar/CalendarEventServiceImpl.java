@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.Comparator;
 import java.util.List;
 
 @Service
@@ -82,6 +83,20 @@ class CalendarEventServiceImpl implements CalendarEventService {
         CalendarEvent event = calendarEventRepository.findByIdAndUserId(id, userId)
                 .orElseThrow(() -> new EntityNotFoundException("Calendar event not found"));
         calendarEventRepository.delete(event);
+    }
+
+    @Override
+    public List<CalendarEventResponse> findDashboard(Long userId) {
+        // Next 3 events from today onwards
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime oneMonthAhead = now.plusMonths(1);
+
+        return calendarEventRepository.findAllByUserIdAndStartDateTimeBetween(userId, now, oneMonthAhead)
+                .stream()
+                .sorted(Comparator.comparing(CalendarEvent::getStartDateTime))
+                .limit(3)
+                .map(calendarEventMapper::toResponse)
+                .toList();
     }
 
     private void validateCategories(List<Long> categoryIds, Long userId) {

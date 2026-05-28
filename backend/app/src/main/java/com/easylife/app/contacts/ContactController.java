@@ -8,6 +8,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/v1/contacts")
 @RequiredArgsConstructor
@@ -80,6 +82,11 @@ public class ContactController {
             @RequestParam Long userId) {
         contactService.deleteNote(contactId, noteId, userId);
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/dashboard")
+    public ResponseEntity<List<ContactResponse>> findDashboard(@RequestParam Long userId) {
+        return ResponseEntity.ok(contactService.findDashboard(userId));
     }
 
 }

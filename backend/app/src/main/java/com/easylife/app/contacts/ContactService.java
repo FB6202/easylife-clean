@@ -3,6 +3,8 @@ package com.easylife.app.contacts;
 import com.easylife.app.contacts.payload.*;
 import com.easylife.app.shared.payload.PageResponse;
 
+import java.util.List;
+
 public interface ContactService {
 
     ContactResponse create(ContactRequest request, Long userId);
@@ -20,6 +22,8 @@ public interface ContactService {
     ContactNoteResponse updateNote(Long contactId, Long noteId, ContactNoteRequest request, Long userId);
 
     void deleteNote(Long contactId, Long noteId, Long userId);
+
+    List<ContactResponse> findDashboard(Long userId);
 
 }
 

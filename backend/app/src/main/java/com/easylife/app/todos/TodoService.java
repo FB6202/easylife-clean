@@ -5,6 +5,8 @@ import com.easylife.app.todos.payload.TodoFilter;
 import com.easylife.app.todos.payload.TodoRequest;
 import com.easylife.app.todos.payload.TodoResponse;
 
+import java.util.List;
+
 public interface TodoService {
 
     TodoResponse create(TodoRequest request, Long userId);
@@ -16,5 +18,7 @@ public interface TodoService {
     TodoResponse update(Long id, TodoRequest request, Long userId);
 
     void delete(Long id, Long userId);
+
+    List<TodoResponse> findDashboard(Long userId);
 
 }

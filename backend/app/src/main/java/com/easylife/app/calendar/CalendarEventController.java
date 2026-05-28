@@ -41,6 +41,11 @@ public class CalendarEventController {
         return ResponseEntity.ok(calendarEventService.findAll(userId));
     }
 
+    @GetMapping("/dashboard")
+    public ResponseEntity<List<CalendarEventResponse>> findDashboard(@RequestParam Long userId) {
+        return ResponseEntity.ok(calendarEventService.findDashboard(userId));
+    }
+
     @GetMapping("/range")
     public ResponseEntity<List<CalendarEventResponse>> findAllBetween(
             @RequestParam Long userId,

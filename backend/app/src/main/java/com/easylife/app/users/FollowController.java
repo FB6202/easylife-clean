@@ -2,6 +2,7 @@ package com.easylife.app.users;
 
 import com.easylife.app.users.payload.FollowRequest;
 import com.easylife.app.users.payload.FollowResponse;
+import com.easylife.app.users.payload.FollowStatsResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -70,6 +71,11 @@ public class FollowController {
             @RequestParam Long followerId,
             @RequestParam Long followingId) {
         return ResponseEntity.ok(followService.isFollowing(followerId, followingId));
+    }
+
+    @GetMapping("/dashboard/stats")
+    public ResponseEntity<FollowStatsResponse> findDashboardStats(@RequestParam Long userId) {
+        return ResponseEntity.ok(followService.findDashboardStats(userId));
     }
 
 }

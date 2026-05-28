@@ -15,6 +15,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.Comparator;
 import java.util.List;
 
 @Service
@@ -102,6 +103,18 @@ class CategoryServiceImpl implements CategoryService, CategoryApi {
         return categoryRepository.findAllById(ids)
                 .stream()
                 .map(c -> new CategoryPreview(c.getId(), c.getName(), c.getIcon(), c.getColor()))
+                .toList();
+    }
+
+    @Override
+    public List<CategoryResponse> findDashboard(Long userId) {
+        // Top 4 categories - for now, just return first 4 sorted by creation date
+        // TODO: Implement usage-based sorting when we have usage tracking
+        return categoryRepository.findAllByUserId(userId)
+                .stream()
+                .sorted(Comparator.comparing(Category::getCreatedAt).reversed())
+                .limit(4)
+                .map(categoryMapper::toResponse)
                 .toList();
     }
 

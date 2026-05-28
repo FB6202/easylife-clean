@@ -1,6 +1,7 @@
 package com.easylife.app.weekplan;
 
 import com.easylife.app.categories.api.CategoryApi;
+import com.easylife.app.shared.enums.WeekPlanStatus;
 import com.easylife.app.shared.payload.PageResponse;
 import com.easylife.app.weekplan.api.*;
 import jakarta.persistence.EntityNotFoundException;
@@ -80,7 +81,7 @@ class WeekPlanServiceImpl implements WeekPlanService, WeekPlanApi {
     @Transactional
     public WeekPlanResponse updateStatus(Long id, String status, Long userId) {
         WeekPlan wp = getWeekPlan(id, userId);
-        wp.setStatus(com.easylife.app.shared.enums.WeekPlanStatus.valueOf(status));
+        wp.setStatus(WeekPlanStatus.valueOf(status));
         WeekPlan saved = weekPlanRepository.save(wp);
         return mapper.toResponse(saved, categoryApi.findPreviewsByIds(saved.getCategoryIds()));
     }
@@ -129,6 +130,20 @@ class WeekPlanServiceImpl implements WeekPlanService, WeekPlanApi {
         wp.getItems().removeIf(i -> i.getId().equals(itemId));
         WeekPlan saved = weekPlanRepository.save(wp);
         return mapper.toResponse(saved, categoryApi.findPreviewsByIds(saved.getCategoryIds()));
+    }
+
+    @Override
+    public WeekPlanResponse findDashboard(Long userId) {
+        // Current ACTIVE weekplan
+        WeekPlanFilter filter = new WeekPlanFilter(WeekPlanStatus.ACTIVE, null, null, null);
+        List<WeekPlan> plans = weekPlanRepository.findAll(WeekPlanSpecification.build(userId, filter));
+
+        if (plans.isEmpty()) {
+            return null;
+        }
+
+        WeekPlan activePlan = plans.get(0);
+        return mapper.toResponse(activePlan, categoryApi.findPreviewsByIds(activePlan.getCategoryIds()));
     }
 
     private WeekPlan getWeekPlan(Long id, Long userId) {

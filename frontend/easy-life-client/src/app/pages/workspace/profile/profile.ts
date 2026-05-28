@@ -9,6 +9,13 @@ import { environment } from '../../../../environments/environment';
 type ColorTheme = 'LIGHT' | 'DARK' | 'SYSTEM';
 type Language = 'DE' | 'EN';
 
+interface WidgetPreference {
+  id: string;
+  label: string;
+  icon: string;
+  enabled: boolean;
+}
+
 @Component({
   selector: 'app-profile',
   imports: [CommonModule, FormsModule],
@@ -45,6 +52,19 @@ export class ProfileComponent {
   language = signal<Language>('EN');
   emailNotifications = signal(false);
   pushNotifications = signal(false);
+
+  // ── Dashboard Widget Preferences ───────────────────────
+  widgetPreferences = signal<WidgetPreference[]>([
+    { id: 'tasks', label: 'Daily Actions', icon: 'check_circle', enabled: true },
+    { id: 'calendar', label: 'Calendar', icon: 'calendar_month', enabled: true },
+    { id: 'goals', label: 'Goals', icon: 'flag', enabled: true },
+    { id: 'weekplan', label: 'My Week', icon: 'view_week', enabled: true },
+    { id: 'categories', label: 'Categories', icon: 'category', enabled: true },
+    { id: 'notifications', label: 'Notifications', icon: 'notifications', enabled: true },
+    { id: 'journal', label: 'Journal', icon: 'menu_book', enabled: false },
+    { id: 'network', label: 'People', icon: 'people', enabled: false },
+    { id: 'following', label: 'Network', icon: 'person_add', enabled: false },
+  ]);
 
   // ── Security ───────────────────────────────────────────
   currentPassword = signal('');
@@ -147,6 +167,15 @@ export class ProfileComponent {
         this.webColorTheme.set(theme ?? 'LIGHT');
         this.language.set((settings.language as Language) ?? 'EN');
         this.emailNotifications.set(settings.notifications ?? false);
+
+        // Widget Preferences aus Settings laden
+        this.widgetPreferences.update((prefs) =>
+          prefs.map((w) => {
+            const settingsKey = `widget${w.id.charAt(0).toUpperCase() + w.id.slice(1)}Enabled`;
+            const enabledInSettings = (settings as any)[settingsKey];
+            return { ...w, enabled: enabledInSettings ?? w.enabled };
+          }),
+        );
       }
 
       // Theme auch im ThemeService syncen
@@ -171,7 +200,7 @@ export class ProfileComponent {
   }
 
   onSave(): void {
-    // TODO: userService.updateProfile() + updateAddress() + updateSettings()
+    // TODO: userService.updateProfile() + updateAddress() + updateSettings() + updateWidgetPreferences()
     console.log('TODO save profile');
     this.hasChanges.set(false);
   }
@@ -196,6 +225,13 @@ export class ProfileComponent {
   setWebTheme(theme: ColorTheme): void {
     this.webColorTheme.set(theme);
     this.themeService.setTheme(theme);
+    this.markChanged();
+  }
+
+  toggleWidgetPreference(id: string): void {
+    this.widgetPreferences.update((prefs) =>
+      prefs.map((w) => (w.id === id ? { ...w, enabled: !w.enabled } : w)),
+    );
     this.markChanged();
   }
 

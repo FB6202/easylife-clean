@@ -3,6 +3,8 @@ package com.easylife.app.goals;
 import com.easylife.app.goals.payload.*;
 import com.easylife.app.shared.payload.PageResponse;
 
+import java.util.List;
+
 public interface GoalService {
 
     GoalResponse create(GoalRequest request, Long userId);
@@ -26,5 +28,7 @@ public interface GoalService {
     void deleteTask(Long goalId, Long taskId, Long userId);
 
     String generateImageUploadUrl(Long goalId, Long userId, String fileName, String contentType);
+
+    List<GoalResponse> findDashboard(Long userId);
 
 }

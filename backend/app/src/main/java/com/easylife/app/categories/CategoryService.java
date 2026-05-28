@@ -22,4 +22,6 @@ public interface CategoryService {
 
     void delete(Long id, Long userId);
 
+    List<CategoryResponse> findDashboard(Long userId);
+
 }

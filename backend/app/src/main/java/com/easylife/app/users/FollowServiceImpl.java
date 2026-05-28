@@ -3,6 +3,7 @@ package com.easylife.app.users;
 import com.easylife.app.shared.enums.FollowStatus;
 import com.easylife.app.users.payload.FollowRequest;
 import com.easylife.app.users.payload.FollowResponse;
+import com.easylife.app.users.payload.FollowStatsResponse;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -105,6 +106,14 @@ class FollowServiceImpl implements FollowService {
                 .map(User::getUsername)
                 .orElse("Unknown");
         return followMapper.toResponse(follow, followerUsername, followingUsername);
+    }
+
+    @Override
+    public FollowStatsResponse findDashboardStats(Long userId) {
+        long following = followRepository.countByFollowerIdAndStatus(userId, FollowStatus.ACCEPTED);
+        long followers = followRepository.countByFollowingIdAndStatus(userId, FollowStatus.ACCEPTED);
+        long pending = followRepository.countByFollowingIdAndStatus(userId, FollowStatus.PENDING);
+        return new FollowStatsResponse(following, followers, pending);
     }
 
 }

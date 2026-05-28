@@ -8,16 +8,17 @@
 - clean frontend code (especially ts-files)
 - create vision board functionality
 - exception handling - s3 service
-- forgot password
+- scroll bar
 
 ## Frontend:
-- filter functionalities
+- filter functionalities (on all pages)
 - modals:
   - hover colors
   - category chronology
   - part chronology
   - filter chronology
   - redesign optional field headline
+  - date picker
 - persistent widgets (as settings)
 - input validations everywhere
 - error component (page or just field):
@@ -27,7 +28,11 @@
 - dark mode (logo)
 - toaster + loading circles
 - screenshot for main page
-- menu only icons (not vanished)
+
+- dashboard:
+  - data comes from backend
+  - ai button
+  - widgets adding
 - ai-agent
   - larger panel
 - todos:
@@ -36,19 +41,31 @@
 - calendar
   - event create notification directly
   - ai-agent
+  - sync functionality
 - documents:
   - test download
   - test preview
-- profile
+- weekplan:
+  - update status to completed (when all tasks done)
+- profile:
   - contract change
+  - forgot pw
   - size for profile image
   - dropdowns for address (country etc.)
   - 2fa design + general design
+- people:
+  - borders (type)
+- network:
+  - other items?
+- notifications:
+  - icon colors
+  - index (unread)
 
 ## Backend:
 - pagination for all types
 - security
 - keycloak
+- forgot pw
 - login/logout (refresh)
 - payment
 - persist widget on user

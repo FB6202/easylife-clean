@@ -6,6 +6,7 @@ import com.easylife.app.journal.api.JournalFilter;
 import com.easylife.app.shared.payload.PageResponse;
 
 import java.time.LocalDate;
+import java.util.List;
 
 public interface JournalEntryService {
 
@@ -20,5 +21,7 @@ public interface JournalEntryService {
     JournalEntryResponse update(Long id, JournalEntryRequest request, Long userId);
 
     void delete(Long id, Long userId);
+
+    List<JournalEntryResponse> findDashboard(Long userId);
 
 }

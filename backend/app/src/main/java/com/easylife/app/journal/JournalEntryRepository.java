@@ -4,6 +4,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 
 import java.time.LocalDate;
+import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 
 interface JournalEntryRepository extends JpaRepository<JournalEntry, Long>, JpaSpecificationExecutor<JournalEntry> {
@@ -13,5 +15,7 @@ interface JournalEntryRepository extends JpaRepository<JournalEntry, Long>, JpaS
     Optional<JournalEntry> findByEntryDateAndUserId(LocalDate entryDate, Long userId);
 
     boolean existsByEntryDateAndUserId(LocalDate entryDate, Long userId);
+
+    List<JournalEntry> findAllByUserId(Long userId);
 
 }

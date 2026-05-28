@@ -93,7 +93,11 @@
     color: var(--color-primary);
     flex-shrink: 0;
     margin-top: 2px;
-    font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    font-variation-settings:
+      'FILL' 0,
+      'wght' 400,
+      'GRAD' 0,
+      'opsz' 24;
   }
 
   &__title {
@@ -221,7 +225,11 @@
       color: var(--color-text-muted);
       flex-shrink: 0;
       margin-top: 2px;
-      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 20;
+      font-variation-settings:
+        'FILL' 0,
+        'wght' 400,
+        'GRAD' 0,
+        'opsz' 20;
     }
   }
 
@@ -268,7 +276,11 @@
 
   .material-symbols-outlined {
     font-size: 15px;
-    font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 20;
+    font-variation-settings:
+      'FILL' 0,
+      'wght' 400,
+      'GRAD' 0,
+      'opsz' 20;
   }
 
   &:hover:not(&--active) {
@@ -281,7 +293,11 @@
     color: white;
 
     .material-symbols-outlined {
-      font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 20;
+      font-variation-settings:
+        'FILL' 1,
+        'wght' 400,
+        'GRAD' 0,
+        'opsz' 20;
     }
   }
 }
@@ -331,7 +347,7 @@
     width: 0;
     height: 0;
 
-    &:checked+.pref-toggle__slider {
+    &:checked + .pref-toggle__slider {
       background: var(--color-primary);
 
       &::before {
@@ -416,7 +432,11 @@
     font-size: 28px;
     flex-shrink: 0;
     margin-top: 2px;
-    font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    font-variation-settings:
+      'FILL' 0,
+      'wght' 400,
+      'GRAD' 0,
+      'opsz' 24;
   }
 
   &__label {
@@ -559,7 +579,11 @@
         font-size: 15px;
         color: var(--color-primary);
         flex-shrink: 0;
-        font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 20;
+        font-variation-settings:
+          'FILL' 1,
+          'wght' 400,
+          'GRAD' 0,
+          'opsz' 20;
       }
     }
   }
@@ -604,7 +628,11 @@
     font-size: 40px;
     color: var(--color-text-muted);
     opacity: 0.4;
-    font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 48;
+    font-variation-settings:
+      'FILL' 0,
+      'wght' 300,
+      'GRAD' 0,
+      'opsz' 48;
   }
 
   p {
@@ -699,7 +727,11 @@
 
     .material-symbols-outlined {
       font-size: 30px;
-      font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+      font-variation-settings:
+        'FILL' 1,
+        'wght' 400,
+        'GRAD' 0,
+        'opsz' 24;
     }
 
     &--danger {
@@ -734,5 +766,30 @@
 
   &:hover:not(:disabled) {
     background: var(--color-danger-hover);
+  }
+}
+
+// ── Widget Preferences Section Divider ────────────────────
+.pref-section-divider {
+  display: flex;
+  align-items: center;
+  gap: $space-3;
+  padding: $space-4 0 $space-2 0;
+  margin-top: $space-2;
+
+  &__label {
+    font-size: $font-size-xs;
+    font-weight: $font-weight-semibold;
+    color: var(--color-text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    white-space: nowrap;
+  }
+
+  &::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--color-border-light);
   }
 }

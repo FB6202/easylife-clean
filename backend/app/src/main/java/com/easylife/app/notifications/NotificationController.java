@@ -77,4 +77,9 @@ public class NotificationController {
         return ResponseEntity.noContent().build();
     }
 
+    @GetMapping("/dashboard")
+    public ResponseEntity<List<NotificationResponse>> findDashboard(@RequestParam Long userId) {
+        return ResponseEntity.ok(notificationService.findDashboard(userId));
+    }
+
 }

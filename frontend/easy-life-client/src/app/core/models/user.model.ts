@@ -23,6 +23,16 @@ export interface SettingsResponse {
   language: string;
   timezone: string;
   notifications: boolean;
+  // Dashboard Widget Preferences
+  widgetTasksEnabled: boolean;
+  widgetCalendarEnabled: boolean;
+  widgetGoalsEnabled: boolean;
+  widgetWeekplanEnabled: boolean;
+  widgetCategoriesEnabled: boolean;
+  widgetNotificationsEnabled: boolean;
+  widgetJournalEnabled: boolean;
+  widgetNetworkEnabled: boolean;
+  widgetFollowingEnabled: boolean;
 }
 
 export interface UserResponse {
