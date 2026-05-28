@@ -1,6 +1,7 @@
 package com.easylife.app.todos;
 
 import com.easylife.app.categories.api.CategoryApi;
+import com.easylife.app.shared.enums.TodoStatus;
 import com.easylife.app.shared.payload.PageResponse;
 import com.easylife.app.todos.payload.TodoFilter;
 import com.easylife.app.todos.payload.TodoRequest;
@@ -9,6 +10,7 @@ import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
@@ -74,6 +76,30 @@ class TodoServiceImpl implements TodoService {
         Todo todo = todoRepository.findByIdAndUserId(id, userId)
                 .orElseThrow(() -> new EntityNotFoundException("Todo not found"));
         todoRepository.delete(todo);
+    }
+
+    @Override
+    public List<TodoResponse> findDashboard(Long userId) {
+        // Top 3 tasks: OPEN or IN_PROGRESS, sorted by priority DESC, then dueDate ASC
+        TodoFilter filter = new TodoFilter(null, null, null, null, null, null);
+        Specification<Todo> spec = TodoSpecification.build(userId, filter)
+                .and((root, query, cb) ->
+                        cb.or(
+                                cb.equal(root.get("status"), TodoStatus.OPEN),
+                                cb.equal(root.get("status"), TodoStatus.IN_PROGRESS)
+                        )
+                );
+
+        Sort sort = Sort.by(
+                Sort.Order.desc("priority"),
+                Sort.Order.asc("dueDate")
+        );
+
+        Page<Todo> result = todoRepository.findAll(spec, PageRequest.of(0, 3, sort));
+        return result.getContent().stream()
+                .map(todo -> todoMapper.toResponse(todo,
+                        categoryApi.findPreviewsByIds(todo.getCategoryIds())))
+                .toList();
     }
 
     private void validateCategories(List<Long> categoryIds, Long userId) {

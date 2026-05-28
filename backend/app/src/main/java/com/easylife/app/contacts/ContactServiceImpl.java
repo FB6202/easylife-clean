@@ -11,6 +11,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.Comparator;
 import java.util.List;
 
 @Service
@@ -107,6 +108,17 @@ class ContactServiceImpl implements ContactService {
                 }
             });
         }
+    }
+
+    @Override
+    public List<ContactResponse> findDashboard(Long userId) {
+        // Newest 3 contacts
+        return contactRepository.findAllByUserId(userId)
+                .stream()
+                .sorted(Comparator.comparing(Contact::getCreatedAt).reversed())
+                .limit(3)
+                .map(contactMapper::toResponse)
+                .toList();
     }
 
 }

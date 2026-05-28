@@ -19,7 +19,6 @@ public interface WeekPlanService {
 
     WeekPlanResponse updateReflection(Long id, String reflection, Long userId);
 
-    // Items
     WeekPlanResponse addItem(Long weekPlanId, WeekPlanItemRequest request, Long userId);
 
     WeekPlanResponse updateItem(Long weekPlanId, Long itemId, WeekPlanItemRequest request, Long userId);
@@ -27,5 +26,7 @@ public interface WeekPlanService {
     WeekPlanResponse toggleItem(Long weekPlanId, Long itemId, Long userId);
 
     WeekPlanResponse removeItem(Long weekPlanId, Long itemId, Long userId);
+
+    WeekPlanResponse findDashboard(Long userId);
 
 }

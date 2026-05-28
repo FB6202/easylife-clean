@@ -12,6 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/journal")
@@ -65,6 +66,11 @@ public class JournalEntryController {
             @RequestParam Long userId) {
         journalEntryService.delete(id, userId);
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/dashboard")
+    public ResponseEntity<List<JournalEntryResponse>> findDashboard(@RequestParam Long userId) {
+        return ResponseEntity.ok(journalEntryService.findDashboard(userId));
     }
 
 }

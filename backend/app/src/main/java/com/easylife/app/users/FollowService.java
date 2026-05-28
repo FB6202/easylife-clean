@@ -2,6 +2,7 @@ package com.easylife.app.users;
 
 import com.easylife.app.users.payload.FollowRequest;
 import com.easylife.app.users.payload.FollowResponse;
+import com.easylife.app.users.payload.FollowStatsResponse;
 
 import java.util.List;
 
@@ -22,5 +23,7 @@ public interface FollowService {
     List<FollowResponse> getPendingRequests(Long userId);
 
     boolean isFollowing(Long followerId, Long followingId);
+
+    FollowStatsResponse findDashboardStats(Long userId);
 
 }

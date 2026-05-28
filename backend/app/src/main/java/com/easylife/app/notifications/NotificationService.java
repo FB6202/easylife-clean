@@ -25,4 +25,6 @@ public interface NotificationService {
 
     long countUnread(Long userId);
 
+    List<NotificationResponse> findDashboard(Long userId);
+
 }

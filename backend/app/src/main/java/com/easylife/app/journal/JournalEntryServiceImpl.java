@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Comparator;
 import java.util.List;
 
 @Service
@@ -92,6 +93,17 @@ class JournalEntryServiceImpl implements JournalEntryService {
         JournalEntry entry = journalEntryRepository.findByIdAndUserId(id, userId)
                 .orElseThrow(() -> new EntityNotFoundException("Journal entry not found"));
         journalEntryRepository.delete(entry);
+    }
+
+    @Override
+    public List<JournalEntryResponse> findDashboard(Long userId) {
+        // Last 3 journal entries
+        return journalEntryRepository.findAllByUserId(userId)
+                .stream()
+                .sorted(Comparator.comparing(JournalEntry::getEntryDate).reversed())
+                .limit(3)
+                .map(journalEntryMapper::toResponse)
+                .toList();
     }
 
 }

@@ -26,4 +26,6 @@ public interface CalendarEventService {
 
     void delete(Long id, Long userId);
 
+    List<CalendarEventResponse> findDashboard(Long userId);
+
 }

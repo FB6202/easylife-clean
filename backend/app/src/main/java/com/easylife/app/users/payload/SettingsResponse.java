@@ -9,5 +9,14 @@ public record SettingsResponse(
         ColorTheme webColorTheme,
         ColorTheme mobileColorTheme,
         Boolean emailNotifications,
-        Boolean pushNotifications
+        Boolean pushNotifications,
+        Boolean widgetTasksEnabled,
+        Boolean widgetCalendarEnabled,
+        Boolean widgetGoalsEnabled,
+        Boolean widgetWeekplanEnabled,
+        Boolean widgetCategoriesEnabled,
+        Boolean widgetNotificationsEnabled,
+        Boolean widgetJournalEnabled,
+        Boolean widgetNetworkEnabled,
+        Boolean widgetFollowingEnabled
 ) {}

@@ -4,6 +4,7 @@ import com.easylife.app.categories.api.CategoryApi;
 import com.easylife.app.goals.api.GoalApi;
 import com.easylife.app.goals.payload.*;
 import com.easylife.app.shared.enums.AccessType;
+import com.easylife.app.shared.enums.GoalStatus;
 import com.easylife.app.shared.payload.PageResponse;
 import com.easylife.app.storage.api.StorageApi;
 import com.easylife.app.users.api.UserApi;
@@ -12,10 +13,12 @@ import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.Comparator;
 import java.util.List;
 
 @Service
@@ -146,6 +149,24 @@ class GoalServiceImpl implements GoalService, GoalApi {
         GoalTask task = goalTaskRepository.findById(taskId)
                 .orElseThrow(() -> new EntityNotFoundException("Task not found"));
         goalTaskRepository.delete(task);
+    }
+
+    @Override
+    public List<GoalResponse> findDashboard(Long userId) {
+        // Top 3 ACTIVE goals sorted by deadline ASC (nulls last)
+        GoalFilter filter = new GoalFilter(GoalStatus.ACTIVE, null, null, null, null);
+        Specification<Goal> spec = GoalSpecification.build(userId, filter);
+
+        List<Goal> goals = goalRepository.findAll(spec);
+        return goals.stream()
+                .sorted(Comparator.comparing(Goal::getDeadline,
+                        Comparator.nullsLast(Comparator.naturalOrder())))
+                .limit(3)
+                .map(goal -> goalMapper.toResponse(
+                        goal,
+                        categoryApi.findPreviewsByIds(goal.getCategoryIds()),
+                        storageApi.generateDownloadUrl(goal.getImagePath())))
+                .toList();
     }
 
     private void validateCategories(List<Long> categoryIds, Long userId) {

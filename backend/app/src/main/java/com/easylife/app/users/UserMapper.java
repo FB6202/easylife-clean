@@ -59,7 +59,16 @@ class UserMapper {
                 settings.getWebColorTheme(),
                 settings.getMobileColorTheme(),
                 settings.getEmailNotifications(),
-                settings.getPushNotifications()
+                settings.getPushNotifications(),
+                settings.getWidgetTasksEnabled(),
+                settings.getWidgetCalendarEnabled(),
+                settings.getWidgetGoalsEnabled(),
+                settings.getWidgetWeekplanEnabled(),
+                settings.getWidgetCategoriesEnabled(),
+                settings.getWidgetNotificationsEnabled(),
+                settings.getWidgetJournalEnabled(),
+                settings.getWidgetNetworkEnabled(),
+                settings.getWidgetFollowingEnabled()
         );
     }
 
@@ -82,6 +91,17 @@ class UserMapper {
                         .mobileColorTheme(ColorTheme.LIGHT)
                         .emailNotifications(true)
                         .pushNotifications(true)
+                        // Dashboard Widget Defaults
+                        .widgetTasksEnabled(true)
+                        .widgetCalendarEnabled(true)
+                        .widgetGoalsEnabled(true)
+                        .widgetWeekplanEnabled(true)
+                        .widgetCategoriesEnabled(true)
+                        .widgetNotificationsEnabled(true)
+                        .widgetJournalEnabled(false)
+                        .widgetNetworkEnabled(false)
+                        .widgetFollowingEnabled(false)
+                        .createdAt(LocalDateTime.now())
                         .build())
                 .build();
     }
@@ -109,6 +129,15 @@ class UserMapper {
         settings.setMobileColorTheme(request.mobileColorTheme());
         settings.setEmailNotifications(request.emailNotifications());
         settings.setPushNotifications(request.pushNotifications());
+        settings.setWidgetTasksEnabled(request.widgetTasksEnabled());
+        settings.setWidgetCalendarEnabled(request.widgetCalendarEnabled());
+        settings.setWidgetGoalsEnabled(request.widgetGoalsEnabled());
+        settings.setWidgetWeekplanEnabled(request.widgetWeekplanEnabled());
+        settings.setWidgetCategoriesEnabled(request.widgetCategoriesEnabled());
+        settings.setWidgetNotificationsEnabled(request.widgetNotificationsEnabled());
+        settings.setWidgetJournalEnabled(request.widgetJournalEnabled());
+        settings.setWidgetNetworkEnabled(request.widgetNetworkEnabled());
+        settings.setWidgetFollowingEnabled(request.widgetFollowingEnabled());
     }
 
 }

@@ -67,4 +67,9 @@ public class CategoryController {
         return ResponseEntity.noContent().build();
     }
 
+    @GetMapping("/dashboard")
+    public ResponseEntity<List<CategoryResponse>> findDashboard(@RequestParam Long userId) {
+        return ResponseEntity.ok(categoryService.findDashboard(userId));
+    }
+
 }

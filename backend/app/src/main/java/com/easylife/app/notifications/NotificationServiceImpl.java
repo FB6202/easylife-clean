@@ -16,6 +16,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.Comparator;
 import java.util.List;
 
 @Service
@@ -95,6 +96,17 @@ class NotificationServiceImpl implements NotificationService {
     @Override
     public long countUnread(Long userId) {
         return notificationRepository.countByUserIdAndAlreadyRead(userId, false);
+    }
+
+    @Override
+    public List<NotificationResponse> findDashboard(Long userId) {
+        // Last 3 unread notifications
+        return notificationRepository.findAllByUserIdAndAlreadyRead(userId, false)
+                .stream()
+                .sorted(Comparator.comparing(Notification::getCreatedAt).reversed())
+                .limit(3)
+                .map(notificationMapper::toResponse)
+                .toList();
     }
 
 }

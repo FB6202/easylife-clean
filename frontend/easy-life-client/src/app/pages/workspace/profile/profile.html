@@ -240,6 +240,34 @@
       </div>
     </div>
 
+    <!-- Dashboard Widgets Heading -->
+    <div class="pref-section-divider">
+      <span class="pref-section-divider__label">Dashboard Widgets</span>
+    </div>
+
+    <!-- Widget Toggles -->
+    @for (widget of widgetPreferences(); track widget.id) {
+      <div class="pref-row">
+        <div class="pref-row__info">
+          <span class="material-symbols-outlined">{{ widget.icon }}</span>
+          <div>
+            <p class="pref-row__label">{{ widget.label }}</p>
+            <p class="pref-row__desc">
+              {{ widget.enabled ? 'Visible' : 'Hidden' }} on your dashboard.
+            </p>
+          </div>
+        </div>
+        <label class="pref-toggle">
+          <input
+            type="checkbox"
+            [checked]="widget.enabled"
+            (change)="toggleWidgetPreference(widget.id)"
+          />
+          <span class="pref-toggle__slider"></span>
+        </label>
+      </div>
+    }
+
     <!-- Language -->
     <div class="pref-row">
       <div class="pref-row__info">
