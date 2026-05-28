@@ -363,9 +363,24 @@ export class DocumentsComponent implements OnInit {
     this.selectedDocument.set(null);
   }
 
-  downloadDoc(doc: DocumentResponse, event?: Event): void {
-    event?.stopPropagation();
-    if (doc.presignedUrl) window.open(doc.presignedUrl, '_blank');
+  async downloadDoc(doc: any, event: Event): Promise<void> {
+    event.stopPropagation();
+    if (!doc.presignedUrl) return;
+
+    try {
+      const response = await fetch(doc.presignedUrl);
+      const blob = await response.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = doc.name || 'download';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    } catch (e) {
+      console.error('Download failed', e);
+    }
   }
 
   // ── File Helpers ───────────────────────────────────────────────────────────

@@ -30,11 +30,9 @@
 - screenshot for main page
 
 - dashboard:
-  - data comes from backend
   - ai button
-  - widgets adding
+  - widgets adding (persistent - settings + dashboard)
 - ai-agent
-  - larger panel
 - todos:
 - categories:
 - goals:
@@ -43,8 +41,6 @@
   - ai-agent
   - sync functionality
 - documents:
-  - test download
-  - test preview
 - weekplan:
   - update status to completed (when all tasks done)
 - profile:
@@ -62,14 +58,11 @@
   - index (unread)
 
 ## Backend:
-- pagination for all types
 - security
 - keycloak
 - forgot pw
 - login/logout (refresh)
 - payment
-- persist widget on user
-- dashboard endpoint
 - ai-agent (tools + session security)
   - tools
   - session security

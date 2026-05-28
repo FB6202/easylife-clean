@@ -103,23 +103,25 @@
 }
 
 // ── AI Button ──────────────────────────────────────────────
+// ── AI Button ──────────────────────────────────────────────
 .dash-ai-btn {
   @include flex-start;
   gap: $space-2;
-  padding: $space-2 $space-5;
+  padding: $space-2 $space-4;
   background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
   color: white;
   border: none;
   border-radius: $radius-pill;
   font-family: $font-family;
-  font-size: $font-size-sm;
+  font-size: $font-size-xs;
   font-weight: $font-weight-semibold;
   cursor: pointer;
   transition: all $transition-base;
-  box-shadow: 0 2px 8px rgba(30, 41, 59, 0.3);
+  box-shadow: 0 2px 12px rgba(30, 41, 59, 0.3);
+  white-space: nowrap;
 
   .material-symbols-outlined {
-    font-size: 18px;
+    font-size: 15px;
     font-variation-settings:
       'FILL' 1,
       'wght' 400,
@@ -130,7 +132,7 @@
 
   &:hover {
     transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(30, 41, 59, 0.45);
+    box-shadow: 0 4px 16px rgba(30, 41, 59, 0.45);
   }
 
   &:active {
