@@ -29,9 +29,10 @@
 - toaster + loading circles
 - screenshot for main page
 
+### Pages
 - dashboard:
-  - ai button
   - widgets adding (persistent - settings + dashboard)
+  - widget colors - different solution
 - ai-agent
 - todos:
 - categories:
@@ -40,6 +41,7 @@
   - event create notification directly
   - ai-agent
   - sync functionality
+  - filter (panel or all)
 - documents:
 - weekplan:
   - update status to completed (when all tasks done)
