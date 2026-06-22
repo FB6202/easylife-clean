@@ -31,8 +31,9 @@
 
 ### Pages
 - dashboard:
-  - widgets adding (persistent - settings + dashboard)
+  - widgets adding (on dashboard)
   - widget colors - different solution
+  - persist settings on edit (settings + widget)
 - ai-agent
 - todos:
 - categories:

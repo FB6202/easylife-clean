@@ -793,3 +793,50 @@
     background: var(--color-border-light);
   }
 }
+
+// ── Preferences Section Divider ────────────────────────────
+.pref-section-divider {
+  display: flex;
+  align-items: center;
+  gap: $space-3;
+  padding: $space-4 0 $space-2;
+  margin-top: $space-2;
+
+  &__label {
+    font-size: $font-size-xs;
+    font-weight: $font-weight-semibold;
+    color: var(--color-text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    white-space: nowrap;
+  }
+
+  &::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--color-border-light);
+  }
+}
+
+// ── Save Bar States ─────────────────────────────────────────
+.profile-save-bar--success {
+  background: var(--color-success-subtle);
+  border-color: var(--color-success);
+  color: var(--color-success-text);
+}
+
+.profile-save-bar--error {
+  background: var(--color-danger-subtle);
+  border-color: var(--color-danger);
+}
+
+// ── Spinner ─────────────────────────────────────────────────
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}

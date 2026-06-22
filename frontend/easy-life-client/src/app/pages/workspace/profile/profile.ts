@@ -1,7 +1,6 @@
 import { Component, signal, inject, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Router, ActivatedRoute } from '@angular/router';
 import { UserService } from '../../../core/services/user-service';
 import { ThemeService } from '../../../core/services/theme';
 import { environment } from '../../../../environments/environment';
@@ -24,11 +23,15 @@ interface WidgetPreference {
 })
 export class ProfileComponent {
   private readonly userService = inject(UserService);
-  private readonly themeService = inject(ThemeService);
-  private readonly router = inject(Router);
-  private readonly route = inject(ActivatedRoute);
+  readonly themeService = inject(ThemeService);
 
+  readonly currentUser = this.userService.currentUser;
+  readonly saving = this.userService.saving;
+
+  // ── UI State ───────────────────────────────────────────
   hasChanges = signal(false);
+  saveSuccess = signal(false);
+  saveError = signal(false);
   showDeleteConfirm = signal(false);
 
   // ── Profile ────────────────────────────────────────────
@@ -41,10 +44,10 @@ export class ProfileComponent {
 
   // ── Address ────────────────────────────────────────────
   street = signal('');
+  zip = signal('');
   city = signal('');
   state = signal('');
   country = signal('');
-  zip = signal('');
 
   // ── Preferences ────────────────────────────────────────
   webColorTheme = signal<ColorTheme>('LIGHT');
@@ -53,7 +56,7 @@ export class ProfileComponent {
   emailNotifications = signal(false);
   pushNotifications = signal(false);
 
-  // ── Dashboard Widget Preferences ───────────────────────
+  // ── Dashboard Widgets ──────────────────────────────────
   widgetPreferences = signal<WidgetPreference[]>([
     { id: 'tasks', label: 'Daily Actions', icon: 'check_circle', enabled: true },
     { id: 'calendar', label: 'Calendar', icon: 'calendar_month', enabled: true },
@@ -76,7 +79,7 @@ export class ProfileComponent {
   // ── Billing ────────────────────────────────────────────
   readonly currentPlan = signal<'FREE' | 'PLUS' | 'PRO'>('FREE');
 
-  // ── Static Options ─────────────────────────────────────
+  // ── Static ─────────────────────────────────────────────
   readonly sessionTimeoutOptions = [
     { value: '15', label: '15 minutes' },
     { value: '30', label: '30 minutes' },
@@ -102,15 +105,17 @@ export class ProfileComponent {
       label: 'Free',
       price: '0€',
       period: 'forever',
-      features: ['50 Tasks', '10 Categories', '5 Goals', '500 MB Storage', 'No AI Agent'],
-      color: '#757575',
       popular: false,
+      color: '#757575',
+      features: ['50 Tasks', '10 Categories', '5 Goals', '500 MB Storage', 'No AI Agent'],
     },
     {
       id: 'PLUS',
       label: 'Plus',
       price: '7.99€',
       period: '/month',
+      popular: true,
+      color: '#1976d2',
       features: [
         'Unlimited Tasks',
         'Unlimited Categories',
@@ -119,14 +124,14 @@ export class ProfileComponent {
         'Basic AI Agent',
         'Network & Following',
       ],
-      color: '#1976d2',
-      popular: true,
     },
     {
       id: 'PRO',
       label: 'Pro',
       price: '14.99€',
       period: '/month',
+      popular: false,
+      color: '#9c27b0',
       features: [
         'Everything in Plus',
         '50 GB Storage',
@@ -134,55 +139,46 @@ export class ProfileComponent {
         'Priority Support',
         'Early Access Features',
       ],
-      color: '#9c27b0',
-      popular: false,
     },
   ];
 
   constructor() {
-    // User-Daten in Form-Signals übertragen sobald geladen
     effect(() => {
-      const user = this.userService.currentUser();
+      const user = this.currentUser();
       if (!user) return;
 
-      // Profile
       this.firstname.set(user.profile?.firstname ?? '');
       this.lastname.set(user.profile?.lastname ?? '');
       this.email.set(user.email ?? '');
       this.bio.set(user.profile?.bio ?? '');
       this.mobileNumber.set(user.profile?.mobileNumber ?? '');
 
-      // Address
       const addr = user.profile?.address;
       this.street.set(addr?.street ?? '');
+      this.zip.set(addr?.zipCode ?? '');
       this.city.set(addr?.city ?? '');
       this.state.set(addr?.state ?? '');
       this.country.set(addr?.country ?? '');
-      this.zip.set(addr?.zip ?? '');
 
-      // Settings
-      const settings = user.settings;
-      if (settings) {
-        const theme = settings.theme as ColorTheme;
-        this.webColorTheme.set(theme ?? 'LIGHT');
-        this.language.set((settings.language as Language) ?? 'EN');
-        this.emailNotifications.set(settings.notifications ?? false);
-
-        // Widget Preferences aus Settings laden
+      const s = user.settings;
+      if (s) {
+        this.webColorTheme.set((s.webColorTheme as ColorTheme) ?? 'LIGHT');
+        this.mobileColorTheme.set((s.mobileColorTheme as ColorTheme) ?? 'SYSTEM');
+        this.language.set((s.language as Language) ?? 'EN');
+        this.emailNotifications.set(s.emailNotifications ?? false);
+        this.pushNotifications.set(s.pushNotifications ?? false);
         this.widgetPreferences.update((prefs) =>
           prefs.map((w) => {
-            const settingsKey = `widget${w.id.charAt(0).toUpperCase() + w.id.slice(1)}Enabled`;
-            const enabledInSettings = (settings as any)[settingsKey];
-            return { ...w, enabled: enabledInSettings ?? w.enabled };
+            const key =
+              `widget${w.id.charAt(0).toUpperCase() + w.id.slice(1)}Enabled` as keyof typeof s;
+            return { ...w, enabled: (s[key] as boolean) ?? w.enabled };
           }),
         );
       }
 
-      // Theme auch im ThemeService syncen
       this.themeService.setTheme(this.webColorTheme());
     });
 
-    // Falls User noch nicht geladen
     if (!this.userService.currentUser()) {
       this.userService.loadById(environment.userId);
     }
@@ -190,42 +186,13 @@ export class ProfileComponent {
 
   // ── Helpers ────────────────────────────────────────────
   getInitials(): string {
-    const f = this.firstname().charAt(0);
-    const l = this.lastname().charAt(0);
-    return (f + l).toUpperCase() || '?';
+    return (this.firstname().charAt(0) + this.lastname().charAt(0)).toUpperCase() || '?';
   }
 
   markChanged(): void {
     this.hasChanges.set(true);
-  }
-
-  onSave(): void {
-    // TODO: userService.updateProfile() + updateAddress() + updateSettings() + updateWidgetPreferences()
-    console.log('TODO save profile');
-    this.hasChanges.set(false);
-  }
-
-  onDiscard(): void {
-    // Felder aus User zurücksetzen
-    const user = this.userService.currentUser();
-    if (user) {
-      this.firstname.set(user.profile?.firstname ?? '');
-      this.lastname.set(user.profile?.lastname ?? '');
-      this.bio.set(user.profile?.bio ?? '');
-      const addr = user.profile?.address;
-      this.street.set(addr?.street ?? '');
-      this.city.set(addr?.city ?? '');
-      this.state.set(addr?.state ?? '');
-      this.country.set(addr?.country ?? '');
-      this.zip.set(addr?.zip ?? '');
-    }
-    this.hasChanges.set(false);
-  }
-
-  setWebTheme(theme: ColorTheme): void {
-    this.webColorTheme.set(theme);
-    this.themeService.setTheme(theme);
-    this.markChanged();
+    this.saveSuccess.set(false);
+    this.saveError.set(false);
   }
 
   toggleWidgetPreference(id: string): void {
@@ -237,8 +204,74 @@ export class ProfileComponent {
 
   scrollToSection(sectionId: string): void {
     setTimeout(() => {
-      const el = document.getElementById(sectionId);
-      if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }, 100);
+      document.getElementById(sectionId)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 50);
+  }
+
+  // ── Save / Discard ─────────────────────────────────────
+  async onSave(): Promise<void> {
+    const user = this.currentUser();
+    if (!user) return;
+
+    const w = (id: string) => this.widgetPreferences().find((x) => x.id === id)?.enabled ?? false;
+
+    const [profileOk, addressOk, settingsOk] = await Promise.all([
+      this.userService.updateProfile(user.id, {
+        firstname: this.firstname(),
+        lastname: this.lastname(),
+        bio: this.bio(),
+        profileImagePath: user.profile?.profileImagePath ?? null,
+        mobileNumber: this.mobileNumber(),
+      }),
+      this.userService.updateAddress(user.id, {
+        country: this.country(),
+        street: this.street(),
+        number: '',
+        additionalAddressInfo: '',
+        zipCode: this.zip(),
+        city: this.city(),
+      }),
+      this.userService.updateSettings(user.id, {
+        language: this.language(),
+        webColorTheme: this.webColorTheme(),
+        mobileColorTheme: this.mobileColorTheme(),
+        emailNotifications: this.emailNotifications(),
+        pushNotifications: this.pushNotifications(),
+        widgetTasksEnabled: w('tasks'),
+        widgetCalendarEnabled: w('calendar'),
+        widgetGoalsEnabled: w('goals'),
+        widgetWeekplanEnabled: w('weekplan'),
+        widgetCategoriesEnabled: w('categories'),
+        widgetNotificationsEnabled: w('notifications'),
+        widgetJournalEnabled: w('journal'),
+        widgetNetworkEnabled: w('network'),
+        widgetFollowingEnabled: w('following'),
+      }),
+    ]);
+
+    if (profileOk && addressOk && settingsOk) {
+      this.hasChanges.set(false);
+      this.saveSuccess.set(true);
+      setTimeout(() => this.saveSuccess.set(false), 3000);
+    } else {
+      this.saveError.set(true);
+    }
+  }
+
+  onDiscard(): void {
+    const user = this.currentUser();
+    if (!user) return;
+    this.firstname.set(user.profile?.firstname ?? '');
+    this.lastname.set(user.profile?.lastname ?? '');
+    this.bio.set(user.profile?.bio ?? '');
+    this.mobileNumber.set(user.profile?.mobileNumber ?? '');
+    const addr = user.profile?.address;
+    this.street.set(addr?.street ?? '');
+    this.zip.set(addr?.zipCode ?? '');
+    this.city.set(addr?.city ?? '');
+    this.state.set(addr?.state ?? '');
+    this.country.set(addr?.country ?? '');
+    this.hasChanges.set(false);
+    this.saveError.set(false);
   }
 }

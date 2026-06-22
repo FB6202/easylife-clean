@@ -1,10 +1,12 @@
 export interface AddressResponse {
   id: number;
   street: string | null;
+  number: string | null;
+  additionalAddressInfo: string | null;
   city: string | null;
   state: string | null;
   country: string | null;
-  zip: string | null;
+  zipCode: string | null;
 }
 
 export interface ProfileResponse {
@@ -19,11 +21,11 @@ export interface ProfileResponse {
 
 export interface SettingsResponse {
   id: number;
-  theme: string;
   language: string;
-  timezone: string;
-  notifications: boolean;
-  // Dashboard Widget Preferences
+  webColorTheme: string;
+  mobileColorTheme: string;
+  emailNotifications: boolean;
+  pushNotifications: boolean;
   widgetTasksEnabled: boolean;
   widgetCalendarEnabled: boolean;
   widgetGoalsEnabled: boolean;

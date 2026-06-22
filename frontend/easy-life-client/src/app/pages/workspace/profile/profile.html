@@ -42,7 +42,6 @@
       </div>
     </div>
 
-    <!-- Avatar -->
     <div class="profile-avatar-row">
       <div class="profile-avatar">
         <span class="profile-avatar__initials">{{ getInitials() }}</span>
@@ -57,7 +56,6 @@
       </div>
     </div>
 
-    <!-- Name -->
     <div class="profile-form-grid">
       <div class="form-group">
         <label>First Name</label>
@@ -77,7 +75,6 @@
       </div>
     </div>
 
-    <!-- Email -->
     <div class="form-group">
       <label>
         Email
@@ -86,7 +83,6 @@
       <input type="email" [value]="email()" disabled class="input--disabled" />
     </div>
 
-    <!-- Mobile Number -->
     <div class="form-group">
       <label>
         Mobile Number
@@ -100,7 +96,6 @@
       />
     </div>
 
-    <!-- Bio -->
     <div class="form-group">
       <label>
         Bio
@@ -130,9 +125,6 @@
     </div>
 
     <div class="profile-form-grid">
-      <!-- ALT: street + number + additionalInfo + zip + city -->
-
-      <!-- NEU: street + zip + city + state + country -->
       <div class="form-group">
         <label>Street</label>
         <input
@@ -192,7 +184,7 @@
       </div>
     </div>
 
-    <!-- Theme -->
+    <!-- Web Theme -->
     <div class="pref-row">
       <div class="pref-row__info">
         <span class="material-symbols-outlined">computer</span>
@@ -207,7 +199,9 @@
             [class]="
               'pref-theme-btn ' + (webColorTheme() === theme.value ? 'pref-theme-btn--active' : '')
             "
-            (click)="webColorTheme.set(theme.value); markChanged()"
+            (click)="
+              webColorTheme.set(theme.value); themeService.setTheme(theme.value); markChanged()
+            "
           >
             <span class="material-symbols-outlined">{{ theme.icon }}</span>
             {{ theme.label }}
@@ -216,6 +210,7 @@
       </div>
     </div>
 
+    <!-- Mobile Theme -->
     <div class="pref-row">
       <div class="pref-row__info">
         <span class="material-symbols-outlined">phone_iphone</span>
@@ -240,12 +235,11 @@
       </div>
     </div>
 
-    <!-- Dashboard Widgets Heading -->
+    <!-- Dashboard Widgets -->
     <div class="pref-section-divider">
       <span class="pref-section-divider__label">Dashboard Widgets</span>
     </div>
 
-    <!-- Widget Toggles -->
     @for (widget of widgetPreferences(); track widget.id) {
       <div class="pref-row">
         <div class="pref-row__info">
@@ -269,6 +263,10 @@
     }
 
     <!-- Language -->
+    <div class="pref-section-divider">
+      <span class="pref-section-divider__label">Language & Notifications</span>
+    </div>
+
     <div class="pref-row">
       <div class="pref-row__info">
         <span class="material-symbols-outlined">translate</span>
@@ -290,7 +288,7 @@
       </div>
     </div>
 
-    <!-- Notifications -->
+    <!-- Email Notifications -->
     <div class="pref-row">
       <div class="pref-row__info">
         <span class="material-symbols-outlined">email</span>
@@ -309,6 +307,7 @@
       </label>
     </div>
 
+    <!-- Push Notifications -->
     <div class="pref-row">
       <div class="pref-row__info">
         <span class="material-symbols-outlined">phone_iphone</span>
@@ -340,7 +339,6 @@
       </div>
     </div>
 
-    <!-- Change Password -->
     <div class="profile-subsection">
       <h3 class="profile-subsection__title">Change Password</h3>
       <div class="profile-form-grid">
@@ -380,7 +378,6 @@
       </div>
     </div>
 
-    <!-- 2FA -->
     <div class="profile-subsection">
       <h3 class="profile-subsection__title">Two-Factor Authentication</h3>
       <div class="security-row">
@@ -413,7 +410,6 @@
       </div>
     </div>
 
-    <!-- Session Timeout -->
     <div class="profile-subsection">
       <h3 class="profile-subsection__title">Session Timeout</h3>
       <div class="profile-form-grid profile-form-grid--single">
@@ -431,7 +427,6 @@
       </div>
     </div>
 
-    <!-- Danger Zone -->
     <div class="profile-subsection profile-subsection--danger">
       <h3 class="profile-subsection__title profile-subsection__title--danger">Danger Zone</h3>
       <div class="security-row">
@@ -466,7 +461,6 @@
       </div>
     </div>
 
-    <!-- Current Plan Badge -->
     <div class="profile-subsection">
       <h3 class="profile-subsection__title">Current Plan</h3>
       <div class="billing-current">
@@ -480,7 +474,6 @@
       </div>
     </div>
 
-    <!-- Plan Cards -->
     <div class="profile-subsection">
       <h3 class="profile-subsection__title">Available Plans</h3>
       <div class="billing-plans">
@@ -523,7 +516,6 @@
       </div>
     </div>
 
-    <!-- Payment Method -->
     <div class="profile-subsection">
       <h3 class="profile-subsection__title">Payment Method</h3>
       <div class="billing-empty">
@@ -546,11 +538,40 @@
         You have unsaved changes
       </p>
       <div class="profile-save-bar__actions">
-        <button class="btn-secondary" (click)="onDiscard()">Discard</button>
-        <button class="btn-primary" (click)="onSave()">
-          <span class="material-symbols-outlined">save</span>
-          Save Changes
+        <button class="btn-secondary" [disabled]="saving()" (click)="onDiscard()">Discard</button>
+        <button class="btn-primary" [disabled]="saving()" (click)="onSave()">
+          @if (saving()) {
+            <span class="material-symbols-outlined" style="animation: spin 1s linear infinite"
+              >sync</span
+            >
+            Saving…
+          } @else {
+            <span class="material-symbols-outlined">save</span>
+            Save Changes
+          }
         </button>
+      </div>
+    </div>
+  }
+
+  @if (saveSuccess()) {
+    <div class="profile-save-bar profile-save-bar--success">
+      <p class="profile-save-bar__text">
+        <span class="material-symbols-outlined">check_circle</span>
+        Changes saved successfully
+      </p>
+    </div>
+  }
+
+  @if (saveError()) {
+    <div class="profile-save-bar profile-save-bar--error">
+      <p class="profile-save-bar__text">
+        <span class="material-symbols-outlined">error</span>
+        Something went wrong. Please try again.
+      </p>
+      <div class="profile-save-bar__actions">
+        <button class="btn-secondary" (click)="saveError.set(false)">Dismiss</button>
+        <button class="btn-primary" (click)="onSave()">Retry</button>
       </div>
     </div>
   }
