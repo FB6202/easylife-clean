@@ -141,6 +141,11 @@
     }
   }
 
+  &__col--task {
+    min-width: 0;
+    overflow: hidden;
+  }
+
   &__row {
     display: grid;
     grid-template-columns: 2fr 1fr 1fr 100px 120px 80px 60px;
@@ -736,5 +741,54 @@
     transform: translateX(-50%);
     border: 5px solid transparent;
     border-top-color: var(--color-text-primary);
+  }
+}
+
+// ── Modal Error ────────────────────────────────────────────
+.modal-error {
+  display: flex;
+  align-items: center;
+  gap: $space-2;
+  font-size: $font-size-sm;
+  color: var(--color-danger);
+  background: var(--color-danger-subtle);
+  border-radius: $radius-md;
+  padding: $space-2 $space-3;
+  margin: $space-3 0 0;
+
+  .material-symbols-outlined {
+    font-size: 16px;
+    flex-shrink: 0;
+  }
+}
+
+.confirm-dialog__icon--success {
+  background: var(--color-success-subtle);
+
+  .material-symbols-outlined {
+    color: var(--color-primary);
+  }
+}
+
+.confirm-dialog__icon--danger {
+  background: var(--color-danger-subtle);
+
+  .material-symbols-outlined {
+    color: var(--color-danger);
+  }
+}
+
+// ── Button Spinner ─────────────────────────────────────────
+.btn-spinner {
+  font-size: 18px;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
   }
 }

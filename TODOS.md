@@ -31,12 +31,13 @@
 
 ### Pages
 - dashboard:
-  - widgets adding (on dashboard)
   - widget colors - different solution
   - persist settings on edit (settings + widget)
 - ai-agent
 - todos:
+  - delete modal (confirm delete button)
 - categories:
+  - icons chosen (list correct)
 - goals:
 - calendar
   - event create notification directly
@@ -44,10 +45,12 @@
   - sync functionality
   - filter (panel or all)
 - documents:
+  - download fails when not exists
 - weekplan:
   - update status to completed (when all tasks done)
 - profile:
   - contract change
+  - update (theme does not work - profile click turn white)
   - forgot pw
   - size for profile image
   - dropdowns for address (country etc.)

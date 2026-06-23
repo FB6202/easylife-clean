@@ -1,9 +1,10 @@
-<!-- Page Header -->
+<!-- ══ HEADER ════════════════════════════════════════════ -->
 <div class="categories-header">
   <div class="categories-header__text">
-    <p class="categories-header__label">Categories</p>
+    <h1>Categories</h1>
     <p class="categories-header__subtitle">
-      Group your tasks, goals and documents into meaningful categories.
+      {{ totalElements() }} categories · {{ categoryService.privateCount() }} private ·
+      {{ categoryService.publicCount() }} public
     </p>
   </div>
   <div class="categories-header__actions">
@@ -25,67 +26,85 @@
   </div>
 </div>
 
-<!-- Grid -->
-<div class="categories-container">
-  <div class="categories-grid">
-    @for (category of paginatedCategories(); track category.id) {
-      <div class="category-card" (click)="openEdit(category)">
-        <div class="category-card__bar" [style.background]="category.color"></div>
-        <div class="category-card__body">
-          <div class="category-card__top">
-            <div class="category-card__icon" [style.background]="category.color + '18'">
-              <span class="material-symbols-outlined" [style.color]="category.color">
-                {{ category.icon }}
+<!-- ══ LOADING STATE ════════════════════════════════════ -->
+@if (loading() && paginatedCategories().length === 0) {
+  <div class="page-loading">
+    <span class="material-symbols-outlined page-loading__spinner">progress_activity</span>
+    <span class="page-loading__text">Loading categories...</span>
+  </div>
+} @else if (paginatedCategories().length === 0) {
+  <div class="empty-state">
+    <span class="material-symbols-outlined empty-state__icon">category</span>
+    <h3 class="empty-state__title">No categories yet</h3>
+    <p class="empty-state__text">Create your first category to organize your content.</p>
+    <button class="btn-primary" (click)="openCreate()">
+      <span class="material-symbols-outlined">add</span>
+      New Category
+    </button>
+  </div>
+} @else {
+  <!-- ══ GRID ════════════════════════════════════════════ -->
+  <div class="categories-container">
+    <div class="categories-grid">
+      @for (category of paginatedCategories(); track category.id) {
+        <div class="category-card" (click)="openEdit(category)">
+          <div class="category-card__bar" [style.background]="category.color"></div>
+          <div class="category-card__body">
+            <div class="category-card__top">
+              <div class="category-card__icon" [style.background]="category.color + '18'">
+                <span class="material-symbols-outlined" [style.color]="category.color">
+                  {{ category.icon }}
+                </span>
+              </div>
+              <span
+                [class]="
+                  'category-card__access ' +
+                  (category.accessType === 'PUBLIC' ? 'access--public' : 'access--private')
+                "
+              >
+                <span class="material-symbols-outlined">
+                  {{ category.accessType === 'PUBLIC' ? 'travel_explore' : 'lock' }}
+                </span>
+                {{ category.accessType.toLowerCase() }}
               </span>
             </div>
-            <span
-              [class]="
-                'category-card__access ' +
-                (category.accessType === 'PUBLIC' ? 'access--public' : 'access--private')
-              "
-            >
-              <span class="material-symbols-outlined">
-                {{ category.accessType === 'PUBLIC' ? 'travel_explore' : 'lock' }}
+            <h3 class="category-card__name">{{ category.name }}</h3>
+            <p class="category-card__desc">{{ category.description }}</p>
+            <div class="category-card__footer">
+              <span class="category-card__date">
+                <span class="material-symbols-outlined">calendar_today</span>
+                Created {{ formatCreatedAt(category.createdAt) }}
               </span>
-              {{ category.accessType.toLowerCase() }}
-            </span>
-          </div>
-          <h3 class="category-card__name">{{ category.name }}</h3>
-          <p class="category-card__desc">{{ category.description }}</p>
-          <div class="category-card__footer">
-            <span class="category-card__date">
-              <span class="material-symbols-outlined">calendar_today</span>
-              Created {{ formatCreatedAt(category.createdAt) }}
-            </span>
-            <button class="category-card__arrow" (click)="openEdit(category, $event)">
-              <span class="material-symbols-outlined">arrow_forward</span>
-            </button>
+              <button class="category-card__arrow" (click)="openEdit(category, $event)">
+                <span class="material-symbols-outlined">arrow_forward</span>
+              </button>
+            </div>
           </div>
         </div>
-      </div>
-    }
+      }
 
-    <div class="category-card category-card--add" (click)="openCreate()">
-      <div class="category-card__add-inner">
-        <div class="category-card__add-icon">
-          <span class="material-symbols-outlined">add</span>
+      <div class="category-card category-card--add" (click)="openCreate()">
+        <div class="category-card__add-inner">
+          <div class="category-card__add-icon">
+            <span class="material-symbols-outlined">add</span>
+          </div>
+          <span class="category-card__add-label">Add New</span>
+          <span class="category-card__add-sub">Define a category</span>
         </div>
-        <span class="category-card__add-label">Add New</span>
-        <span class="category-card__add-sub">Define a category</span>
       </div>
     </div>
   </div>
+}
 
-  <app-pagination
-    [currentPage]="currentPage()"
-    [totalPages]="totalPages()"
-    [totalElements]="totalElements()"
-    [pageSize]="pageSize()"
-    (pageChange)="onPageChange($event)"
-    (pageSizeChange)="onPageSizeChange($event)"
-    (aiClick)="onAiClick()"
-  />
-</div>
+<app-pagination
+  [currentPage]="currentPage()"
+  [totalPages]="totalPages()"
+  [totalElements]="totalElements()"
+  [pageSize]="pageSize()"
+  (pageChange)="onPageChange($event)"
+  (pageSizeChange)="onPageSizeChange($event)"
+  (aiClick)="onAiClick()"
+/>
 
 <!-- ══ FILTER PANEL ══════════════════════════════════════ -->
 @if (showFilter()) {
@@ -219,9 +238,23 @@
         </div>
       </div>
 
+      @if (createError()) {
+        <p class="modal-error">
+          <span class="material-symbols-outlined">error</span>
+          Something went wrong. Please try again.
+        </p>
+      }
+
       <div class="cat-modal__footer">
         <button class="btn-secondary" (click)="showCreateModal.set(false)">Cancel</button>
-        <button class="btn-primary" (click)="submitCreate()">Create Category</button>
+        <button class="btn-primary" [disabled]="saving()" (click)="submitCreate()">
+          @if (saving()) {
+            <span class="material-symbols-outlined btn-spinner">progress_activity</span>
+          } @else {
+            <span class="material-symbols-outlined">add</span>
+          }
+          Create Category
+        </button>
       </div>
     </div>
   </div>
@@ -354,9 +387,23 @@
         </div>
       </div>
 
+      @if (editError()) {
+        <p class="modal-error">
+          <span class="material-symbols-outlined">error</span>
+          Something went wrong. Please try again.
+        </p>
+      }
+
       <div class="cat-modal__footer">
         <button class="btn-secondary" (click)="showEditModal.set(false)">Cancel</button>
-        <button class="btn-primary" (click)="submitEdit()">Save Changes</button>
+        <button class="btn-primary" [disabled]="saving()" (click)="submitEdit()">
+          @if (saving()) {
+            <span class="material-symbols-outlined btn-spinner">progress_activity</span>
+          } @else {
+            <span class="material-symbols-outlined">save</span>
+          }
+          Save Changes
+        </button>
       </div>
     </div>
   </div>
@@ -366,17 +413,35 @@
 @if (showDeleteConfirm() && selectedCategory()) {
   <div class="modal-overlay" (click)="showDeleteConfirm.set(false)">
     <div class="confirm-dialog" (click)="$event.stopPropagation()">
-      <div class="confirm-dialog__icon confirm-dialog__icon--danger">
-        <span class="material-symbols-outlined">delete</span>
+      <div class="confirm-dialog__icon">
+        <span class="material-symbols-outlined">delete_forever</span>
       </div>
-      <h3 class="confirm-dialog__title">Delete Category</h3>
-      <p class="confirm-dialog__text">
-        Are you sure you want to delete
-        <strong>"{{ selectedCategory()!.name }}"</strong>? This will not delete the items inside it.
-      </p>
+      <h3 class="confirm-dialog__title">Delete "{{ selectedCategory()!.name }}"?</h3>
+      <p class="confirm-dialog__text">This will not delete the items inside it.</p>
+
+      @if (deleteError()) {
+        <p class="modal-error">
+          <span class="material-symbols-outlined">error</span>
+          Could not delete category. Please try again.
+        </p>
+      }
+
       <div class="confirm-dialog__actions">
-        <button class="btn-secondary" (click)="showDeleteConfirm.set(false)">Cancel</button>
-        <button class="btn-danger" (click)="confirmDelete()">Delete Category</button>
+        <button
+          class="btn-secondary"
+          [disabled]="deleting()"
+          (click)="showDeleteConfirm.set(false)"
+        >
+          Cancel
+        </button>
+        <button class="btn-danger" [disabled]="deleting()" (click)="confirmDelete()">
+          @if (deleting()) {
+            <span class="material-symbols-outlined btn-spinner">progress_activity</span>
+          } @else {
+            <span class="material-symbols-outlined">delete</span>
+          }
+          Delete Category
+        </button>
       </div>
     </div>
   </div>

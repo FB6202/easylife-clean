@@ -10,6 +10,7 @@ import {
 import { TodoService } from '../../../core/services/todo-service';
 import {
   TodoResponse,
+  TodoRequest,
   TodoFilter,
   CategoryPreview,
   AccessType,
@@ -48,7 +49,7 @@ export class TasksComponent implements OnInit {
   readonly priorities: Priority[] = ['CRITICAL', 'HIGH', 'MEDIUM', 'LOW', 'OPTIONAL'];
   readonly statuses: TodoStatus[] = ['OPEN', 'IN_PROGRESS', 'DONE'];
 
-  // ── Service State (read-only Zugriff) ──────────────────────────────────────
+  // ── Service State ──────────────────────────────────────────────────────────
   readonly paginatedTasks = this.todoService.todos;
   readonly currentPage = this.todoService.currentPage;
   readonly pageSize = this.todoService.pageSize;
@@ -57,6 +58,9 @@ export class TasksComponent implements OnInit {
   readonly pendingCount = this.todoService.pendingCount;
   readonly inProgressCount = this.todoService.inProgressCount;
   readonly doneCount = this.todoService.doneCount;
+  readonly loading = this.todoService.loading;
+  readonly saving = this.todoService.saving;
+  readonly deleting = this.todoService.deleting;
 
   // ── Derived ────────────────────────────────────────────────────────────────
   readonly productivityScore = computed(() => {
@@ -73,7 +77,7 @@ export class TasksComponent implements OnInit {
     return 'Building';
   });
 
-  // ── Categories (wird vom API geladen) ──────────────────────────────────────
+  // ── Categories ─────────────────────────────────────────────────────────────
   readonly availableCategories = this.categoryService.allCategories;
 
   // ── Filter ─────────────────────────────────────────────────────────────────
@@ -145,9 +149,7 @@ export class TasksComponent implements OnInit {
     if (!Array.isArray(cats)) return [];
     const selected = this.createForm().categoryIds;
     return [...cats].sort((a, b) => {
-      const aSelected = selected.includes(a.id) ? 0 : 1;
-      const bSelected = selected.includes(b.id) ? 0 : 1;
-      return aSelected - bSelected;
+      return (selected.includes(a.id) ? 0 : 1) - (selected.includes(b.id) ? 0 : 1);
     });
   });
 
@@ -156,29 +158,23 @@ export class TasksComponent implements OnInit {
     if (!Array.isArray(cats)) return [];
     const selected = this.editForm().categoryIds;
     return [...cats].sort((a, b) => {
-      const aSelected = selected.includes(a.id) ? 0 : 1;
-      const bSelected = selected.includes(b.id) ? 0 : 1;
-      return aSelected - bSelected;
+      return (selected.includes(a.id) ? 0 : 1) - (selected.includes(b.id) ? 0 : 1);
     });
   });
 
   onFilterApply(values: FilterValues): void {
     this.activeFilters.set(values);
-
     const categoryIds = (values['categories'] as string[] | undefined)
       ?.map(Number)
       .filter((n) => !isNaN(n));
-
-    const filter: TodoFilter = {
+    this.todoService.loadAll(this.userId, 0, {
       status: (values['status'] as TodoStatus) || undefined,
       priority: (values['priority'] as Priority) || undefined,
       accessType: (values['access'] as AccessType) || undefined,
       dueDateFrom: (values['dueDateFrom'] as string) || undefined,
       dueDateTo: (values['dueDateTo'] as string) || undefined,
       categoryIds: categoryIds?.length ? categoryIds : undefined,
-    };
-
-    this.todoService.loadAll(this.userId, 0, filter);
+    });
     this.showFilter.set(false);
   }
 
@@ -244,6 +240,12 @@ export class TasksComponent implements OnInit {
   activeMenu = signal<number | null>(null);
   selectedTask = signal<TodoResponse | null>(null);
 
+  // Inline Feedback
+  createError = signal(false);
+  editError = signal(false);
+  deleteError = signal(false);
+  doneError = signal(false);
+
   createForm = signal<TaskForm>({
     title: '',
     description: '',
@@ -264,8 +266,9 @@ export class TasksComponent implements OnInit {
     categoryIds: [],
   });
 
-  // ── Create (TODO: todoService.create() sobald implementiert) ───────────────
+  // ── Create ─────────────────────────────────────────────────────────────────
   openCreate(): void {
+    this.createError.set(false);
     this.createForm.set({
       title: '',
       description: '',
@@ -281,14 +284,29 @@ export class TasksComponent implements OnInit {
 
   submitCreate(): void {
     if (!this.createForm().title.trim()) return;
-    // TODO: this.todoService.create(this.userId, this.createForm());
-    console.log('TODO create:', this.createForm());
-    this.showCreateModal.set(false);
+    this.createError.set(false);
+    const f = this.createForm();
+    const request: TodoRequest = {
+      title: f.title,
+      description: f.description,
+      priority: f.priority,
+      status: f.status,
+      accessType: f.accessType,
+      dueDate: f.dueDate || null,
+      categoryIds: f.categoryIds,
+    };
+    this.todoService.create(
+      this.userId,
+      request,
+      () => this.showCreateModal.set(false),
+      () => this.createError.set(true),
+    );
   }
 
-  // ── Edit (findById wird aufgerufen für frischen Stand) ────────────────────
+  // ── Edit ───────────────────────────────────────────────────────────────────
   openEdit(task: TodoResponse): void {
     this.todoService.loadById(this.userId, task.id);
+    this.editError.set(false);
     this.selectedTask.set(task);
     this.editForm.set({
       title: task.title,
@@ -305,39 +323,81 @@ export class TasksComponent implements OnInit {
   }
 
   submitEdit(): void {
-    if (!this.editForm().title.trim()) return;
-    // TODO: this.todoService.update(this.userId, this.selectedTask()!.id, this.editForm());
-    console.log('TODO update:', this.selectedTask()?.id, this.editForm());
-    this.showEditModal.set(false);
+    if (!this.editForm().title.trim() || !this.selectedTask()) return;
+    this.editError.set(false);
+    const f = this.editForm();
+    const request: TodoRequest = {
+      title: f.title,
+      description: f.description,
+      priority: f.priority,
+      status: f.status,
+      accessType: f.accessType,
+      dueDate: f.dueDate || null,
+      categoryIds: f.categoryIds,
+    };
+    this.todoService.update(
+      this.userId,
+      this.selectedTask()!.id,
+      request,
+      () => this.showEditModal.set(false),
+      () => this.editError.set(true),
+    );
   }
 
-  // ── Done (TODO: todoService.update() sobald implementiert) ────────────────
+  // ── Done ───────────────────────────────────────────────────────────────────
   openDoneConfirm(task: TodoResponse): void {
     this.selectedTask.set(task);
+    this.doneError.set(false);
     this.showDoneConfirm.set(true);
     this.activeMenu.set(null);
   }
 
   confirmDone(): void {
-    // TODO: this.todoService.update(this.userId, id, { ...task, status: 'DONE' });
-    console.log('TODO mark done:', this.selectedTask()?.id);
-    this.showDoneConfirm.set(false);
-    this.selectedTask.set(null);
+    if (!this.selectedTask()) return;
+    this.doneError.set(false);
+    const task = this.selectedTask()!;
+    const request: TodoRequest = {
+      title: task.title,
+      description: task.description ?? '',
+      priority: task.priority,
+      status: 'DONE',
+      accessType: task.accessType,
+      dueDate: task.dueDate ?? null,
+      categoryIds: task.categories?.map((c) => c.id) ?? [],
+    };
+    this.todoService.update(
+      this.userId,
+      task.id,
+      request,
+      () => {
+        this.showDoneConfirm.set(false);
+        this.selectedTask.set(null);
+      },
+      () => this.doneError.set(true),
+    );
   }
 
-  // ── Delete (TODO: todoService.delete() sobald implementiert) ──────────────
+  // ── Delete ─────────────────────────────────────────────────────────────────
   openDeleteConfirm(task: TodoResponse): void {
     this.selectedTask.set(task);
+    this.deleteError.set(false);
     this.showEditModal.set(false);
     this.showDeleteConfirm.set(true);
     this.activeMenu.set(null);
   }
 
   confirmDelete(): void {
-    // TODO: this.todoService.delete(this.userId, this.selectedTask()!.id);
-    console.log('TODO delete:', this.selectedTask()?.id);
-    this.showDeleteConfirm.set(false);
-    this.selectedTask.set(null);
+    if (!this.selectedTask()) return;
+    this.deleteError.set(false);
+    this.todoService.delete(
+      this.userId,
+      this.selectedTask()!.id,
+      () => {
+        this.showDeleteConfirm.set(false);
+        this.selectedTask.set(null);
+      },
+      () => this.deleteError.set(true),
+    );
   }
 
   // ── Menu & Category Toggles ────────────────────────────────────────────────
@@ -400,6 +460,15 @@ export class TasksComponent implements OnInit {
   @HostListener('document:click')
   onDocumentClick(): void {
     this.activeMenu.set(null);
+  }
+
+  @HostListener('document:keydown.escape')
+  onEscape(): void {
+    this.showCreateModal.set(false);
+    this.showEditModal.set(false);
+    this.showDeleteConfirm.set(false);
+    this.showDoneConfirm.set(false);
+    this.showFilter.set(false);
   }
 
   // ── Lifecycle ──────────────────────────────────────────────────────────────

@@ -336,9 +336,23 @@
         </div>
       </div>
 
+      @if (createError()) {
+        <p class="modal-error">
+          <span class="material-symbols-outlined">error</span>
+          Something went wrong. Please try again.
+        </p>
+      }
+
       <div class="task-modal__footer">
         <button class="btn-secondary" (click)="showCreateModal.set(false)">Cancel</button>
-        <button class="btn-primary" (click)="submitCreate()">Create Task</button>
+        <button class="btn-primary" [disabled]="saving()" (click)="submitCreate()">
+          @if (saving()) {
+            <span class="material-symbols-outlined btn-spinner">progress_activity</span>
+          } @else {
+            <span class="material-symbols-outlined">add</span>
+          }
+          Create Task
+        </button>
       </div>
     </div>
   </div>
@@ -508,9 +522,23 @@
         </div>
       </div>
 
+      @if (editError()) {
+        <p class="modal-error">
+          <span class="material-symbols-outlined">error</span>
+          Something went wrong. Please try again.
+        </p>
+      }
+
       <div class="task-modal__footer">
         <button class="btn-secondary" (click)="showEditModal.set(false)">Cancel</button>
-        <button class="btn-primary" (click)="submitEdit()">Save Changes</button>
+        <button class="btn-primary" [disabled]="saving()" (click)="submitEdit()">
+          @if (saving()) {
+            <span class="material-symbols-outlined btn-spinner">progress_activity</span>
+          } @else {
+            <span class="material-symbols-outlined">save</span>
+          }
+          Save Changes
+        </button>
       </div>
     </div>
   </div>
@@ -521,16 +549,34 @@
   <div class="modal-overlay" (click)="showDeleteConfirm.set(false)">
     <div class="confirm-dialog" (click)="$event.stopPropagation()">
       <div class="confirm-dialog__icon confirm-dialog__icon--danger">
-        <span class="material-symbols-outlined">delete</span>
+        <span class="material-symbols-outlined">delete_forever</span>
       </div>
-      <h3 class="confirm-dialog__title">Delete Task</h3>
-      <p class="confirm-dialog__text">
-        Are you sure you want to delete <strong>"{{ selectedTask()!.title }}"</strong>? This action
-        cannot be undone.
-      </p>
+      <h3 class="confirm-dialog__title">Delete "{{ selectedTask()!.title }}"?</h3>
+      <p class="confirm-dialog__text">This task will be permanently removed.</p>
+
+      @if (deleteError()) {
+        <p class="modal-error">
+          <span class="material-symbols-outlined">error</span>
+          Could not delete task. Please try again.
+        </p>
+      }
+
       <div class="confirm-dialog__actions">
-        <button class="btn-secondary" (click)="showDeleteConfirm.set(false)">Cancel</button>
-        <button class="btn-danger" (click)="confirmDelete()">Delete Task</button>
+        <button
+          class="btn-secondary"
+          [disabled]="deleting()"
+          (click)="showDeleteConfirm.set(false)"
+        >
+          Cancel
+        </button>
+        <button class="btn-danger" [disabled]="deleting()" (click)="confirmDelete()">
+          @if (deleting()) {
+            <span class="material-symbols-outlined btn-spinner">progress_activity</span>
+          } @else {
+            <span class="material-symbols-outlined">delete</span>
+          }
+          Delete
+        </button>
       </div>
     </div>
   </div>
@@ -543,13 +589,28 @@
       <div class="confirm-dialog__icon confirm-dialog__icon--success">
         <span class="material-symbols-outlined">check_circle</span>
       </div>
-      <h3 class="confirm-dialog__title">Mark as Done</h3>
-      <p class="confirm-dialog__text">
-        Mark <strong>"{{ selectedTask()!.title }}"</strong> as completed?
-      </p>
+      <h3 class="confirm-dialog__title">Mark as Done?</h3>
+      <p class="confirm-dialog__text">"{{ selectedTask()!.title }}" will be completed.</p>
+
+      @if (doneError()) {
+        <p class="modal-error">
+          <span class="material-symbols-outlined">error</span>
+          Something went wrong. Please try again.
+        </p>
+      }
+
       <div class="confirm-dialog__actions">
-        <button class="btn-secondary" (click)="showDoneConfirm.set(false)">Cancel</button>
-        <button class="btn-primary" (click)="confirmDone()">Mark as Done</button>
+        <button class="btn-secondary" [disabled]="saving()" (click)="showDoneConfirm.set(false)">
+          Cancel
+        </button>
+        <button class="btn-primary" [disabled]="saving()" (click)="confirmDone()">
+          @if (saving()) {
+            <span class="material-symbols-outlined btn-spinner">progress_activity</span>
+          } @else {
+            <span class="material-symbols-outlined">check_circle</span>
+          }
+          Complete
+        </button>
       </div>
     </div>
   </div>
