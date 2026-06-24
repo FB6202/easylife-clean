@@ -252,6 +252,16 @@
 }
 
 // ── Cat Modal ──────────────────────────────────────────────
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(4px);
+  z-index: 200;
+  @include flex-center;
+  padding: $space-4;
+}
+
 .cat-modal {
   background: var(--color-bg-card);
   border-radius: $radius-xl;

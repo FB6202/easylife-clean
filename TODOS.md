@@ -35,9 +35,8 @@
   - persist settings on edit (settings + widget)
 - ai-agent
 - todos:
-  - delete modal (confirm delete button)
 - categories:
-  - icons chosen (list correct)
+  - icons chosen (list correct and more)
 - goals:
 - calendar
   - event create notification directly
