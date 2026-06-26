@@ -134,16 +134,19 @@
       />
 
       <div class="goal-image-upload">
-        @if (getCreateImagePreview()) {
+        @if (createImagePreview()) {
           <div class="goal-image-upload__preview">
-            <img [src]="getCreateImagePreview()" alt="Goal image preview" />
+            <img [src]="createImagePreview()" alt="Goal image preview" />
             <div class="goal-image-upload__overlay">
               <label class="goal-image-upload__btn" for="create-image-input">
                 <span class="material-symbols-outlined">photo_camera</span>Change
               </label>
               <button
                 class="goal-image-upload__btn goal-image-upload__btn--remove"
-                (click)="createForm.update((f) => ({ ...f, imageFile: null }))"
+                (click)="
+                  createForm.update((f) => ({ ...f, imageFile: null }));
+                  createImagePreview.set(null)
+                "
               >
                 <span class="material-symbols-outlined">delete</span>Remove
               </button>
@@ -462,16 +465,20 @@
       />
 
       <div class="goal-image-upload">
-        @if (getEditImagePreview()) {
+        @if (editImagePreview()) {
           <div class="goal-image-upload__preview">
-            <img [src]="getEditImagePreview()" alt="Goal image preview" />
+            <img [src]="editImagePreview()" alt="Goal image preview" />
             <div class="goal-image-upload__overlay">
               <label class="goal-image-upload__btn" for="edit-image-input">
                 <span class="material-symbols-outlined">photo_camera</span>Change
               </label>
               <button
                 class="goal-image-upload__btn goal-image-upload__btn--remove"
-                (click)="editForm.update((f) => ({ ...f, imageFile: null }))"
+                (click)="
+                  editForm.update((f) => ({ ...f, imageFile: null }));
+                  editImagePreview.set(null);
+                  imageRemovedInEdit.set(true)
+                "
               >
                 <span class="material-symbols-outlined">delete</span>Remove
               </button>
@@ -657,11 +664,19 @@
         @for (task of editForm().tasks; track $index; let i = $index) {
           <div class="goal-task-row">
             <div class="goal-task-row__check">
-              <input
-                type="checkbox"
-                [checked]="task.done"
-                (change)="updateEditTask(i, 'done', $any($event.target).checked)"
-              />
+              @if (task.saving) {
+                <span
+                  class="material-symbols-outlined btn-spinner"
+                  style="font-size: 18px; color: var(--color-primary)"
+                  >progress_activity</span
+                >
+              } @else {
+                <input
+                  type="checkbox"
+                  [checked]="task.done"
+                  (change)="updateEditTask(i, 'done', $any($event.target).checked)"
+                />
+              }
             </div>
             <input
               type="text"
@@ -670,6 +685,7 @@
               placeholder="Task title..."
               [value]="task.title"
               (input)="updateEditTask(i, 'title', $any($event.target).value)"
+              (blur)="saveEditTask(i)"
             />
             <div class="goal-task-row__meta">
               <div class="goal-task-row__contribution">
@@ -684,6 +700,7 @@
                     max="100"
                     [value]="task.progressContribution"
                     (input)="updateEditTask(i, 'progressContribution', +$any($event.target).value)"
+                    (blur)="saveEditTask(i)"
                   />
                   <span class="goal-task-row__contribution-unit">%</span>
                 </div>
@@ -703,6 +720,7 @@
                   class="goal-task-row__date"
                   [value]="task.dueDate"
                   (input)="updateEditTask(i, 'dueDate', $any($event.target).value)"
+                  (blur)="saveEditTask(i)"
                 />
               </div>
               <button

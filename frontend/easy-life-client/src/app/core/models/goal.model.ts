@@ -38,3 +38,24 @@ export interface GoalFilter {
   deadlineTo?: string;
   categoryIds?: number[];
 }
+
+export interface GoalRequest {
+  title: string;
+  description: string;
+  measurableTarget: string;
+  targetValue: number;
+  targetUnit: string;
+  currentProgress: number;
+  deadline: string | null;
+  status: GoalStatus;
+  accessType: AccessType;
+  categoryIds: number[];
+}
+
+export interface GoalTaskRequest {
+  title: string;
+  description: string;
+  done: boolean;
+  progressContribution: number;
+  dueDate: string | null;
+}

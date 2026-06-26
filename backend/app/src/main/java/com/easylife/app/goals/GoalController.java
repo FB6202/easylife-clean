@@ -70,6 +70,13 @@ public class GoalController {
         return ResponseEntity.ok(goalService.updateImage(id, imagePath, userId));
     }
 
+    @DeleteMapping("/{id}/image")
+    public ResponseEntity<GoalResponse> deleteImage(
+            @PathVariable Long id,
+            @RequestParam Long userId) {
+        return ResponseEntity.ok(goalService.updateImage(id, null, userId));
+    }
+
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(
             @PathVariable Long id,

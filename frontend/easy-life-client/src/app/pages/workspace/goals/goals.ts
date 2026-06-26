@@ -12,6 +12,7 @@ import { CategoryService } from '../../../core/services/category-service';
 import {
   GoalResponse,
   GoalFilter,
+  GoalRequest,
   GoalStatus,
   AccessType,
   GoalTaskResponse,
@@ -20,11 +21,13 @@ import { environment } from '../../../../environments/environment';
 import { AiAgentService } from '../../../core/services/ai-agent';
 
 interface GoalTaskForm {
+  id: number | null;
   title: string;
   description: string;
   done: boolean;
   progressContribution: number;
   dueDate: string;
+  saving: boolean;
 }
 
 interface GoalForm {
@@ -65,13 +68,20 @@ export class GoalsComponent implements OnInit {
   readonly totalElements = this.goalService.totalElements;
   readonly activeCount = this.goalService.activeCount;
   readonly completedCount = this.goalService.completedCount;
-  readonly abandonedCount = this.goalService.abandonedCount;
+  readonly saving = this.goalService.saving;
+  readonly deleting = this.goalService.deleting;
+  readonly uploadingImage = this.goalService.uploadingImage;
 
   readonly availableCategories = this.categoryService.allCategories;
 
   // ── Filter ─────────────────────────────────────────────────────────────────
   showFilter = signal(false);
   activeFilters = signal<FilterValues>({});
+
+  // ── Inline Feedback ────────────────────────────────────────────────────────
+  createError = signal(false);
+  editError = signal(false);
+  deleteError = signal(false);
 
   readonly goalFilterFields = computed((): FilterField[] => [
     {
@@ -226,25 +236,27 @@ export class GoalsComponent implements OnInit {
   }
 
   // ── Image Upload ───────────────────────────────────────────────────────────
-  getCreateImagePreview(): string | null {
-    const file = this.createForm().imageFile;
-    return file ? URL.createObjectURL(file) : null;
-  }
-
-  getEditImagePreview(): string | null {
-    const f = this.editForm();
-    if (f.imageFile) return URL.createObjectURL(f.imageFile);
-    return this.selectedGoal()?.presignedImageUrl ?? null;
-  }
+  // ── Image Preview Cache (blob URLs) ───────────────────────────────────────
+  readonly createImagePreview = signal<string | null>(null);
+  readonly editImagePreview = signal<string | null>(null);
+  readonly imageRemovedInEdit = signal(false);
 
   onCreateImageSelect(event: Event): void {
     const file = (event.target as HTMLInputElement).files?.[0] ?? null;
     this.createForm.update((f) => ({ ...f, imageFile: file }));
+    if (this.createImagePreview()) {
+      URL.revokeObjectURL(this.createImagePreview()!);
+    }
+    this.createImagePreview.set(file ? URL.createObjectURL(file) : null);
   }
 
   onEditImageSelect(event: Event): void {
     const file = (event.target as HTMLInputElement).files?.[0] ?? null;
     this.editForm.update((f) => ({ ...f, imageFile: file }));
+    if (this.editImagePreview()) {
+      URL.revokeObjectURL(this.editImagePreview()!);
+    }
+    this.editImagePreview.set(file ? URL.createObjectURL(file) : null);
   }
 
   // ── Task helpers ───────────────────────────────────────────────────────────
@@ -253,19 +265,58 @@ export class GoalsComponent implements OnInit {
       ...f,
       tasks: [
         ...f.tasks,
-        { title: '', description: '', done: false, progressContribution: 0, dueDate: '' },
+        {
+          id: null,
+          title: '',
+          description: '',
+          done: false,
+          progressContribution: 0,
+          dueDate: '',
+          saving: false,
+        },
       ],
     }));
   }
 
   addTaskToEdit(): void {
+    const goalId = this.selectedGoal()?.id;
+    if (!goalId) return;
+
+    // Erst in Form eintragen mit saving=true
     this.editForm.update((f) => ({
       ...f,
       tasks: [
         ...f.tasks,
-        { title: '', description: '', done: false, progressContribution: 0, dueDate: '' },
+        {
+          id: null,
+          title: '',
+          description: '',
+          done: false,
+          progressContribution: 0,
+          dueDate: '',
+          saving: true,
+        },
       ],
     }));
+
+    const index = this.editForm().tasks.length - 1;
+
+    this.goalService.addTask(
+      this.userId,
+      goalId,
+      { title: '', description: '', done: false, progressContribution: 0, dueDate: null },
+      (created) => {
+        this.editForm.update((f) => {
+          const tasks = [...f.tasks];
+          tasks[index] = { ...tasks[index], id: created.id, saving: false };
+          return { ...f, tasks };
+        });
+      },
+      () => {
+        // bei Fehler Task wieder entfernen
+        this.editForm.update((f) => ({ ...f, tasks: f.tasks.filter((_, i) => i !== index) }));
+      },
+    );
   }
 
   updateCreateTask(index: number, field: keyof GoalTaskForm, value: any): void {
@@ -282,6 +333,51 @@ export class GoalsComponent implements OnInit {
       tasks[index] = { ...tasks[index], [field]: value };
       return { ...f, tasks };
     });
+
+    // Nur bei bestehenden Tasks (haben id) sofort speichern
+    // done → sofort; andere Felder → über (blur) im Template
+    if (field === 'done') {
+      this.saveEditTask(index);
+    }
+  }
+
+  saveEditTask(index: number): void {
+    const task = this.editForm().tasks[index];
+    const goalId = this.selectedGoal()?.id;
+    if (!task.id || !goalId) return;
+
+    this.editForm.update((f) => {
+      const tasks = [...f.tasks];
+      tasks[index] = { ...tasks[index], saving: true };
+      return { ...f, tasks };
+    });
+
+    this.goalService.updateTask(
+      this.userId,
+      goalId,
+      task.id,
+      {
+        title: task.title,
+        description: task.description,
+        done: task.done,
+        progressContribution: task.progressContribution,
+        dueDate: task.dueDate || null,
+      },
+      () => {
+        this.editForm.update((f) => {
+          const tasks = [...f.tasks];
+          tasks[index] = { ...tasks[index], saving: false };
+          return { ...f, tasks };
+        });
+      },
+      () => {
+        this.editForm.update((f) => {
+          const tasks = [...f.tasks];
+          tasks[index] = { ...tasks[index], saving: false };
+          return { ...f, tasks };
+        });
+      },
+    );
   }
 
   removeTaskFromCreate(index: number): void {
@@ -289,7 +385,24 @@ export class GoalsComponent implements OnInit {
   }
 
   removeTaskFromEdit(index: number): void {
-    this.editForm.update((f) => ({ ...f, tasks: f.tasks.filter((_, i) => i !== index) }));
+    const task = this.editForm().tasks[index];
+    const goalId = this.selectedGoal()?.id;
+
+    // Neu (keine id) → einfach aus Form entfernen
+    if (!task.id || !goalId) {
+      this.editForm.update((f) => ({ ...f, tasks: f.tasks.filter((_, i) => i !== index) }));
+      return;
+    }
+
+    this.goalService.deleteTask(
+      this.userId,
+      goalId,
+      task.id,
+      () => {
+        this.editForm.update((f) => ({ ...f, tasks: f.tasks.filter((_, i) => i !== index) }));
+      },
+      () => {},
+    );
   }
 
   getCreateTaskTotal(): number {
@@ -329,19 +442,76 @@ export class GoalsComponent implements OnInit {
 
   openCreate(): void {
     this.createForm.set(this.emptyForm());
+    this.createImagePreview.set(null);
     this.showCatDropdown.set(false);
     this.showCreateModal.set(true);
   }
 
   submitCreate(): void {
     if (!this.createForm().title.trim()) return;
-    console.log('TODO create goal:', this.createForm());
-    this.showCreateModal.set(false);
+    this.createError.set(false);
+    const f = this.createForm();
+    const request: GoalRequest = {
+      title: f.title,
+      description: f.description,
+      measurableTarget: f.measurableTarget,
+      targetValue: f.targetValue,
+      targetUnit: f.targetUnit,
+      currentProgress: f.currentProgress,
+      deadline: f.deadline || null,
+      status: f.status,
+      accessType: f.accessType,
+      categoryIds: f.categoryIds,
+    };
+
+    this.goalService.create(
+      this.userId,
+      request,
+      (created) => {
+        // Tasks sequentiell posten
+        const taskPromises = f.tasks
+          .filter((t) => t.title.trim())
+          .map(
+            (t) =>
+              new Promise<void>((resolve) => {
+                this.goalService.addTask(
+                  this.userId,
+                  created.id,
+                  {
+                    title: t.title,
+                    description: t.description,
+                    done: t.done,
+                    progressContribution: t.progressContribution,
+                    dueDate: t.dueDate || null,
+                  },
+                  () => resolve(),
+                  () => resolve(),
+                );
+              }),
+          );
+
+        Promise.all(taskPromises).then(() => {
+          if (f.imageFile) {
+            this.goalService.uploadImage(
+              this.userId,
+              created.id,
+              f.imageFile,
+              () => {},
+              () => {},
+            );
+          }
+          this.showCreateModal.set(false);
+        });
+      },
+      () => this.createError.set(true),
+    );
   }
 
   openEdit(goal: GoalResponse): void {
     this.goalService.loadById(this.userId, goal.id);
     this.selectedGoal.set(goal);
+    this.imageRemovedInEdit.set(false);
+    this.editImagePreview.set(goal.presignedImageUrl ?? null);
     this.editForm.set({
       title: goal.title,
       description: goal.description ?? '',
@@ -355,11 +525,13 @@ export class GoalsComponent implements OnInit {
       categoryIds: goal.categories?.map((c) => c.id) ?? [],
       tasks:
         goal.tasks?.map((t) => ({
+          id: t.id, // ← neu
           title: t.title,
           description: t.description ?? '',
           done: t.done,
           progressContribution: t.progressContribution,
           dueDate: t.dueDate ?? '',
+          saving: false, // ← neu
         })) ?? [],
       imageFile: null,
     });
@@ -369,9 +541,52 @@ export class GoalsComponent implements OnInit {
   }
 
   submitEdit(): void {
-    if (!this.editForm().title.trim()) return;
-    console.log('TODO update goal:', this.selectedGoal()?.id, this.editForm());
-    this.showEditModal.set(false);
+    if (!this.editForm().title.trim() || !this.selectedGoal()) return;
+    this.editError.set(false);
+    const f = this.editForm();
+    const goalId = this.selectedGoal()!.id;
+
+    const request: GoalRequest = {
+      title: f.title,
+      description: f.description,
+      measurableTarget: f.measurableTarget,
+      targetValue: f.targetValue,
+      targetUnit: f.targetUnit,
+      currentProgress: f.currentProgress,
+      deadline: f.deadline || null,
+      status: f.status,
+      accessType: f.accessType,
+      categoryIds: f.categoryIds,
+    };
+
+    this.goalService.update(
+      this.userId,
+      goalId,
+      request,
+      (updated) => {
+        if (f.imageFile) {
+          // neues Bild hochladen
+          this.goalService.uploadImage(
+            this.userId,
+            goalId,
+            f.imageFile,
+            () => {},
+            () => {},
+          );
+        } else if (this.imageRemovedInEdit()) {
+          // Bild explizit gelöscht
+          this.goalService.removeImage(
+            this.userId,
+            goalId,
+            () => {},
+            () => {},
+          );
+        }
+        this.selectedGoal.set(updated);
+        this.showEditModal.set(false);
+      },
+      () => this.editError.set(true),
+    );
   }
 
   openDeleteConfirm(goal: GoalResponse): void {
@@ -382,9 +597,17 @@ export class GoalsComponent implements OnInit {
   }
 
   confirmDelete(): void {
-    console.log('TODO delete goal:', this.selectedGoal()?.id);
-    this.showDeleteConfirm.set(false);
-    this.selectedGoal.set(null);
+    if (!this.selectedGoal()) return;
+    this.deleteError.set(false);
+    this.goalService.delete(
+      this.userId,
+      this.selectedGoal()!.id,
+      () => {
+        this.showDeleteConfirm.set(false);
+        this.selectedGoal.set(null);
+      },
+      () => this.deleteError.set(true),
+    );
   }
 
   toggleGoalMenu(id: number, event: Event): void {
