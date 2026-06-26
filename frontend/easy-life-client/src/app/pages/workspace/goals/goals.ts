@@ -240,6 +240,12 @@ export class GoalsComponent implements OnInit {
   readonly createImagePreview = signal<string | null>(null);
   readonly editImagePreview = signal<string | null>(null);
   readonly imageRemovedInEdit = signal(false);
+  readonly loadedImages = signal<Set<number>>(new Set());
+  readonly editImageLoaded = signal(false);
+
+  onImageLoad(goalId: number): void {
+    this.loadedImages.update((s) => new Set(s).add(goalId));
+  }
 
   onCreateImageSelect(event: Event): void {
     const file = (event.target as HTMLInputElement).files?.[0] ?? null;
@@ -508,6 +514,7 @@ export class GoalsComponent implements OnInit {
   }
 
   openEdit(goal: GoalResponse): void {
+    this.editImageLoaded.set(false);
     this.goalService.loadById(this.userId, goal.id);
     this.selectedGoal.set(goal);
     this.imageRemovedInEdit.set(false);
