@@ -69,7 +69,7 @@ export class GoalService {
   }
 
   // ── loadById ───────────────────────────────────────────────────────────────
-  loadById(userId: number, id: number): void {
+  loadById(userId: number, id: number, onSuccess?: (goal: GoalResponse) => void): void {
     this.loading.set(true);
     const params = new HttpParams().set('userId', userId);
 
@@ -80,6 +80,7 @@ export class GoalService {
         next: (goal) => {
           this.selectedGoal.set(goal);
           this.loading.set(false);
+          onSuccess?.(goal);
         },
         error: () => this.loading.set(false),
       });

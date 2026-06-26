@@ -29,7 +29,15 @@
     @for (goal of paginatedGoals(); track goal.id) {
       <div class="goal-card" (click)="openEdit(goal)">
         <div class="goal-card__image">
-          @if (goal.presignedImageUrl) {
+          @if (loadingGoalId() === goal.id) {
+            <div class="goal-card__image-placeholder">
+              <span class="material-symbols-outlined btn-spinner">progress_activity</span>
+            </div>
+          } @else if (uploadingImage() && selectedGoal()?.id === goal.id) {
+            <div class="goal-card__image-placeholder">
+              <span class="material-symbols-outlined btn-spinner">progress_activity</span>
+            </div>
+          } @else if (goal.presignedImageUrl) {
             @if (!loadedImages().has(goal.id)) {
               <div class="goal-card__image-placeholder">
                 <span class="material-symbols-outlined btn-spinner">progress_activity</span>
@@ -821,8 +829,21 @@
         associated tasks will also be deleted.
       </p>
       <div class="confirm-dialog__actions">
-        <button class="btn-secondary" (click)="showDeleteConfirm.set(false)">Cancel</button>
-        <button class="btn-danger" (click)="confirmDelete()">Delete Goal</button>
+        <button
+          class="btn-secondary"
+          [disabled]="deleting()"
+          (click)="showDeleteConfirm.set(false)"
+        >
+          Cancel
+        </button>
+        <button class="btn-danger" [disabled]="deleting()" (click)="confirmDelete()">
+          @if (deleting()) {
+            <span class="material-symbols-outlined btn-spinner">progress_activity</span>
+          } @else {
+            <span class="material-symbols-outlined">delete</span>
+          }
+          Delete Goal
+        </button>
       </div>
     </div>
   </div>

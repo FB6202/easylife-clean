@@ -33,6 +33,7 @@
 - dashboard:
   - widget colors - different solution
   - persist settings on edit (settings + widget)
+  - loading state - spinner (not hourglass)
 - ai-agent
 - todos:
 - categories:

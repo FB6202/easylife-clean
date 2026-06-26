@@ -242,6 +242,7 @@ export class GoalsComponent implements OnInit {
   readonly imageRemovedInEdit = signal(false);
   readonly loadedImages = signal<Set<number>>(new Set());
   readonly editImageLoaded = signal(false);
+  readonly loadingGoalId = signal<number | null>(null);
 
   onImageLoad(goalId: number): void {
     this.loadedImages.update((s) => new Set(s).add(goalId));
@@ -514,37 +515,42 @@ export class GoalsComponent implements OnInit {
   }
 
   openEdit(goal: GoalResponse): void {
+    this.loadingGoalId.set(goal.id);
     this.editImageLoaded.set(false);
-    this.goalService.loadById(this.userId, goal.id);
-    this.selectedGoal.set(goal);
     this.imageRemovedInEdit.set(false);
-    this.editImagePreview.set(goal.presignedImageUrl ?? null);
-    this.editForm.set({
-      title: goal.title,
-      description: goal.description ?? '',
-      measurableTarget: goal.measurableTarget ?? '',
-      targetValue: goal.targetValue,
-      targetUnit: goal.targetUnit ?? '%',
-      currentProgress: goal.currentProgress,
-      deadline: goal.deadline ?? '',
-      status: goal.status,
-      accessType: goal.accessType,
-      categoryIds: goal.categories?.map((c) => c.id) ?? [],
-      tasks:
-        goal.tasks?.map((t) => ({
-          id: t.id, // ← neu
-          title: t.title,
-          description: t.description ?? '',
-          done: t.done,
-          progressContribution: t.progressContribution,
-          dueDate: t.dueDate ?? '',
-          saving: false, // ← neu
-        })) ?? [],
-      imageFile: null,
-    });
+    this.selectedGoal.set(goal);
     this.showEditCatDropdown.set(false);
     this.activeGoalMenu.set(null);
-    this.showEditModal.set(true);
+
+    this.goalService.loadById(this.userId, goal.id, (loaded) => {
+      this.loadingGoalId.set(null);
+      this.selectedGoal.set(loaded);
+      this.editImagePreview.set(loaded.presignedImageUrl ?? null);
+      this.editForm.set({
+        title: loaded.title,
+        description: loaded.description ?? '',
+        measurableTarget: loaded.measurableTarget ?? '',
+        targetValue: loaded.targetValue,
+        targetUnit: loaded.targetUnit ?? '%',
+        currentProgress: loaded.currentProgress,
+        deadline: loaded.deadline ?? '',
+        status: loaded.status,
+        accessType: loaded.accessType,
+        categoryIds: loaded.categories?.map((c) => c.id) ?? [],
+        tasks:
+          loaded.tasks?.map((t) => ({
+            id: t.id,
+            title: t.title,
+            description: t.description ?? '',
+            done: t.done,
+            progressContribution: t.progressContribution,
+            dueDate: t.dueDate ?? '',
+            saving: false,
+          })) ?? [],
+        imageFile: null,
+      });
+      this.showEditModal.set(true);
+    });
   }
 
   submitEdit(): void {
