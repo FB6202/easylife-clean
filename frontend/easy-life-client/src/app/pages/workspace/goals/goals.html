@@ -428,7 +428,14 @@
 
       <div class="goal-modal__footer">
         <button class="btn-secondary" (click)="showCreateModal.set(false)">Cancel</button>
-        <button class="btn-primary" (click)="submitCreate()">Create Goal</button>
+        <button class="btn-primary" [disabled]="saving()" (click)="submitCreate()">
+          @if (saving()) {
+            <span class="material-symbols-outlined btn-spinner">progress_activity</span>
+          } @else {
+            <span class="material-symbols-outlined">add</span>
+          }
+          Create Goal
+        </button>
       </div>
     </div>
   </div>
@@ -665,11 +672,7 @@
           <div class="goal-task-row">
             <div class="goal-task-row__check">
               @if (task.saving) {
-                <span
-                  class="material-symbols-outlined btn-spinner"
-                  style="font-size: 18px; color: var(--color-primary)"
-                  >progress_activity</span
-                >
+                <span class="material-symbols-outlined btn-spinner">progress_activity</span>
               } @else {
                 <input
                   type="checkbox"
@@ -768,7 +771,14 @@
 
       <div class="goal-modal__footer">
         <button class="btn-secondary" (click)="showEditModal.set(false)">Cancel</button>
-        <button class="btn-primary" (click)="submitEdit()">Save Changes</button>
+        <button class="btn-primary" [disabled]="saving()" (click)="submitEdit()">
+          @if (saving()) {
+            <span class="material-symbols-outlined btn-spinner">progress_activity</span>
+          } @else {
+            <span class="material-symbols-outlined">save</span>
+          }
+          Save Changes
+        </button>
       </div>
     </div>
   </div>
