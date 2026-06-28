@@ -5,12 +5,15 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { environment } from '../../../environments/environment';
 import { JournalEntryResponse, JournalFilter } from '../models/journal.model';
 import { PageResponse } from '../models/todo.model';
+import { LoadingService } from './loading';
 
 @Injectable({ providedIn: 'root' })
 export class JournalService {
-  private readonly http = inject(HttpClient);
-  private readonly destroyRef = inject(DestroyRef);
   private readonly base = `${environment.apiUrl}/api/v1/journal`;
+
+  private readonly http = inject(HttpClient);
+  private readonly loadingService = inject(LoadingService);
+  private readonly destroyRef = inject(DestroyRef);
 
   readonly entries = signal<JournalEntryResponse[]>([]);
   readonly selectedEntry = signal<JournalEntryResponse | null>(null);
@@ -25,6 +28,7 @@ export class JournalService {
 
   loadAll(userId: number, page = 0, filter: JournalFilter = {}): void {
     this.loading.set(true);
+    this.loadingService.start();
 
     let params = new HttpParams()
       .set('userId', userId)
@@ -48,13 +52,19 @@ export class JournalService {
           this.totalElements.set(res.totalElements ?? 0);
           this.currentPage.set(res.page ?? 0);
           this.loading.set(false);
+          this.loadingService.stop();
         },
-        error: () => this.loading.set(false),
+        error: () => {
+          this.loading.set(false);
+          this.loadingService.stop();
+        },
       });
   }
 
   loadById(userId: number, id: number): void {
     this.loading.set(true);
+    this.loadingService.start();
+
     const params = new HttpParams().set('userId', userId);
 
     this.http
@@ -64,8 +74,12 @@ export class JournalService {
         next: (entry) => {
           this.selectedEntry.set(entry);
           this.loading.set(false);
+          this.loadingService.stop();
         },
-        error: () => this.loading.set(false),
+        error: () => {
+          this.loading.set(false);
+          this.loadingService.stop();
+        },
       });
   }
 }

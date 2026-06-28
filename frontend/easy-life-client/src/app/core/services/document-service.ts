@@ -5,12 +5,15 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { environment } from '../../../environments/environment';
 import { DocumentResponse, DocumentFilter } from '../models/document.model';
 import { PageResponse } from '../models/todo.model';
+import { LoadingService } from './loading';
 
 @Injectable({ providedIn: 'root' })
 export class DocumentService {
-  private readonly http = inject(HttpClient);
-  private readonly destroyRef = inject(DestroyRef);
   private readonly base = `${environment.apiUrl}/api/v1/documents`;
+
+  private readonly http = inject(HttpClient);
+  private readonly loadingService = inject(LoadingService);
+  private readonly destroyRef = inject(DestroyRef);
 
   readonly documents = signal<DocumentResponse[]>([]);
   readonly selectedDoc = signal<DocumentResponse | null>(null);
@@ -30,6 +33,7 @@ export class DocumentService {
 
   loadAll(userId: number, page = 0, filter: DocumentFilter = {}): void {
     this.loading.set(true);
+    this.loadingService.start();
 
     let params = new HttpParams()
       .set('userId', userId)
@@ -54,13 +58,19 @@ export class DocumentService {
           this.totalElements.set(res.totalElements ?? 0);
           this.currentPage.set(res.page ?? 0);
           this.loading.set(false);
+          this.loadingService.stop();
         },
-        error: () => this.loading.set(false),
+        error: () => {
+          this.loading.set(false);
+          this.loadingService.stop();
+        },
       });
   }
 
   loadById(userId: number, id: number): void {
     this.loading.set(true);
+    this.loadingService.start();
+
     const params = new HttpParams().set('userId', userId);
 
     this.http
@@ -70,8 +80,12 @@ export class DocumentService {
         next: (doc) => {
           this.selectedDoc.set(doc);
           this.loading.set(false);
+          this.loadingService.stop();
         },
-        error: () => this.loading.set(false),
+        error: () => {
+          this.loading.set(false);
+          this.loadingService.stop();
+        },
       });
   }
 }

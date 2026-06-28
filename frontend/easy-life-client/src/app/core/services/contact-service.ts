@@ -5,12 +5,15 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { environment } from '../../../environments/environment';
 import { ContactResponse, ContactFilter } from '../models/contact.model';
 import { PageResponse } from '../models/todo.model';
+import { LoadingService } from './loading';
 
 @Injectable({ providedIn: 'root' })
 export class ContactService {
+  private readonly base = `${environment.apiUrl}/api/v1/contacts`;
+
+  private readonly loadingService = inject(LoadingService);
   private readonly http = inject(HttpClient);
   private readonly destroyRef = inject(DestroyRef);
-  private readonly base = `${environment.apiUrl}/api/v1/contacts`;
 
   readonly contacts = signal<ContactResponse[]>([]);
   readonly selectedContact = signal<ContactResponse | null>(null);
@@ -32,6 +35,7 @@ export class ContactService {
 
   loadAll(userId: number, page = 0, filter: ContactFilter = {}): void {
     this.loading.set(true);
+    this.loadingService.start();
 
     let params = new HttpParams()
       .set('userId', userId)
@@ -54,8 +58,12 @@ export class ContactService {
           this.totalElements.set(res.totalElements ?? 0);
           this.currentPage.set(res.page ?? 0);
           this.loading.set(false);
+          this.loadingService.stop();
         },
-        error: () => this.loading.set(false),
+        error: () => {
+          this.loading.set(false);
+          this.loadingService.stop();
+        },
       });
   }
 

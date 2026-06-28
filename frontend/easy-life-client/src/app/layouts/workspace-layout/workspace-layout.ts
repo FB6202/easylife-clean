@@ -5,6 +5,7 @@ import { SettingsModalComponent } from '../../shared/components/settings-modal/s
 import { UserService } from '../../core/services/user-service';
 import { environment } from '../../../environments/environment';
 import { AiAgentWidgetComponent } from '../../shared/components/ai-agent/ai-agent';
+import { LoadingService } from '../../core/services/loading';
 
 @Component({
   selector: 'app-workspace-layout',
@@ -14,6 +15,7 @@ import { AiAgentWidgetComponent } from '../../shared/components/ai-agent/ai-agen
 })
 export class WorkspaceLayoutComponent implements OnInit {
   private readonly userService = inject(UserService);
+  readonly loadingService = inject(LoadingService);
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
 
@@ -55,6 +57,10 @@ export class WorkspaceLayoutComponent implements OnInit {
     if (!this.userService.currentUser()) {
       this.userService.loadById(environment.userId);
     }
+  }
+
+  isRouteActive(route: string): boolean {
+    return this.router.url.includes(`/${route}`);
   }
 
   // ── Methods ────────────────────────────────────────────

@@ -15,7 +15,16 @@
             class="sidebar__item"
             [attr.data-label]="item.label"
           >
-            <span class="material-symbols-outlined sidebar__icon">{{ item.icon }}</span>
+            <span
+              class="material-symbols-outlined sidebar__icon"
+              [class.btn-spinner]="loadingService.isLoading() && isRouteActive(item.route)"
+            >
+              @if (loadingService.isLoading() && isRouteActive(item.route)) {
+                progress_activity
+              } @else {
+                {{ item.icon }}
+              }
+            </span>
             <span class="sidebar__label">{{ item.label }}</span>
           </a>
         }
@@ -30,7 +39,16 @@
             class="sidebar__item"
             [attr.data-label]="item.label"
           >
-            <span class="material-symbols-outlined sidebar__icon">{{ item.icon }}</span>
+            <span
+              class="material-symbols-outlined sidebar__icon"
+              [class.btn-spinner]="loadingService.isLoading() && isRouteActive(item.route)"
+            >
+              @if (loadingService.isLoading() && isRouteActive(item.route)) {
+                progress_activity
+              } @else {
+                {{ item.icon }}
+              }
+            </span>
             <span class="sidebar__label">{{ item.label }}</span>
             @if (item.badge && unreadNotificationCount() > 0) {
               <span class="sidebar__badge">

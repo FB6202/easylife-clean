@@ -19,7 +19,6 @@
   - filter chronology
   - redesign optional field headline
   - date picker
-- persistent widgets (as settings)
 - input validations everywhere
 - error component (page or just field):
   - page
@@ -30,6 +29,12 @@
 - screenshot for main page
 
 ### Pages
+- general loading spinner page:
+  - calendar
+  - follower service
+  - contact service
+  - notification service
+  - user service?
 - dashboard:
   - widget colors - different solution
   - persist settings on edit (settings + widget)
@@ -46,6 +51,7 @@
   - filter (panel or all)
 - documents:
   - download fails when not exists
+  - total storage + file bytes... (rest call)
 - weekplan:
   - update status to completed (when all tasks done)
 - profile:
