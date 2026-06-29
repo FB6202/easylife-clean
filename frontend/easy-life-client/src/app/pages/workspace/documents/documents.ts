@@ -110,21 +110,6 @@ export class DocumentsComponent implements OnInit {
       ],
     },
     {
-      key: 'fileType',
-      label: 'File Type',
-      type: 'select',
-      icon: 'description',
-      options: [
-        { value: 'pdf', label: 'PDF', icon: 'picture_as_pdf', color: '#d32f2f' },
-        { value: 'docx', label: 'Word', icon: 'description', color: '#1976d2' },
-        { value: 'xlsx', label: 'Excel', icon: 'table_chart', color: '#43a047' },
-        { value: 'pptx', label: 'PowerPoint', icon: 'slideshow', color: '#f57c00' },
-        { value: 'png', label: 'Image', icon: 'image', color: '#9c27b0' },
-        { value: 'txt', label: 'Text', icon: 'article', color: '#757575' },
-        { value: 'zip', label: 'Archive', icon: 'folder_zip', color: '#5d4037' },
-      ],
-    },
-    {
       key: 'access',
       label: 'Access',
       type: 'select',
