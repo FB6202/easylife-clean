@@ -40,8 +40,8 @@ export class DocumentService {
 
     if (filter.fileType) params = params.set('fileType', filter.fileType);
     if (filter.accessType) params = params.set('accessType', filter.accessType);
-    if (filter.uploadedFrom) params = params.set('uploadedFrom', filter.uploadedFrom + 'T00:00:00');
-    if (filter.uploadedTo) params = params.set('uploadedTo', filter.uploadedTo + 'T23:59:59');
+    if (filter.uploadedFrom) params = params.set('uploadedFrom', filter.uploadedFrom);
+    if (filter.uploadedTo) params = params.set('uploadedTo', filter.uploadedTo);
     if (filter.categoryIds?.length) {
       filter.categoryIds.forEach((id) => (params = params.append('categoryIds', id)));
     }

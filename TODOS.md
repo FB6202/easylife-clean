@@ -46,6 +46,7 @@
   - filter (panel or all)
 - documents:
   - download fails when not exists
+  - user feedback
   - total storage + file bytes... (rest call)
 - weekplan:
   - update status to completed (when all tasks done)
