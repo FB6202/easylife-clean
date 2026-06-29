@@ -11,7 +11,7 @@ export class UserService {
   private readonly base = `${environment.apiUrl}/api/users`;
 
   private readonly http = inject(HttpClient);
-  private readonly loadingService = inject(LoadingService);
+
   private readonly destroyRef = inject(DestroyRef);
 
   readonly currentUser = signal<UserResponse | null>(null);
@@ -36,7 +36,6 @@ export class UserService {
 
   loadByKeycloakId(keycloakId: string): void {
     this.loading.set(true);
-    this.loadingService.start();
 
     this.http
       .get<UserResponse>(`${this.base}/keycloak/${keycloakId}`)
@@ -45,11 +44,9 @@ export class UserService {
         next: (user) => {
           this.currentUser.set(user);
           this.loading.set(false);
-          this.loadingService.stop();
         },
         error: () => {
           this.loading.set(false);
-          this.loadingService.stop();
         },
       });
   }

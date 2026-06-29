@@ -36,7 +36,6 @@ export class DashboardService {
   private readonly baseUrl = `${environment.apiUrl}/api/v1`;
 
   private readonly http = inject(HttpClient);
-  private readonly loadingService = inject(LoadingService);
 
   // Signal für die geladenen Dashboard-Daten
   readonly dashboardData = signal<DashboardData | null>(null);
@@ -45,7 +44,7 @@ export class DashboardService {
 
   loadDashboardData(userId: number, enabledWidgets: string[]): void {
     this.loading.set(true);
-    this.loadingService.start();
+
     this.error.set(null);
 
     const requests: { [key: string]: Observable<any> } = {};
@@ -94,7 +93,7 @@ export class DashboardService {
         })),
         catchError((err) => {
           this.error.set('Failed to load dashboard data');
-          this.loadingService.stop();
+
           console.error('Dashboard load error:', err);
           return of({
             tasks: [],
@@ -112,7 +111,6 @@ export class DashboardService {
       .subscribe((data) => {
         this.dashboardData.set(data);
         this.loading.set(false);
-        this.loadingService.stop();
       });
   }
 

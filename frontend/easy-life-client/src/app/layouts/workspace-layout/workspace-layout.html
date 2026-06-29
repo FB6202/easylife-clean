@@ -17,9 +17,9 @@
           >
             <span
               class="material-symbols-outlined sidebar__icon"
-              [class.btn-spinner]="loadingService.isLoading() && isRouteActive(item.route)"
+              [class.btn-spinner]="navigatingTo() === item.route"
             >
-              @if (loadingService.isLoading() && isRouteActive(item.route)) {
+              @if (navigatingTo() === item.route) {
                 progress_activity
               } @else {
                 {{ item.icon }}
@@ -29,7 +29,7 @@
           </a>
         }
       </div>
-
+ 
       <div class="sidebar__section">
         <span class="sidebar__section-label">Account</span>
         @for (item of accountItems; track item.route) {
@@ -41,9 +41,9 @@
           >
             <span
               class="material-symbols-outlined sidebar__icon"
-              [class.btn-spinner]="loadingService.isLoading() && isRouteActive(item.route)"
+              [class.btn-spinner]="navigatingTo() === item.route"
             >
-              @if (loadingService.isLoading() && isRouteActive(item.route)) {
+              @if (navigatingTo() === item.route) {
                 progress_activity
               } @else {
                 {{ item.icon }}

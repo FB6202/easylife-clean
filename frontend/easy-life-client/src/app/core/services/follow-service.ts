@@ -11,7 +11,6 @@ export class FollowService {
   private readonly base = `${environment.apiUrl}/api/v1/follows`;
 
   private readonly http = inject(HttpClient);
-  private readonly loadingService = inject(LoadingService);
   private readonly destroyRef = inject(DestroyRef);
 
   readonly following = signal<FollowResponse[]>([]);
@@ -21,7 +20,6 @@ export class FollowService {
 
   loadAll(userId: number): void {
     this.loading.set(true);
-    this.loadingService.start();
 
     const params = new HttpParams().set('userId', userId);
 
@@ -42,11 +40,9 @@ export class FollowService {
         next: (r) => {
           this.pending.set(r);
           this.loading.set(false);
-          this.loadingService.stop();
         },
         error: () => {
           this.loading.set(false);
-          this.loadingService.stop();
         },
       });
   }

@@ -12,7 +12,7 @@ export class WeekPlanService {
   private readonly base = `${environment.apiUrl}/api/v1/weekplans`;
 
   private readonly http = inject(HttpClient);
-  private readonly loadingService = inject(LoadingService);
+
   private readonly destroyRef = inject(DestroyRef);
 
   readonly weekPlans = signal<WeekPlanResponse[]>([]);
@@ -33,7 +33,6 @@ export class WeekPlanService {
 
   loadAll(userId: number, page = 0, filter: WeekPlanFilter = {}): void {
     this.loading.set(true);
-    this.loadingService.start();
 
     let params = new HttpParams()
       .set('userId', userId)
@@ -57,18 +56,15 @@ export class WeekPlanService {
           this.totalElements.set(res.totalElements ?? 0);
           this.currentPage.set(res.page ?? 0);
           this.loading.set(false);
-          this.loadingService.stop();
         },
         error: () => {
           this.loading.set(false);
-          this.loadingService.stop();
         },
       });
   }
 
   loadById(userId: number, id: number): void {
     this.loading.set(true);
-    this.loadingService.start();
 
     const params = new HttpParams().set('userId', userId);
 
@@ -79,11 +75,9 @@ export class WeekPlanService {
         next: (plan) => {
           this.selectedPlan.set(plan);
           this.loading.set(false);
-          this.loadingService.stop();
         },
         error: () => {
           this.loading.set(false);
-          this.loadingService.stop();
         },
       });
   }

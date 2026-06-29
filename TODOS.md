@@ -29,16 +29,11 @@
 - screenshot for main page
 
 ### Pages
-- general loading spinner page:
-  - calendar
-  - follower service
-  - contact service
-  - notification service
-  - user service?
 - dashboard:
   - widget colors - different solution
   - persist settings on edit (settings + widget)
   - loading state - spinner (not hourglass)
+  - widgets with save option
 - ai-agent
 - todos:
 - categories:

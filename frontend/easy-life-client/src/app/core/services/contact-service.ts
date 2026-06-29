@@ -11,7 +11,6 @@ import { LoadingService } from './loading';
 export class ContactService {
   private readonly base = `${environment.apiUrl}/api/v1/contacts`;
 
-  private readonly loadingService = inject(LoadingService);
   private readonly http = inject(HttpClient);
   private readonly destroyRef = inject(DestroyRef);
 
@@ -35,7 +34,6 @@ export class ContactService {
 
   loadAll(userId: number, page = 0, filter: ContactFilter = {}): void {
     this.loading.set(true);
-    this.loadingService.start();
 
     let params = new HttpParams()
       .set('userId', userId)
@@ -58,11 +56,9 @@ export class ContactService {
           this.totalElements.set(res.totalElements ?? 0);
           this.currentPage.set(res.page ?? 0);
           this.loading.set(false);
-          this.loadingService.stop();
         },
         error: () => {
           this.loading.set(false);
-          this.loadingService.stop();
         },
       });
   }

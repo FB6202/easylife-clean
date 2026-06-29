@@ -18,7 +18,6 @@ export class GoalService {
   private readonly base = `${environment.apiUrl}/api/v1/goals`;
 
   private readonly http = inject(HttpClient);
-  private readonly loadingService = inject(LoadingService);
 
   private readonly destroyRef = inject(DestroyRef);
 
@@ -43,7 +42,6 @@ export class GoalService {
   // ── loadAll ────────────────────────────────────────────────────────────────
   loadAll(userId: number, page = 0, filter: GoalFilter = {}): void {
     this.loading.set(true);
-    this.loadingService.start();
 
     let params = new HttpParams()
       .set('userId', userId)
@@ -68,11 +66,9 @@ export class GoalService {
           this.totalElements.set(res.totalElements ?? 0);
           this.currentPage.set(res.page ?? 0);
           this.loading.set(false);
-          this.loadingService.stop();
         },
         error: () => {
           this.loading.set(false);
-          this.loadingService.stop();
         },
       });
   }
@@ -80,7 +76,6 @@ export class GoalService {
   // ── loadById ───────────────────────────────────────────────────────────────
   loadById(userId: number, id: number, onSuccess?: (goal: GoalResponse) => void): void {
     this.loading.set(true);
-    this.loadingService.start();
 
     const params = new HttpParams().set('userId', userId);
 
@@ -92,11 +87,9 @@ export class GoalService {
           this.selectedGoal.set(goal);
           this.loading.set(false);
           onSuccess?.(goal);
-          this.loadingService.stop();
         },
         error: () => {
           this.loading.set(false);
-          this.loadingService.stop();
         },
       });
   }

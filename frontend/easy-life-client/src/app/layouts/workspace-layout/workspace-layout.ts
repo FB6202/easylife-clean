@@ -1,11 +1,18 @@
-import { Component, signal, inject, computed, OnInit } from '@angular/core';
+import { Component, signal, inject, computed, OnInit, DestroyRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule, Router, ActivatedRoute } from '@angular/router';
+import {
+  RouterModule,
+  Router,
+  ActivatedRoute,
+  NavigationStart,
+  NavigationEnd,
+} from '@angular/router';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { filter } from 'rxjs';
 import { SettingsModalComponent } from '../../shared/components/settings-modal/settings-modal';
 import { UserService } from '../../core/services/user-service';
 import { environment } from '../../../environments/environment';
 import { AiAgentWidgetComponent } from '../../shared/components/ai-agent/ai-agent';
-import { LoadingService } from '../../core/services/loading';
 
 @Component({
   selector: 'app-workspace-layout',
@@ -15,12 +22,13 @@ import { LoadingService } from '../../core/services/loading';
 })
 export class WorkspaceLayoutComponent implements OnInit {
   private readonly userService = inject(UserService);
-  readonly loadingService = inject(LoadingService);
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
+  private readonly destroyRef = inject(DestroyRef);
 
   sidebarCollapsed = signal(false);
   showSettings = signal(false);
+  readonly navigatingTo = signal<string | null>(null);
 
   // ── User ───────────────────────────────────────────────
   readonly currentUser = this.userService.currentUser;
@@ -50,17 +58,23 @@ export class WorkspaceLayoutComponent implements OnInit {
     { route: 'notifications', label: 'Notifications', icon: 'notifications', badge: true },
   ];
 
-  readonly unreadNotificationCount = signal(0); // TODO: NotificationService
+  readonly unreadNotificationCount = signal(0);
 
   // ── Lifecycle ──────────────────────────────────────────
   ngOnInit(): void {
     if (!this.userService.currentUser()) {
       this.userService.loadById(environment.userId);
     }
-  }
 
-  isRouteActive(route: string): boolean {
-    return this.router.url.includes(`/${route}`);
+    this.router.events.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((e) => {
+      if (e instanceof NavigationStart) {
+        const segment = e.url.split('/').pop() ?? null;
+        this.navigatingTo.set(segment);
+      }
+      if (e instanceof NavigationEnd) {
+        this.navigatingTo.set(null);
+      }
+    });
   }
 
   // ── Methods ────────────────────────────────────────────

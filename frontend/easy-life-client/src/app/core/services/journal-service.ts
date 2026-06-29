@@ -12,7 +12,7 @@ export class JournalService {
   private readonly base = `${environment.apiUrl}/api/v1/journal`;
 
   private readonly http = inject(HttpClient);
-  private readonly loadingService = inject(LoadingService);
+
   private readonly destroyRef = inject(DestroyRef);
 
   readonly entries = signal<JournalEntryResponse[]>([]);
@@ -28,7 +28,6 @@ export class JournalService {
 
   loadAll(userId: number, page = 0, filter: JournalFilter = {}): void {
     this.loading.set(true);
-    this.loadingService.start();
 
     let params = new HttpParams()
       .set('userId', userId)
@@ -52,18 +51,15 @@ export class JournalService {
           this.totalElements.set(res.totalElements ?? 0);
           this.currentPage.set(res.page ?? 0);
           this.loading.set(false);
-          this.loadingService.stop();
         },
         error: () => {
           this.loading.set(false);
-          this.loadingService.stop();
         },
       });
   }
 
   loadById(userId: number, id: number): void {
     this.loading.set(true);
-    this.loadingService.start();
 
     const params = new HttpParams().set('userId', userId);
 
@@ -74,11 +70,9 @@ export class JournalService {
         next: (entry) => {
           this.selectedEntry.set(entry);
           this.loading.set(false);
-          this.loadingService.stop();
         },
         error: () => {
           this.loading.set(false);
-          this.loadingService.stop();
         },
       });
   }

@@ -5,12 +5,15 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { environment } from '../../../environments/environment';
 import { NotificationResponse, NotificationFilter } from '../models/notification.model';
 import { PageResponse } from '../models/todo.model';
+import { LoadingService } from './loading';
 
 @Injectable({ providedIn: 'root' })
 export class NotificationService {
-  private readonly http = inject(HttpClient);
-  private readonly destroyRef = inject(DestroyRef);
   private readonly base = `${environment.apiUrl}/api/v1/notifications`;
+
+  private readonly http = inject(HttpClient);
+
+  private readonly destroyRef = inject(DestroyRef);
 
   readonly notifications = signal<NotificationResponse[]>([]);
   readonly loading = signal(false);
@@ -47,7 +50,9 @@ export class NotificationService {
           this.currentPage.set(res.page ?? 0);
           this.loading.set(false);
         },
-        error: () => this.loading.set(false),
+        error: () => {
+          this.loading.set(false);
+        },
       });
   }
 
