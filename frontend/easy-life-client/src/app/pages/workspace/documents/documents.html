@@ -369,10 +369,26 @@
         </div>
       </div>
 
+      @if (uploadError()) {
+        <p class="modal-error">
+          <span class="material-symbols-outlined">error</span>
+          Upload failed. Please try again.
+        </p>
+      }
+
       <div class="doc-modal__footer">
         <button class="btn-secondary" (click)="showUploadModal.set(false)">Cancel</button>
-        <button class="btn-primary" [disabled]="!uploadedFile()" (click)="submitUpload()">
-          <span class="material-symbols-outlined">upload</span>Upload
+        <button
+          class="btn-primary"
+          [disabled]="!uploadedFile() || saving()"
+          (click)="submitUpload()"
+        >
+          @if (saving()) {
+            <span class="material-symbols-outlined btn-spinner">progress_activity</span>
+          } @else {
+            <span class="material-symbols-outlined">upload</span>
+          }
+          Upload
         </button>
       </div>
     </div>
@@ -573,9 +589,23 @@
         </div>
       </div>
 
+      @if (editError()) {
+        <p class="modal-error">
+          <span class="material-symbols-outlined">error</span>
+          Something went wrong. Please try again.
+        </p>
+      }
+
       <div class="doc-modal__footer">
         <button class="btn-secondary" (click)="showEditModal.set(false)">Cancel</button>
-        <button class="btn-primary" (click)="submitEdit()">Save Changes</button>
+        <button class="btn-primary" [disabled]="saving()" (click)="submitEdit()">
+          @if (saving()) {
+            <span class="material-symbols-outlined btn-spinner">progress_activity</span>
+          } @else {
+            <span class="material-symbols-outlined">save</span>
+          }
+          Save Changes
+        </button>
       </div>
     </div>
   </div>
@@ -594,9 +624,28 @@
         <strong>"{{ selectedDocument()!.title }}"</strong>? The file will be permanently removed
         from storage.
       </p>
+      @if (deleteError()) {
+        <p class="modal-error">
+          <span class="material-symbols-outlined">error</span>
+          Could not delete document. Please try again.
+        </p>
+      }
       <div class="confirm-dialog__actions">
-        <button class="btn-secondary" (click)="showDeleteConfirm.set(false)">Cancel</button>
-        <button class="btn-danger" (click)="confirmDelete()">Delete Document</button>
+        <button
+          class="btn-secondary"
+          [disabled]="deleting()"
+          (click)="showDeleteConfirm.set(false)"
+        >
+          Cancel
+        </button>
+        <button class="btn-danger" [disabled]="deleting()" (click)="confirmDelete()">
+          @if (deleting()) {
+            <span class="material-symbols-outlined btn-spinner">progress_activity</span>
+          } @else {
+            <span class="material-symbols-outlined">delete</span>
+          }
+          Delete Document
+        </button>
       </div>
     </div>
   </div>

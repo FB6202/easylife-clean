@@ -53,13 +53,13 @@ class S3ServiceImpl implements StorageApi {
     }
 
     @Override
-    public String buildKey(String username, String entityType, Long entityId, String fileName) {
+    public String buildKey(String username, String entityType, String fileName) {
         String uuid = UUID.randomUUID().toString().substring(0, 8);
         String sanitizedFileName = fileName.replaceAll(
                 S3Constants.ALLOWED_FILENAME_CHARS,
                 S3Constants.REPLACEMENT_CHAR
         );
-        return username + "/" + entityType + "/" + entityId + "/" + uuid + "_" + sanitizedFileName;
+        return username + "/" + entityType + "/" + uuid + "_" + sanitizedFileName;
     }
 
 }

@@ -3,6 +3,7 @@ package com.easylife.app.goals;
 import com.easylife.app.categories.api.CategoryApi;
 import com.easylife.app.goals.api.GoalApi;
 import com.easylife.app.goals.payload.*;
+import com.easylife.app.shared.Constants;
 import com.easylife.app.shared.enums.AccessType;
 import com.easylife.app.shared.enums.GoalStatus;
 import com.easylife.app.shared.payload.PageResponse;
@@ -186,8 +187,7 @@ class GoalServiceImpl implements GoalService, GoalApi {
         UserResponse user = userApi.findById(userId);
         String key = storageApi.buildKey(
                 user.username(),
-                "goals",
-                goalId,
+                Constants.STORAGE_GOALS,
                 fileName
         );
         return storageApi.generateUploadUrl(key, contentType);

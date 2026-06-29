@@ -2,6 +2,7 @@ package com.easylife.app.users;
 
 import com.easylife.app.categories.api.CategoryApi;
 import com.easylife.app.goals.api.GoalApi;
+import com.easylife.app.shared.Constants;
 import com.easylife.app.shared.enums.FollowStatus;
 import com.easylife.app.storage.api.StorageApi;
 import com.easylife.app.users.api.UserApi;
@@ -114,8 +115,7 @@ public class UserServiceImpl implements UserService, UserApi {
         User user = getUserEntity(userId);
         String key = storageApi.buildKey(
                 user.getUsername(),
-                "profiles",
-                userId,
+                Constants.STORAGE_PROFILE,
                 fileName
         );
         return storageApi.generateUploadUrl(key, contentType);

@@ -45,9 +45,8 @@
   - sync functionality
   - filter (panel or all)
 - documents:
-  - download fails when not exists
-  - user feedback
-  - total storage + file bytes... (rest call)
+  - download fails when not exists (user feedback)
+  - evtl. filter prettier
 - weekplan:
   - update status to completed (when all tasks done)
 - profile:

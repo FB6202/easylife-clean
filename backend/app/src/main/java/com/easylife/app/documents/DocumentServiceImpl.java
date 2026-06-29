@@ -4,6 +4,7 @@ import com.easylife.app.categories.api.CategoryApi;
 import com.easylife.app.documents.payload.DocumentFilter;
 import com.easylife.app.documents.payload.DocumentRequest;
 import com.easylife.app.documents.payload.DocumentResponse;
+import com.easylife.app.shared.Constants;
 import com.easylife.app.shared.payload.PageResponse;
 import com.easylife.app.storage.api.StorageApi;
 import com.easylife.app.users.api.UserApi;
@@ -107,8 +108,7 @@ class DocumentServiceImpl implements DocumentService {
         UserResponse user = userApi.findById(userId);
         String key = storageApi.buildKey(
                 user.username(),
-                "documents",
-                userId,
+                Constants.STORAGE_DOCS,
                 fileName
         );
         return storageApi.generateUploadUrl(key, contentType);

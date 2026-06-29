@@ -59,6 +59,12 @@ export class DocumentsComponent implements OnInit {
   showFilter = signal(false);
   activeFilters = signal<FilterValues>({});
 
+  readonly saving = this.documentService.saving;
+  readonly deleting = this.documentService.deleting;
+  readonly uploadError = signal(false);
+  readonly editError = signal(false);
+  readonly deleteError = signal(false);
+
   readonly documentFilterFields = computed((): FilterField[] => [
     {
       key: 'fileType',
@@ -298,10 +304,17 @@ export class DocumentsComponent implements OnInit {
     }
   }
 
-  submitUpload(): void {
+  async submitUpload(): Promise<void> {
     if (!this.uploadedFile() || !this.uploadForm().title.trim()) return;
-    console.log('TODO upload:', this.uploadedFile(), this.uploadForm());
-    this.showUploadModal.set(false);
+    this.uploadError.set(false);
+
+    await this.documentService.upload(
+      this.userId,
+      this.uploadedFile()!,
+      this.uploadForm(),
+      () => this.showUploadModal.set(false),
+      () => this.uploadError.set(true),
+    );
   }
 
   // ── Edit Modal ─────────────────────────────────────────────────────────────
@@ -317,22 +330,42 @@ export class DocumentsComponent implements OnInit {
   });
 
   openEdit(doc: DocumentResponse): void {
-    this.documentService.loadById(this.userId, doc.id);
     this.selectedDocument.set(doc);
-    this.editForm.set({
-      title: doc.title,
-      description: doc.description ?? '',
-      accessType: doc.accessType,
-      categoryIds: doc.categories?.map((c) => c.id) ?? [],
-    });
     this.showEditCatDropdown.set(false);
-    this.showEditModal.set(true);
+
+    this.documentService.loadById(this.userId, doc.id, (loaded) => {
+      this.selectedDocument.set(loaded);
+      this.editForm.set({
+        title: loaded.title,
+        description: loaded.description ?? '',
+        accessType: loaded.accessType,
+        categoryIds: loaded.categories?.map((c) => c.id) ?? [],
+      });
+      this.showEditModal.set(true);
+    });
   }
 
   submitEdit(): void {
-    if (!this.editForm().title.trim()) return;
-    console.log('TODO update doc:', this.selectedDocument()?.id, this.editForm());
-    this.showEditModal.set(false);
+    if (!this.editForm().title.trim() || !this.selectedDocument()) return;
+    this.editError.set(false);
+
+    this.documentService.update(
+      this.userId,
+      this.selectedDocument()!.id,
+      {
+        title: this.editForm().title,
+        description: this.editForm().description,
+        fileType: this.selectedDocument()!.fileType,
+        fileSizeBytes: this.selectedDocument()!.fileSizeBytes,
+        accessType: this.editForm().accessType,
+        categoryIds: this.editForm().categoryIds,
+      },
+      (updated) => {
+        this.selectedDocument.set(updated);
+        this.showEditModal.set(false);
+      },
+      () => this.editError.set(true),
+    );
   }
 
   openDeleteConfirm(doc: DocumentResponse, event?: Event): void {
@@ -343,9 +376,18 @@ export class DocumentsComponent implements OnInit {
   }
 
   confirmDelete(): void {
-    console.log('TODO delete doc:', this.selectedDocument()?.id);
-    this.showDeleteConfirm.set(false);
-    this.selectedDocument.set(null);
+    if (!this.selectedDocument()) return;
+    this.deleteError.set(false);
+
+    this.documentService.delete(
+      this.userId,
+      this.selectedDocument()!.id,
+      () => {
+        this.showDeleteConfirm.set(false);
+        this.selectedDocument.set(null);
+      },
+      () => this.deleteError.set(true),
+    );
   }
 
   async downloadDoc(doc: any, event: Event): Promise<void> {
