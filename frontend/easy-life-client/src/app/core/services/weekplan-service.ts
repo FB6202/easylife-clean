@@ -5,7 +5,6 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { environment } from '../../../environments/environment';
 import { WeekPlanResponse, WeekPlanFilter } from '../models/weekplan.model';
 import { PageResponse } from '../models/todo.model';
-import { LoadingService } from './loading';
 
 @Injectable({ providedIn: 'root' })
 export class WeekPlanService {

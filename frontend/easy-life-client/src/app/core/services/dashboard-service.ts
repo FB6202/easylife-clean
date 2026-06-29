@@ -11,7 +11,6 @@ import { CategoryResponse } from '../models/category.model';
 import { NotificationResponse } from '../models/notification.model';
 import { JournalEntryResponse } from '../models/journal.model';
 import { ContactResponse } from '../models/contact.model';
-import { LoadingService } from './loading';
 
 export interface FollowStatsResponse {
   following: number;

@@ -4,14 +4,13 @@ import { DestroyRef } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { environment } from '../../../environments/environment';
 import { CalendarEventResponse, EventType } from '../models/calendar.model';
-import { LoadingService } from './loading';
 
 @Injectable({ providedIn: 'root' })
 export class CalendarService {
   private readonly base = `${environment.apiUrl}/api/v1/calendar`;
 
   private readonly http = inject(HttpClient);
-  private readonly loadingService = inject(LoadingService);
+
   private readonly destroyRef = inject(DestroyRef);
 
   // ── State ──────────────────────────────────────────────────────────────────
@@ -30,7 +29,6 @@ export class CalendarService {
   // ── findAll ────────────────────────────────────────────────────────────────
   loadAll(userId: number): void {
     this.loading.set(true);
-    this.loadingService.start();
 
     const params = new HttpParams().set('userId', userId);
 
@@ -41,11 +39,9 @@ export class CalendarService {
         next: (events) => {
           this.events.set(events);
           this.loading.set(false);
-          this.loadingService.stop();
         },
         error: () => {
           this.loading.set(false);
-          this.loadingService.stop();
         },
       });
   }
@@ -53,7 +49,6 @@ export class CalendarService {
   // ── findById ───────────────────────────────────────────────────────────────
   loadById(userId: number, id: number): void {
     this.loading.set(true);
-    this.loadingService.start();
 
     const params = new HttpParams().set('userId', userId);
 
@@ -64,11 +59,9 @@ export class CalendarService {
         next: (event) => {
           this.selectedEvent.set(event);
           this.loading.set(false);
-          this.loadingService.stop();
         },
         error: () => {
           this.loading.set(false);
-          this.loadingService.stop();
         },
       });
   }

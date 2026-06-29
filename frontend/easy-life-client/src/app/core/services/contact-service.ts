@@ -5,7 +5,6 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { environment } from '../../../environments/environment';
 import { ContactResponse, ContactFilter } from '../models/contact.model';
 import { PageResponse } from '../models/todo.model';
-import { LoadingService } from './loading';
 
 @Injectable({ providedIn: 'root' })
 export class ContactService {

@@ -11,7 +11,6 @@ import {
   GoalTaskResponse,
 } from '../models/goal.model';
 import { PageResponse } from '../models/todo.model';
-import { LoadingService } from './loading';
 
 @Injectable({ providedIn: 'root' })
 export class GoalService {

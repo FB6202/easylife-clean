@@ -4,7 +4,6 @@ import { DestroyRef } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { environment } from '../../../environments/environment';
 import { TodoResponse, TodoRequest, PageResponse, TodoFilter } from '../models/todo.model';
-import { LoadingService } from './loading';
 
 @Injectable({ providedIn: 'root' })
 export class TodoService {

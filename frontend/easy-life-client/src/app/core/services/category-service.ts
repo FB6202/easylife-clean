@@ -5,14 +5,13 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { environment } from '../../../environments/environment';
 import { CategoryResponse, CategoryFilter, CategoryRequest } from '../models/category.model';
 import { PageResponse } from '../models/todo.model';
-import { LoadingService } from './loading';
 
 @Injectable({ providedIn: 'root' })
 export class CategoryService {
   private readonly base = `${environment.apiUrl}/api/v1/categories`;
 
   private readonly http = inject(HttpClient);
-  private readonly loadingService = inject(LoadingService);
+
   private readonly destroyRef = inject(DestroyRef);
 
   // ── State ──────────────────────────────────────────────────────────────────
@@ -38,7 +37,6 @@ export class CategoryService {
   // ── loadAll (unpaged, für Dropdowns in anderen Modulen) ────────────────────
   loadAll(userId: number, page = 0, filter: CategoryFilter = {}): void {
     this.loading.set(true);
-    this.loadingService.start();
 
     let params = new HttpParams()
       .set('userId', userId)
@@ -59,11 +57,9 @@ export class CategoryService {
           this.totalElements.set(res.totalElements ?? 0);
           this.currentPage.set(res.page ?? 0);
           this.loading.set(false);
-          this.loadingService.stop();
         },
         error: () => {
           this.loading.set(false);
-          this.loadingService.stop();
         },
       });
   }
@@ -71,7 +67,6 @@ export class CategoryService {
   // ── loadById ───────────────────────────────────────────────────────────────
   loadById(userId: number, id: number): void {
     this.loading.set(true);
-    this.loadingService.start();
 
     const params = new HttpParams().set('userId', userId);
 
@@ -82,11 +77,9 @@ export class CategoryService {
         next: (cat) => {
           this.selectedCategory.set(cat);
           this.loading.set(false);
-          this.loadingService.stop();
         },
         error: () => {
           this.loading.set(false);
-          this.loadingService.stop();
         },
       });
   }
