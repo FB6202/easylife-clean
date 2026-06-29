@@ -8,6 +8,6 @@ public interface StorageApi {
 
     void delete(String key);
 
-    String buildKey(String username, String entityType, Long entityId, String fileName);
+    String buildKey(String username, String entityType, String fileName);
 
 }

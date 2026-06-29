@@ -40,6 +40,15 @@ export type FileType =
   | 'ts'
   | 'js';
 
+export interface DocumentRequest {
+  title: string;
+  description: string;
+  fileType: string;
+  fileSizeBytes: number | null;
+  accessType: AccessType;
+  categoryIds: number[];
+}
+
 export interface DocumentResponse {
   id: number;
   title: string;
