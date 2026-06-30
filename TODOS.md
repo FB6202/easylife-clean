@@ -4,7 +4,7 @@
 - website + social media
 - delete mechanism for efficient db storage using ;)
 - tests for all edge cases (document)
-- clean backend code (especially entities)
+- clean backend code (especially entities + repos)
 - clean frontend code (especially ts-files)
 - create vision board functionality
 - exception handling - s3 service
@@ -49,6 +49,7 @@
   - evtl. filter prettier
 - weekplan:
   - update status to completed (when all tasks done)
+- journal:
 - profile:
   - contract change
   - update (theme does not work - profile click turn white)

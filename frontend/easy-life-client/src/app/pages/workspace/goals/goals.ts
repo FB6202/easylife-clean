@@ -28,6 +28,7 @@ interface GoalTaskForm {
   progressContribution: number;
   dueDate: string;
   saving: boolean;
+  deleted?: boolean;
 }
 
 interface GoalForm {
@@ -286,10 +287,6 @@ export class GoalsComponent implements OnInit {
   }
 
   addTaskToEdit(): void {
-    const goalId = this.selectedGoal()?.id;
-    if (!goalId) return;
-
-    // Erst in Form eintragen mit saving=true
     this.editForm.update((f) => ({
       ...f,
       tasks: [
@@ -301,29 +298,10 @@ export class GoalsComponent implements OnInit {
           done: false,
           progressContribution: 0,
           dueDate: '',
-          saving: true,
+          saving: false,
         },
       ],
     }));
-
-    const index = this.editForm().tasks.length - 1;
-
-    this.goalService.addTask(
-      this.userId,
-      goalId,
-      { title: '', description: '', done: false, progressContribution: 0, dueDate: null },
-      (created) => {
-        this.editForm.update((f) => {
-          const tasks = [...f.tasks];
-          tasks[index] = { ...tasks[index], id: created.id, saving: false };
-          return { ...f, tasks };
-        });
-      },
-      () => {
-        // bei Fehler Task wieder entfernen
-        this.editForm.update((f) => ({ ...f, tasks: f.tasks.filter((_, i) => i !== index) }));
-      },
-    );
   }
 
   updateCreateTask(index: number, field: keyof GoalTaskForm, value: any): void {
@@ -340,51 +318,6 @@ export class GoalsComponent implements OnInit {
       tasks[index] = { ...tasks[index], [field]: value };
       return { ...f, tasks };
     });
-
-    // Nur bei bestehenden Tasks (haben id) sofort speichern
-    // done → sofort; andere Felder → über (blur) im Template
-    if (field === 'done') {
-      this.saveEditTask(index);
-    }
-  }
-
-  saveEditTask(index: number): void {
-    const task = this.editForm().tasks[index];
-    const goalId = this.selectedGoal()?.id;
-    if (!task.id || !goalId) return;
-
-    this.editForm.update((f) => {
-      const tasks = [...f.tasks];
-      tasks[index] = { ...tasks[index], saving: true };
-      return { ...f, tasks };
-    });
-
-    this.goalService.updateTask(
-      this.userId,
-      goalId,
-      task.id,
-      {
-        title: task.title,
-        description: task.description,
-        done: task.done,
-        progressContribution: task.progressContribution,
-        dueDate: task.dueDate || null,
-      },
-      () => {
-        this.editForm.update((f) => {
-          const tasks = [...f.tasks];
-          tasks[index] = { ...tasks[index], saving: false };
-          return { ...f, tasks };
-        });
-      },
-      () => {
-        this.editForm.update((f) => {
-          const tasks = [...f.tasks];
-          tasks[index] = { ...tasks[index], saving: false };
-          return { ...f, tasks };
-        });
-      },
-    );
   }
 
   removeTaskFromCreate(index: number): void {
@@ -553,7 +486,7 @@ export class GoalsComponent implements OnInit {
     });
   }
 
-  submitEdit(): void {
+  async submitEdit(): Promise<void> {
     if (!this.editForm().title.trim() || !this.selectedGoal()) return;
     this.editError.set(false);
     const f = this.editForm();
@@ -576,9 +509,71 @@ export class GoalsComponent implements OnInit {
       this.userId,
       goalId,
       request,
-      (updated) => {
+      async () => {
+        const toDelete = f.tasks.filter((t) => t.deleted && t.id !== null);
+        const toCreate = f.tasks.filter((t) => !t.deleted && t.id === null && t.title.trim());
+        const toUpdate = f.tasks.filter((t) => !t.deleted && t.id !== null);
+
+        const taskOps: Promise<void>[] = [];
+
+        toDelete.forEach((t) => {
+          taskOps.push(
+            new Promise((resolve) => {
+              this.goalService.deleteTask(
+                this.userId,
+                goalId,
+                t.id!,
+                () => resolve(),
+                () => resolve(),
+              );
+            }),
+          );
+        });
+
+        toCreate.forEach((t) => {
+          taskOps.push(
+            new Promise((resolve) => {
+              this.goalService.addTask(
+                this.userId,
+                goalId,
+                {
+                  title: t.title,
+                  description: t.description,
+                  done: t.done,
+                  progressContribution: t.progressContribution,
+                  dueDate: t.dueDate || null,
+                },
+                () => resolve(),
+                () => resolve(),
+              );
+            }),
+          );
+        });
+
+        toUpdate.forEach((t) => {
+          taskOps.push(
+            new Promise((resolve) => {
+              this.goalService.updateTask(
+                this.userId,
+                goalId,
+                t.id!,
+                {
+                  title: t.title,
+                  description: t.description,
+                  done: t.done,
+                  progressContribution: t.progressContribution,
+                  dueDate: t.dueDate || null,
+                },
+                () => resolve(),
+                () => resolve(),
+              );
+            }),
+          );
+        });
+
+        await Promise.all(taskOps);
+
         if (f.imageFile) {
-          // neues Bild hochladen
           this.goalService.uploadImage(
             this.userId,
             goalId,
@@ -587,7 +582,6 @@ export class GoalsComponent implements OnInit {
             () => {},
           );
         } else if (this.imageRemovedInEdit()) {
-          // Bild explizit gelöscht
           this.goalService.removeImage(
             this.userId,
             goalId,
@@ -595,8 +589,12 @@ export class GoalsComponent implements OnInit {
             () => {},
           );
         }
-        this.selectedGoal.set(updated);
-        this.showEditModal.set(false);
+
+        this.goalService.loadById(this.userId, goalId, (updated) => {
+          this.selectedGoal.set(updated);
+          this.goalService.goals.update((list) => list.map((g) => (g.id === goalId ? updated : g)));
+          this.showEditModal.set(false);
+        });
       },
       () => this.editError.set(true),
     );

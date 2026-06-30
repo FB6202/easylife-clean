@@ -701,72 +701,69 @@
 
       <div class="goal-tasks-list">
         @for (task of editForm().tasks; track $index; let i = $index) {
-          <div class="goal-task-row">
-            <div class="goal-task-row__check">
-              @if (task.saving) {
-                <span class="material-symbols-outlined btn-spinner">progress_activity</span>
-              } @else {
+          @if (!task.deleted) {
+            <div class="goal-task-row">
+              <div class="goal-task-row__check">
                 <input
                   type="checkbox"
                   [checked]="task.done"
                   (change)="updateEditTask(i, 'done', $any($event.target).checked)"
                 />
-              }
-            </div>
-            <input
-              type="text"
-              class="goal-task-row__title"
-              [class.goal-task-row__title--done]="task.done"
-              placeholder="Task title..."
-              [value]="task.title"
-              (input)="updateEditTask(i, 'title', $any($event.target).value)"
-              (blur)="saveEditTask(i)"
-            />
-            <div class="goal-task-row__meta">
-              <div class="goal-task-row__contribution">
-                <span class="goal-task-row__contribution-label">
-                  <span class="material-symbols-outlined">percent</span>Contribution to goal
-                </span>
-                <div class="goal-task-row__contribution-input-wrap">
+              </div>
+              <input
+                type="text"
+                class="goal-task-row__title"
+                [class.goal-task-row__title--done]="task.done"
+                placeholder="Task title..."
+                [value]="task.title"
+                (input)="updateEditTask(i, 'title', $any($event.target).value)"
+              />
+              <div class="goal-task-row__meta">
+                <div class="goal-task-row__contribution">
+                  <span class="goal-task-row__contribution-label">
+                    <span class="material-symbols-outlined">percent</span>Contribution to goal
+                  </span>
+                  <div class="goal-task-row__contribution-input-wrap">
+                    <input
+                      type="number"
+                      class="goal-task-row__progress"
+                      min="0"
+                      max="100"
+                      [value]="task.progressContribution"
+                      (input)="
+                        updateEditTask(i, 'progressContribution', +$any($event.target).value)
+                      "
+                    />
+                    <span class="goal-task-row__contribution-unit">%</span>
+                  </div>
+                  <div class="goal-task-row__contribution-bar">
+                    <div
+                      class="goal-task-row__contribution-fill"
+                      [style.width.%]="task.progressContribution"
+                    ></div>
+                  </div>
+                </div>
+                <div class="goal-task-row__date-wrap">
+                  <span class="goal-task-row__contribution-label">
+                    <span class="material-symbols-outlined">event</span>Due date
+                  </span>
                   <input
-                    type="number"
-                    class="goal-task-row__progress"
-                    min="0"
-                    max="100"
-                    [value]="task.progressContribution"
-                    (input)="updateEditTask(i, 'progressContribution', +$any($event.target).value)"
-                    (blur)="saveEditTask(i)"
+                    type="date"
+                    class="goal-task-row__date"
+                    [value]="task.dueDate"
+                    (input)="updateEditTask(i, 'dueDate', $any($event.target).value)"
                   />
-                  <span class="goal-task-row__contribution-unit">%</span>
                 </div>
-                <div class="goal-task-row__contribution-bar">
-                  <div
-                    class="goal-task-row__contribution-fill"
-                    [style.width.%]="task.progressContribution"
-                  ></div>
-                </div>
+                <button
+                  class="goal-task-row__remove"
+                  (click)="removeTaskFromEdit(i)"
+                  title="Remove task"
+                >
+                  <span class="material-symbols-outlined">close</span>
+                </button>
               </div>
-              <div class="goal-task-row__date-wrap">
-                <span class="goal-task-row__contribution-label">
-                  <span class="material-symbols-outlined">event</span>Due date
-                </span>
-                <input
-                  type="date"
-                  class="goal-task-row__date"
-                  [value]="task.dueDate"
-                  (input)="updateEditTask(i, 'dueDate', $any($event.target).value)"
-                  (blur)="saveEditTask(i)"
-                />
-              </div>
-              <button
-                class="goal-task-row__remove"
-                (click)="removeTaskFromEdit(i)"
-                title="Remove task"
-              >
-                <span class="material-symbols-outlined">close</span>
-              </button>
             </div>
-          </div>
+          }
         }
         @if (editForm().tasks.length === 0) {
           <p class="goal-tasks-empty">No tasks yet. Add tasks to break down your goal.</p>

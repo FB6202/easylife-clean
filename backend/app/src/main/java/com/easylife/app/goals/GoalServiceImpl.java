@@ -2,8 +2,11 @@ package com.easylife.app.goals;
 
 import com.easylife.app.categories.api.CategoryApi;
 import com.easylife.app.goals.api.GoalApi;
-import com.easylife.app.goals.payload.*;
-import com.easylife.app.shared.Constants;
+import com.easylife.app.goals.payload.GoalFilter;
+import com.easylife.app.goals.payload.GoalRequest;
+import com.easylife.app.goals.payload.GoalResponse;
+import com.easylife.app.goals.payload.GoalTaskRequest;
+import com.easylife.app.goals.payload.GoalTaskResponse;
 import com.easylife.app.shared.enums.AccessType;
 import com.easylife.app.shared.enums.GoalStatus;
 import com.easylife.app.shared.payload.PageResponse;
@@ -60,14 +63,17 @@ class GoalServiceImpl implements GoalService, GoalApi {
     @Override
     public PageResponse<GoalResponse> findAll(Long userId, GoalFilter filter, int page, int size) {
         Specification<Goal> spec = GoalSpecification.build(userId, filter);
-        Page<Goal> result = goalRepository.findAll(spec, PageRequest.of(page, size));
+        Page<Goal> result = goalRepository.findAll(spec, PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt")));
+
+        List<GoalResponse> content = result.getContent().stream()
+                .map(goal -> goalMapper.toResponse(
+                        goal,
+                        categoryApi.findPreviewsByIds(goal.getCategoryIds()),
+                        storageApi.generateDownloadUrl(goal.getImagePath())))
+                .toList();
+
         return new PageResponse<>(
-                result.getContent().stream()
-                        .map(goal -> goalMapper.toResponse(
-                                goal,
-                                categoryApi.findPreviewsByIds(goal.getCategoryIds()),
-                                storageApi.generateDownloadUrl(goal.getImagePath())))
-                        .toList(),
+                content,
                 result.getNumber(),
                 result.getSize(),
                 result.getTotalElements(),
@@ -77,9 +83,9 @@ class GoalServiceImpl implements GoalService, GoalApi {
 
     @Override
     public GoalResponse update(Long id, GoalRequest request, Long userId) {
+        validateCategories(request.categoryIds(), userId);
         Goal goal = goalRepository.findByIdAndUserId(id, userId)
                 .orElseThrow(() -> new EntityNotFoundException("Goal not found"));
-        validateCategories(request.categoryIds(), userId);
         goalMapper.update(goal, request);
         goal.setUpdatedAt(LocalDateTime.now());
         Goal saved = goalRepository.save(goal);
@@ -129,32 +135,80 @@ class GoalServiceImpl implements GoalService, GoalApi {
                 .orElseThrow(() -> new EntityNotFoundException("Goal not found"));
         GoalTask task = goalMapper.toTaskEntity(request, goal);
         task.setCreatedAt(LocalDateTime.now());
-        return goalMapper.toTaskResponse(goalTaskRepository.save(task));
+        GoalTask saved = goalTaskRepository.save(task);
+
+        recalculateProgress(goal);
+
+        return goalMapper.toTaskResponse(saved);
     }
 
     @Override
     public GoalTaskResponse updateTask(Long goalId, Long taskId, GoalTaskRequest request, Long userId) {
-        goalRepository.findByIdAndUserId(goalId, userId)
+        Goal goal = goalRepository.findByIdAndUserId(goalId, userId)
                 .orElseThrow(() -> new EntityNotFoundException("Goal not found"));
         GoalTask task = goalTaskRepository.findById(taskId)
                 .orElseThrow(() -> new EntityNotFoundException("Task not found"));
         goalMapper.updateTask(task, request);
         task.setUpdatedAt(LocalDateTime.now());
-        return goalMapper.toTaskResponse(goalTaskRepository.save(task));
+        GoalTask saved = goalTaskRepository.save(task);
+
+        recalculateProgress(goal);
+
+        return goalMapper.toTaskResponse(saved);
     }
 
     @Override
     public void deleteTask(Long goalId, Long taskId, Long userId) {
-        goalRepository.findByIdAndUserId(goalId, userId)
+        Goal goal = goalRepository.findByIdAndUserId(goalId, userId)
                 .orElseThrow(() -> new EntityNotFoundException("Goal not found"));
         GoalTask task = goalTaskRepository.findById(taskId)
                 .orElseThrow(() -> new EntityNotFoundException("Task not found"));
         goalTaskRepository.delete(task);
+
+        recalculateProgress(goal);
+    }
+
+    private void recalculateProgress(Goal goal) {
+        List<GoalTask> tasks = goalTaskRepository.findAllByGoalId(goal.getId());
+
+        int progress = tasks.stream()
+                .filter(GoalTask::getDone)
+                .mapToInt(GoalTask::getProgressContribution)
+                .sum();
+        progress = Math.min(progress, 100);
+
+        boolean allTasksDone = !tasks.isEmpty() && tasks.stream().allMatch(GoalTask::getDone);
+
+        goal.setCurrentProgress(progress);
+
+        if (goal.getStatus() != GoalStatus.ABANDONED) {
+            if ((progress >= 100 || allTasksDone) && goal.getStatus() != GoalStatus.COMPLETED) {
+                goal.setStatus(GoalStatus.COMPLETED);
+            } else if (progress < 100 && !allTasksDone && goal.getStatus() == GoalStatus.COMPLETED) {
+                goal.setStatus(GoalStatus.ACTIVE);
+            }
+        }
+
+        goal.setUpdatedAt(LocalDateTime.now());
+        goalRepository.save(goal);
+    }
+
+    @Override
+    public String generateImageUploadUrl(Long goalId, Long userId, String fileName, String contentType) {
+        goalRepository.findByIdAndUserId(goalId, userId)
+                .orElseThrow(() -> new EntityNotFoundException("Goal not found"));
+        UserResponse user = userApi.findById(userId);
+        String key = storageApi.buildKey(user.username(), "goals", fileName);
+        return storageApi.generateUploadUrl(key, contentType);
+    }
+
+    @Override
+    public long countPublicByUserId(Long userId) {
+        return goalRepository.countByUserIdAndAccessType(userId, AccessType.PUBLIC);
     }
 
     @Override
     public List<GoalResponse> findDashboard(Long userId) {
-        // Top 3 ACTIVE goals sorted by deadline ASC (nulls last)
         GoalFilter filter = new GoalFilter(GoalStatus.ACTIVE, null, null, null, null);
         Specification<Goal> spec = GoalSpecification.build(userId, filter);
 
@@ -172,30 +226,15 @@ class GoalServiceImpl implements GoalService, GoalApi {
 
     private void validateCategories(List<Long> categoryIds, Long userId) {
         if (categoryIds != null && !categoryIds.isEmpty()) {
+            if (categoryIds.size() > 5) {
+                throw new IllegalArgumentException("Maximum 5 categories allowed");
+            }
             categoryIds.forEach(categoryId -> {
                 if (!categoryApi.existsByIdAndUserId(categoryId, userId)) {
                     throw new EntityNotFoundException("Category not found: " + categoryId);
                 }
             });
         }
-    }
-
-    @Override
-    public String generateImageUploadUrl(Long goalId, Long userId, String fileName, String contentType) {
-        goalRepository.findByIdAndUserId(goalId, userId)
-                .orElseThrow(() -> new EntityNotFoundException("Goal not found"));
-        UserResponse user = userApi.findById(userId);
-        String key = storageApi.buildKey(
-                user.username(),
-                Constants.STORAGE_GOALS,
-                fileName
-        );
-        return storageApi.generateUploadUrl(key, contentType);
-    }
-
-    @Override
-    public long countPublicByUserId(Long userId) {
-        return goalRepository.countByUserIdAndAccessType(userId, AccessType.PUBLIC);
     }
 
 }
